@@ -1,0 +1,4 @@
+#define NETWORK_SIZE 3
+
+#define NETWORK_INPUT_SIZE 4
+#define NETWORK_OUTPUT_SIZE 5

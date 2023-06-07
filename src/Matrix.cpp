@@ -1,4 +1,5 @@
 #include "Matrix.h"
+#include "util.hpp"
 #include <iostream>
 
 void Matrix::initialize() {
@@ -168,13 +169,14 @@ Matrix *Matrix::crossover(Matrix *m) {
     if (this->ligne != m->ligne || this->col != m->col)
         throw std::invalid_argument("lol");
 
-    int n = m->col / 5;
+    int n = 0;
+    int eq = (randomDouble() + 1) / 2;
+    int r = this->col * this->ligne * eq;
 
     Matrix *a = new Matrix(this->ligne, this->col);
     a->mult_scal(-1.);
 
-    for (int i = 0; i < n; i++) {
-
+    while (n < r) {
         int x = rand() % m->col, y = rand() % m->ligne;
 
         if (rand() <= RAND_MAX * 0.5) {
@@ -183,12 +185,16 @@ Matrix *Matrix::crossover(Matrix *m) {
             for (int k = std::min(y, y_); k <= std::max(y, y_); k++) {
                 a->set(x, k, a->get(x, k) >= 0 ? this->get(x, k) : -1);
             }
+
+            n += std::abs(y - y_);
         } else {
             int x_ = rand() % m->col;
 
             for (int k = std::min(x, x_); k <= std::max(x, x_); k++) {
                 a->set(k, y, a->get(k, y) >= 0 ? this->get(k, y) : -1);
             }
+
+            n += std::abs(x - x_);
         }
     }
 

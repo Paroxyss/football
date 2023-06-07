@@ -120,10 +120,10 @@ void Matrix::mult_inv(Matrix *a) {
         }
         newT[i] = v;
     }
-	
-	for(int i = 0; i < this->ligne; i++){
-		free(this->t[i]);
-	}
+
+    for (int i = 0; i < this->ligne; i++) {
+        free(this->t[i]);
+    }
 
     free(this->t);
     this->t = newT;
@@ -147,4 +147,58 @@ void Matrix::mult_scal(double x) {
             this->set(i, j, this->get(i, j) * x);
         }
     }
+}
+
+/*
+    On veut reproduire deux matrices pour réaliser UN UNIQUE chromosome enfant.
+    On sélectionne (this->m / 5) sous matrices avec 1 change sur 2 d'être
+   lignes ou colonnes. On copie les genomes contenues dans les
+   sous matrices dans la matrice enfant à la même position. Si un génome avait
+   déjà était copié à un l'emplacement alors celui-ci est libéré.
+   Finalement, tous les génomes non complétés de l'enfant son complétés par ceux
+   de la seconde matrice parent.
+
+   Il est important que la fonction retourne une matrice puisque les matrices
+   parents peuvent être ultérieurement sélectionnées pour d'autre opération de
+   sélection, Il faut alors que celle-ci ne soient pas modifiées.
+
+   ATTENTION CODE NON TESTÉ
+*/
+Matrix *Matrix::crossover(Matrix *m) {
+    if (this->ligne != m->ligne || this->col != m->col)
+        throw std::invalid_argument("lol");
+
+    int n = m->col / 5;
+
+    Matrix *a = new Matrix(this->ligne, this->col);
+    a->mult_scal(-1.);
+
+    for (int i = 0; i < n; i++) {
+
+        int x = rand() % m->col, y = rand() % m->ligne;
+
+        if (rand() <= RAND_MAX * 0.5) {
+            int y_ = rand() % m->ligne;
+
+            for (int k = std::min(y, y_); k <= std::max(y, y_); k++) {
+                a->set(x, k, a->get(x, k) >= 0 ? this->get(x, k) : -1);
+            }
+        } else {
+            int x_ = rand() % m->col;
+
+            for (int k = std::min(x, x_); k <= std::max(x, x_); k++) {
+                a->set(k, y, a->get(k, y) >= 0 ? this->get(k, y) : -1);
+            }
+        }
+    }
+
+    for (int i = 0; i < m->ligne; i++) {
+        for (int j = 0; j < m->col; j++) {
+            if (a->get(i, j) < 0) {
+                a->set(i, j, m->get(i, j));
+            }
+        }
+    }
+
+    return a;
 }

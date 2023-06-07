@@ -30,4 +30,6 @@ class Matrix {
     void add(Matrix *a);
 
     void mult_scal(double x);
+
+    Matrix *crossover(Matrix *a);
 };

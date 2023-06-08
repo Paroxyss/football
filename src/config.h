@@ -1,4 +1,19 @@
+#define PI 3.1415
+
 #define NETWORK_SIZE 3
+
+#define GAME_RESOLUTION 1
+
+#define MAP_LENGTH 2000
+#define MAP_HEIGHT 1000 
+#define GOAL_HEIGHT 25
+
+#define PLAYER_MASS 5
+#define PLAYER_SIZE	100
+#define PLAYER_ACCELERATION 1
+
+#define BALL_MASS 1
+#define BALL_SIZE 200
 
 #define NETWORK_INPUT_SIZE 4
 #define NETWORK_OUTPUT_SIZE 5

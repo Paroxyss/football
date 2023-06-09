@@ -8,11 +8,11 @@
 #define MAP_HEIGHT 1000 
 #define GOAL_HEIGHT 25
 
-#define PLAYER_MASS 5
+#define PLAYER_MASS 10
 #define PLAYER_SIZE	100
 #define PLAYER_ACCELERATION 1
 
-#define BALL_MASS 1
+#define BALL_MASS 5
 #define BALL_SIZE 200
 
 #define NETWORK_INPUT_SIZE 4

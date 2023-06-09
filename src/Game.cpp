@@ -7,6 +7,7 @@
 
 #include "Display.h"
 #include "Game.hpp"
+#include "Vector.hpp"
 #include "config.h"
 #include "stdlib.h"
 
@@ -14,56 +15,52 @@ Game::Game(int playerNumber) {
     this->playerNumber = playerNumber;
     this->players = (player *)malloc(playerNumber * sizeof(player));
 
-    ball = {.x = 0, .y = 0, .vx = 0, .vy = 0, .size = BALL_SIZE};
+    setBall({.x = 0, .y = 0});
     for (int i = 0; i < playerNumber; i++) {
-        this->players[i].x = 0;
-        this->players[i].y = 0;
-        this->players[i].orientation = 0;
-        this->players[i].acceleration = 0;
-        this->players[i].size = PLAYER_SIZE;
+        setPlayer(i, {.x = 0, .y = 0}, {.x = 0, .y = 0}, 0, PLAYER_SIZE);
     };
 }
 
 Game::~Game() { free(players); }
 
-void Game::tick() {
-    ball.x += ball.vx * GAME_RESOLUTION;
-    ball.y += ball.vy * GAME_RESOLUTION;
+inline double distancecarre(player &p, ball &b) { return normeCarre(p.pos - b.pos); }
+inline double distancecarre(player &p, player &b) { return normeCarre(p.pos - b.pos); }
 
-    if (ball.x + BALL_SIZE > MAP_LENGTH && ball.vx > 0) {
-        ball.vx = -ball.vx;
-    } else if (ball.x - BALL_SIZE < 0 && ball.vx < 0) {
-        ball.vx = -ball.vx;
-    } else if (ball.y + BALL_SIZE > MAP_HEIGHT && ball.vy > 0) {
-        ball.vy = -ball.vy;
-    } else if (ball.y - BALL_SIZE < 0 && ball.vy < 0) {
-        ball.vy = -ball.vy;
+void Game::tick() {
+    ball.pos += ball.vitesse * GAME_RESOLUTION;
+
+    if (ball.pos.x + BALL_SIZE > MAP_LENGTH && ball.vitesse.x > 0) {
+        ball.vitesse.x = -ball.vitesse.x;
+    } else if (ball.pos.x - BALL_SIZE < 0 && ball.vitesse.x < 0) {
+        ball.vitesse.x = -ball.vitesse.x;
+    } else if (ball.pos.y + BALL_SIZE > MAP_HEIGHT && ball.vitesse.y > 0) {
+        ball.vitesse.y = -ball.vitesse.y;
+    } else if (ball.pos.y - BALL_SIZE < 0 && ball.vitesse.y < 0) {
+        ball.vitesse.y = -ball.vitesse.y;
     }
-    ball.vx *= 0.90;
-    ball.vy *= 0.90;
+    ball.vitesse += -ball.vitesse / BALL_MASS;
 
     for (int i = 0; i < playerNumber; i++) {
-        if (players[i].acceleration > 0) {
-			players[i].vx += players[i].acceleration * cos(players[i].orientation);
-			players[i].vy += players[i].acceleration * sin(players[i].orientation);
-			players[i].acceleration = 0;
+        player &p = players[i];
+        if (p.acceleration > 0) {
+            p.vitesse.x += p.acceleration * cos(p.orientation);
+            p.vitesse.y += p.acceleration * sin(p.orientation);
+            p.acceleration = 0;
         }
 
-        players[i].x += players[i].vx * GAME_RESOLUTION;
-        players[i].y += players[i].vy * GAME_RESOLUTION;
-		
-        if (players[i].x + players[i].size > MAP_LENGTH && players[i].vx > 0) {
-            players[i].vx = -players[i].vx;
-        } else if (players[i].x - players[i].size < 0 && players[i].vx < 0) {
-            players[i].vx = -players[i].vx;
-        } else if (players[i].y + players[i].size > MAP_HEIGHT && players[i].vy > 0) {
-            players[i].vy = -players[i].vy;
-        } else if (players[i].y - players[i].size < 0 && players[i].vy < 0) {
-            players[i].vy = -players[i].vy;
+        p.pos += p.vitesse * GAME_RESOLUTION;
+
+        if (p.pos.x + p.size > MAP_LENGTH && p.vitesse.x > 0) {
+            p.vitesse.x = -p.vitesse.x;
+        } else if (p.pos.x - p.size < 0 && p.vitesse.x < 0) {
+            p.vitesse.x = -p.vitesse.x;
+        } else if (p.pos.y + p.size > MAP_HEIGHT && p.vitesse.y > 0) {
+            p.vitesse.y = -p.vitesse.y;
+        } else if (p.pos.y - p.size < 0 && p.vitesse.y < 0) {
+            p.vitesse.y = -p.vitesse.y;
         }
-		
-        players[i].vx *= 0.90;
-        players[i].vy *= 0.90;
+
+        p.vitesse += -p.vitesse / PLAYER_MASS;
     }
 };
 
@@ -71,13 +68,22 @@ void Game::doAction(unsigned int id, double rotation, double acceleration){
 
 };
 
-void Game::setBall(double x, double y, double vx, double vy, double size){
+void Game::setBall(vector pos, vector vitesse, double size) {
+	this->ball = {
+		.pos = pos,
+		.vitesse = vitesse,
+		.size = size
+	};
+}
 
-};
-
-void Game::setPlayer(double x, double y, double speed, double orientation, double size){
-
-};
+void Game::setPlayer(int id, vector pos, vector speed, double orientation, double size) {
+	this->players[id].pos = pos;
+	this->players[id].vitesse = speed;
+	this->players[id].orientation = orientation;
+	this->players[id].size = size;
+	this->players[id].acceleration = 0;
+	
+}
 
 void moveCursor(unsigned int x, unsigned int y) { printf("\033[%d;%df", y, x); }
 
@@ -93,12 +99,13 @@ void Game::print() { // affichage provisoir de la partie, sur le terminal
     auto d = Display(MAP_LENGTH, MAP_HEIGHT);
 
     d.clear();
-    d.drawCircle('.', ball.x, ball.y, ball.size, TERM_YELLOW);
+    d.drawCircle('.', ball.pos.x, ball.pos.y, ball.size, TERM_YELLOW);
 
     for (int i = 0; i < playerNumber; i++) {
-        d.drawCircle('X', players[i].x, players[i].y, players[i].size, TERM_BLUE);
-        d.drawLine('-', players[i].x, players[i].y, players[i].x + cos(players[i].orientation) * players[i].size,
-                   players[i].y + sin(players[i].orientation) * players[i].size);
+		player &p = players[i];
+        d.drawCircle('X', p.pos.x, p.pos.y, p.size, TERM_BLUE);
+        d.drawLine('-', p.pos.x, p.pos.y, p.pos.x + cos(p.orientation) * p.size,
+                   p.pos.y + sin(p.orientation) * p.size);
     }
 
     d.cursorToBottom();

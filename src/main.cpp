@@ -20,13 +20,25 @@ int main() {
 
     g.ball.x = 1000;
     g.ball.y = 500;
+    g.ball.vx = 10;
+    g.ball.vy = 50;
+
+	int i = 0;
 
     while (true) {
+
+		if(i%10 == 0){
+			g.players[0].orientation += 0.5;
+		}
+		
+		if(i%13 == 0){
+			g.players[0].acceleration = 20 + i % 70;
+		}
+
+		g.tick();
         g.print();
-        g.ball.x += 10;
-		g.players[0].x += 5;
-		g.players[0].y -= 2.5;
         fflush(stdout);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		i++;
     }
 }

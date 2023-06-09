@@ -41,4 +41,5 @@ class Display {
 
     void cursorToBottom();
     void drawBorders(displayColor color = TERM_DEFAULT);
+    void drawLine(char c,  int startx, int starty, int endx, int endy, displayColor color = TERM_DEFAULT, int resolution = 10);
 };

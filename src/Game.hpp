@@ -2,7 +2,7 @@
 #include "config.h"
 
 struct player {
-    double x, y, orientation, vitesse, size;
+    double x, y, vx, vy, orientation, acceleration, size;
 };
 
 struct ball {

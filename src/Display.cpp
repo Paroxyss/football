@@ -20,25 +20,25 @@ Display::Display(int length, int height) {
     this->fakeLen = length;
     this->fakeHeight = height;
 
-	// on récupère les dimensions du terminal
+    // on récupère les dimensions du terminal
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
-	// on initialise les facteurs
+    // on initialise les facteurs
     double scaleFactor;
     double horizontaFactor = (double)w.ws_xpixel / length;
     double verticalFactor = (double)w.ws_ypixel / height;
-	
-	// On utilisera le plus petit facteur pour afficher, de manière à s'assurer que tout rentre
-    if (verticalFactor < horizontaFactor) { 
+
+    // On utilisera le plus petit facteur pour afficher, de manière à s'assurer que tout rentre
+    if (verticalFactor < horizontaFactor) {
         scaleFactor = verticalFactor;
     } else {
         scaleFactor = horizontaFactor;
     }
 
-	// on définir les facteurs que l'on utilisera
-    this->lengthFactor = scaleFactor / ((double)w.ws_xpixel / (w.ws_col + 2));
-    this->heightFactor = scaleFactor / ((double)w.ws_ypixel / (w.ws_row + 2));
+    // on définir les facteurs que l'on utilisera
+    this->lengthFactor = scaleFactor / ((double)w.ws_xpixel / (w.ws_col));
+    this->heightFactor = scaleFactor / ((double)w.ws_ypixel / (w.ws_row));
 };
 
 // met un caractère à une ceratine position
@@ -56,6 +56,15 @@ void Display::drawCircle(char c, int x, int y, int radius, displayColor color) {
 
 // mets le curseur en bas à gauche, notamment pour que le terminal ecrive le prompt après
 void Display::cursorToBottom() { moveToVirtualPos(fakeLen, fakeHeight); }
+
+void Display::drawLine(char c, int startx, int starty, int endx, int endy, displayColor color, int resolution) {
+    int lenx = endx - startx;
+    int leny = endy - starty;
+    for (double i = 0; i < 1; i += (double)1 / resolution) {
+        setChar(c, startx + lenx * i, starty + leny * i, color);
+    }
+}
+
 void Display::drawBorders(displayColor color) {
     for (int i = 0; i < fakeHeight; i += 1 / heightFactor) {
         setChar('#', 0, i, color);

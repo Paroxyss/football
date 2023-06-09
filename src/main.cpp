@@ -13,24 +13,27 @@
 #include <unistd.h>
 
 int main() {
-    auto g = Game(1);
+    auto g = Game(2);
 
-    g.players[0].pos = {.x = 900, .y = 400};
+    g.players[0].pos = {.x = 900, .y = 300};
+    g.players[1].pos = {.x = 600, .y = 300};
 
-	g.ball.size = 100;
-    g.ball.pos = {.x = 1000, .y = 500};
-    g.ball.vitesse = {.x = 100, .y = 100};
+    g.ball.size = 100;
+    g.ball.pos = {.x = 100, .y = 700};
+    g.ball.vitesse = {.x = 10, .y = 10};
 
     int i = 0;
 
     while (true) {
 
-        if (i % 10 == 0) {
-            g.players[0].orientation += 0.5;
-        }
+        for (int i2 = 0; i2 < g.playerNumber; i2++) {
+            if (i % (10 + i2) == 0) {
+                g.players[i2].orientation += 0.5;
+            }
 
-        if (i % 13 == 0) {
-            g.players[0].acceleration = 20 + i % 70;
+            if (i % (13 + 4 * i2) == 0) {
+                g.players[i2].acceleration = 20;
+            }
         }
 
         g.tick();

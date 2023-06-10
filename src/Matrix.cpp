@@ -219,9 +219,7 @@ Matrix *Matrix::mutation(Matrix *m) {
                 continue;
             }
 
-            // la fonction f(x) = 1 - cos(pi*x) est temporaire
-            double x = (randomDouble() + 1) / 2, v = m->get(i, j);
-            m->set(i, j, v * (1 - cos(M_PI * v)));
+            m->set(i, j, m->get(i, j) * mutation_scalar());
         }
     }
 

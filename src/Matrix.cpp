@@ -1,5 +1,6 @@
 #include "Matrix.h"
 #include "util.hpp"
+#include <cmath>
 #include <iostream>
 
 void Matrix::initialize() {
@@ -207,4 +208,22 @@ Matrix *Matrix::crossover(Matrix *m) {
     }
 
     return a;
+}
+
+Matrix *Matrix::mutation(Matrix *m) {
+    int np = m->ligne * m->col;
+
+    for (int i = 0; i < m->ligne; i++) {
+        for (int j = 0; j < m->col; j++) {
+            if ((rand() % np) != 0) {
+                continue;
+            }
+
+            // la fonction f(x) = 1 - cos(pi*x) est temporaire
+            double x = (randomDouble() + 1) / 2, v = m->get(i, j);
+            m->set(i, j, v * (1 - cos(M_PI * v)));
+        }
+    }
+
+    return m;
 }

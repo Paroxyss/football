@@ -8,6 +8,6 @@ std::default_random_engine re;
 
 // genère un double aléatoire
 double randomDouble() {
-	double a = unif(re);
+    double a = unif(re);
     return a;
 }

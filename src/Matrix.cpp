@@ -43,6 +43,18 @@ void Matrix::set(int i, int j, double x) {
     this->t[i][j] = x;
 }
 
+Matrix *Matrix::copy() {
+    Matrix *c = new Matrix(this->ligne, this->col);
+
+    for (int i = 0; i < this->ligne; i++) {
+        for (int j = 0; j < this->col; j++) {
+            c->set(i, j, this->get(i, j));
+        }
+    }
+
+    return c;
+}
+
 double Matrix::trace() {
     if (this->col != this->ligne)
         throw std::invalid_argument("lol");

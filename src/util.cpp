@@ -17,5 +17,5 @@ std::default_random_engine re5;
 
 double mutation_scalar() {
     int x = unif5(re5);
-    return 0.5 * (tanh(3 * x - 12) + tanh(3 * x - 3) + 2);
+    return 0.5 * (tanh(1.75 * (x - 1)) + tanh(2 * (x - 4)) + 2);
 }

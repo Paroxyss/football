@@ -14,13 +14,13 @@ Matrix *one_pointer_crossover(Matrix *a, Matrix *b) {
         throw std::invalid_argument("lol");
 
     int x = rand() % a->col;
+    Matrix *c = new Matrix(a->ligne, a->col);
 
-    Matrix *c = (x > a->col / 2 ? a : b)->copy();
-    Matrix *t = (x > a->col / 2 ? b : a);
+    for (int j = 0; j < a->col; j++) {
+        Matrix *t = (j < x ? a : b);
 
-    for (int i = x; i < a->col; i++) {
-        for (int j = 0; j < a->ligne; j++) {
-            c->set(j, i, t->get(j, i));
+        for (int i = 0; i < a->ligne; i++) {
+            c->set(i, j, t->get(i, j));
         }
     }
 
@@ -33,13 +33,13 @@ Matrix *double_pointer_crossover(Matrix *a, Matrix *b) {
 
     int x1 = rand() % a->col;
     int x2 = rand() % a->col + x1;
+    Matrix *c = new Matrix(a->ligne, a->col);
 
-    Matrix *c = (x2 - x1 > a->col / 2 ? b : a)->copy();
-    Matrix *t = x2 - x1 > a->col / 2 ? a : b;
+    for (int j = 0; j < a->col; j++) {
+        Matrix *t = (x1 <= j && j <= x2 ? a : b);
 
-    for (int i = x1; i <= x2; i++) {
-        for (int j = 0; j < a->ligne; j++) {
-            c->set(j, i, t->get(j, i));
+        for (int i = 0; i < a->ligne; i++) {
+            c->set(i, j, t->get(i, j));
         }
     }
 
@@ -99,11 +99,12 @@ Matrix *PMX(Matrix *a, Matrix *b) {
 
     int x = rand() % a->col;
     int y = rand() % a->ligne;
-    Matrix *c = a->copy();
+    Matrix *c = new Matrix(a->ligne, a->col);
 
-    for (int i = x; i < b->ligne; i++) {
-        for (int j = y; j < b->col; j++) {
-            c->set(i, j, b->get(i, j));
+    for (int i = 0; i < a->ligne; i++) {
+        for (int j = 0; j < a->col; j++) {
+            bool r = i <= y || j >= x;
+            c->set(i, j, (r ? a : b)->get(i, j));
         }
     }
 

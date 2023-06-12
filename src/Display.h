@@ -1,7 +1,8 @@
 
-// représente un "écran" virtuel, qui s'affichera pour le moment dans le terminal.
-// À terme, on pourrait faire une interface web qui se connecte en websocket,
-// de manière à pouvoir lancer le programme sur un serveur et le monitorer depuis un site
+// représente un "écran" virtuel, qui s'affichera pour le moment dans le
+// terminal. À terme, on pourrait faire une interface web qui se connecte en
+// websocket, de manière à pouvoir lancer le programme sur un serveur et le
+// monitorer depuis un site
 
 enum displayColor {
     TERM_BLACK = 30,
@@ -35,11 +36,13 @@ class Display {
     Display(int length, int height);
 
     void setChar(char c, int x, int y, displayColor color = TERM_DEFAULT);
-    void drawCircle(char c, int x, int y, int radius, displayColor color = TERM_DEFAULT);
+    void drawCircle(char c, int x, int y, int radius,
+                    displayColor color = TERM_DEFAULT);
 
     void clear();
 
     void cursorToBottom();
     void drawBorders(displayColor color = TERM_DEFAULT);
-    void drawLine(char c,  int startx, int starty, int endx, int endy, displayColor color = TERM_DEFAULT, int resolution = 10);
+    void drawLine(char c, int startx, int starty, int endx, int endy,
+                  displayColor color = TERM_DEFAULT, int resolution = 10);
 };

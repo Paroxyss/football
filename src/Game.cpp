@@ -21,15 +21,26 @@ Game::Game(int playerNumber) {
     };
 }
 
-Game::~Game() { free(players); }
+Game::~Game() {
+    free(players);
+}
 
-inline double distancecarre(player &p, ball &b) { return normeCarre(p.pos - b.pos); }
-inline double distancecarre(player &p, player &b) { return normeCarre(p.pos - b.pos); }
+inline double distancecarre(player &p, ball &b) {
+    return normeCarre(p.pos - b.pos);
+}
+inline double distancecarre(player &p, player &b) {
+    return normeCarre(p.pos - b.pos);
+}
 
-void computeCollision(vector x1, vector &v1, double m1, vector x2, vector &v2, double m2) {
+void computeCollision(vector x1, vector &v1, double m1, vector x2, vector &v2,
+                      double m2) {
 
-    auto dv1 = (x1 - x2) * (dotProduct(v1 - v2, x1 - x2) / normeCarre(x1 - x2)) * ((double)(2 * m2) / (m1 + m2));
-    auto dv2 = (x2 - x1) * (dotProduct(v2 - v1, x2 - x1) / normeCarre(x2 - x1)) * ((double)(2 * m1) / (m1 + m2));
+    auto dv1 = (x1 - x2) *
+               (dotProduct(v1 - v2, x1 - x2) / normeCarre(x1 - x2)) *
+               ((double)(2 * m2) / (m1 + m2));
+    auto dv2 = (x2 - x1) *
+               (dotProduct(v2 - v1, x2 - x1) / normeCarre(x2 - x1)) *
+               ((double)(2 * m1) / (m1 + m2));
 
     v1 = v1 - dv1;
     v2 = v2 - dv2;
@@ -50,7 +61,8 @@ void Game::tick() {
     ball.vitesse += -ball.vitesse / BALL_MASS;
 
     for (int i = 0; i < playerNumber; i++) {
-        //std::cout << "computing player " << i << " of " << playerNumber << std::endl;
+        // std::cout << "computing player " << i << " of " << playerNumber <<
+        // std::endl;
         player &p = players[i];
         if (p.acceleration > 0) {
             p.vitesse.x += p.acceleration * cos(p.orientation);
@@ -100,9 +112,12 @@ void Game::doAction(unsigned int id, double rotation, double acceleration){
 
 };
 
-void Game::setBall(vector pos, vector vitesse, double size) { this->ball = {.pos = pos, .vitesse = vitesse, .size = size}; }
+void Game::setBall(vector pos, vector vitesse, double size) {
+    this->ball = {.pos = pos, .vitesse = vitesse, .size = size};
+}
 
-void Game::setPlayer(int id, vector pos, vector speed, double orientation, double size) {
+void Game::setPlayer(int id, vector pos, vector speed, double orientation,
+                     double size) {
     this->players[id].pos = pos;
     this->players[id].vitesse = speed;
     this->players[id].orientation = orientation;
@@ -110,16 +125,20 @@ void Game::setPlayer(int id, vector pos, vector speed, double orientation, doubl
     this->players[id].acceleration = 0;
 }
 
-void moveCursor(unsigned int x, unsigned int y) { printf("\033[%d;%df", y, x); }
+void moveCursor(unsigned int x, unsigned int y) {
+    printf("\033[%d;%df", y, x);
+}
 
-void clearScreen() { std::cout << "\033[2J" << std::endl; }
+void clearScreen() {
+    std::cout << "\033[2J" << std::endl;
+}
 
 void setPixel(char c, unsigned int x, unsigned int y) {
     moveCursor(x, y);
     std::cout << c;
 }
 
-void Game::print() { // affichage provisoir de la partie, sur le terminal
+void Game::print() { // affichage provisoire de la partie, sur le terminal
                      // On obtient la taille du terminal
     auto d = Display(MAP_LENGTH, MAP_HEIGHT);
 
@@ -129,7 +148,8 @@ void Game::print() { // affichage provisoir de la partie, sur le terminal
     for (int i = 0; i < playerNumber; i++) {
         player &p = players[i];
         d.drawCircle('X', p.pos.x, p.pos.y, PLAYER_SIZE, TERM_BLUE);
-        d.drawLine('-', p.pos.x, p.pos.y, p.pos.x + cos(p.orientation) * p.size, p.pos.y + sin(p.orientation) * p.size);
+        d.drawLine('-', p.pos.x, p.pos.y, p.pos.x + cos(p.orientation) * p.size,
+                   p.pos.y + sin(p.orientation) * p.size);
     }
 
     d.cursorToBottom();

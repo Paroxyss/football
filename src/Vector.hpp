@@ -1,4 +1,5 @@
 #pragma once
+
 struct vector {
     double x, y;
 };

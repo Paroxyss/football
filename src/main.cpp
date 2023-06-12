@@ -1,3 +1,4 @@
+#include "Chromosome.hpp"
 #include "Game.hpp"
 #include "Matrix.h"
 #include "Network.hpp"
@@ -20,7 +21,7 @@ int main() {
 
     g.ball.size = 100;
     g.ball.pos = {.x = 100, .y = 700};
-    g.ball.vitesse = {.x = 10, .y = 10};
+    g.ball.vitesse = {.x = 500, .y = 10};
 
     int i = 0;
 

@@ -8,13 +8,21 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-void Display::moveTo(int col, int ligne) { printf("\033[%d;%df", ligne + 1, col + 1); }
+void Display::moveTo(int col, int ligne) {
+    printf("\033[%d;%df", ligne + 1, col + 1);
+}
 
-void Display::clear() { std::cout << "\033[2J" << std::endl; };
+void Display::clear() {
+    std::cout << "\033[2J" << std::endl;
+};
 
-void Display::setColor(displayColor color) { printf("\033[%dm", color); }
+void Display::setColor(displayColor color) {
+    printf("\033[%dm", color);
+}
 
-void Display::moveToVirtualPos(int x, int y) { moveTo(x * lengthFactor, y * heightFactor); };
+void Display::moveToVirtualPos(int x, int y) {
+    moveTo(x * lengthFactor, y * heightFactor);
+};
 
 Display::Display(int length, int height) {
     this->fakeLen = length;
@@ -29,7 +37,8 @@ Display::Display(int length, int height) {
     double horizontaFactor = (double)w.ws_xpixel / length;
     double verticalFactor = (double)w.ws_ypixel / height;
 
-    // On utilisera le plus petit facteur pour afficher, de manière à s'assurer que tout rentre
+    // On utilisera le plus petit facteur pour afficher, de manière à s'assurer
+    // que tout rentre
     if (verticalFactor < horizontaFactor) {
         scaleFactor = verticalFactor;
     } else {
@@ -41,7 +50,7 @@ Display::Display(int length, int height) {
     this->heightFactor = scaleFactor / ((double)w.ws_ypixel / (w.ws_row));
 };
 
-// met un caractère à une ceratine position
+// met un caractère à une certaine position
 void Display::setChar(char c, int x, int y, displayColor color) {
     moveToVirtualPos(x, y);
     setColor(color);
@@ -50,14 +59,19 @@ void Display::setChar(char c, int x, int y, displayColor color) {
 
 void Display::drawCircle(char c, int x, int y, int radius, displayColor color) {
     for (int i = 0; i < 360; i += 12) {
-        setChar(c, x + radius * cos(i * PI / 180), y + radius * sin(i * PI / 180), color);
+        setChar(c, x + radius * cos(i * PI / 180),
+                y + radius * sin(i * PI / 180), color);
     }
 };
 
-// mets le curseur en bas à gauche, notamment pour que le terminal ecrive le prompt après
-void Display::cursorToBottom() { moveToVirtualPos(fakeLen, fakeHeight); }
+// mets le curseur en bas à gauche, notamment pour que le terminal écrive le
+// prompt après
+void Display::cursorToBottom() {
+    moveToVirtualPos(fakeLen, fakeHeight);
+}
 
-void Display::drawLine(char c, int startx, int starty, int endx, int endy, displayColor color, int resolution) {
+void Display::drawLine(char c, int startx, int starty, int endx, int endy,
+                       displayColor color, int resolution) {
     int lenx = endx - startx;
     int leny = endy - starty;
     for (double i = 0; i < 1; i += (double)1 / resolution) {

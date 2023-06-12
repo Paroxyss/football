@@ -28,6 +28,7 @@ Game::~Game() {
 inline double distancecarre(player &p, ball &b) {
     return normeCarre(p.pos - b.pos);
 }
+
 inline double distancecarre(player &p, player &b) {
     return normeCarre(p.pos - b.pos);
 }

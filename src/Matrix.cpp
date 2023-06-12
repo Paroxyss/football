@@ -210,7 +210,7 @@ Matrix *Matrix::crossover(Matrix *m) {
     return a;
 }
 
-Matrix *Matrix::mutation(Matrix *m) {
+Matrix *mutation(Matrix *m) {
     int np = m->ligne * m->col;
 
     for (int i = 0; i < m->ligne; i++) {
@@ -224,4 +224,12 @@ Matrix *Matrix::mutation(Matrix *m) {
     }
 
     return m;
+}
+
+void Matrix::randomize() {
+    for (int i = 0; i < this->ligne; i++) {
+        for (int j = 0; j < this->col; j++) {
+            this->set(i, j, randomDouble() * 10);
+        }
+    }
 }

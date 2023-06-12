@@ -32,5 +32,7 @@ class Matrix {
     void mult_scal(double x);
 
     Matrix *crossover(Matrix *a);
-    Matrix *mutation(Matrix *m);
+    void randomize();
 };
+
+Matrix *mutation(Matrix *m);

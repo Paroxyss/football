@@ -1,5 +1,6 @@
 #include "Vector.hpp"
 #include <cmath>
+#include <ostream>
 
 vector copy(vector v) {
     return {.x = v.x, .y = v.y};
@@ -58,4 +59,13 @@ double dotProduct(vector a, vector b) {
 
 double normeCarre(vector a) {
     return pow(a.x, 2) + pow(a.y, 2);
+}
+
+double norme(vector a) {
+    return sqrt(normeCarre(a));
+}
+
+std::ostream &operator<<(std::ostream &os, const vector &obj) {
+    os << "Vect{ x: " << obj.x << "; y: " << obj.y << " }";
+    return os;
 }

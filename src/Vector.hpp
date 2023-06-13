@@ -1,5 +1,5 @@
 #pragma once
-
+#include <ostream>
 struct vector {
     double x, y;
 };
@@ -24,3 +24,6 @@ vector operator/(vector, double factor);
 
 double dotProduct(vector, vector);
 double normeCarre(vector);
+double norme(vector);
+
+std::ostream &operator<<(std::ostream &os, const vector &obj);

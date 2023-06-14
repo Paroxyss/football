@@ -1,4 +1,6 @@
 #include <cmath>
+#include <cstdio>
+#include <ctime>
 #include <iostream>
 #include <math.h>
 #include <ostream>
@@ -45,27 +47,58 @@ inline double distancecarre(ball &p, ball &b) {
     return normeCarre(p.pos - b.pos);
 }
 
-inline collisionList *insert(collisionList *list, ball *obj,
-                             CollisionType type) {
+inline collisionList *insert(collisionList *list, ball *actor, ball *secondary,
+                             CollisionType type, double time = INFINITY) {
     collisionList *l = (collisionList *)malloc(sizeof(collisionList));
-    l->obj = obj;
+    l->actor = actor;
+    l->secondary = secondary;
+    l->time = time;
     l->type = type;
     l->next = list;
     return l;
 }
 
-// fonction qui liste toutes les collisions en cours, pour pouvoir savoir
-// laquelle est arrivé en premier
-collisionList *Game::getCollisionList(int objId) {
+double getWallCollisionTime(ball *obj, ball *wall) {
+    vector MO = obj->pos - wall->pos;
+
+    vector n = {
+        .x = -wall->vitesse.y,
+        .y = wall->vitesse.x,
+    };
+
+    double c = abs(dotProduct(MO, n) / norme(n));
+    double ev = abs(dotProduct(obj->vitesse, n) / norme(n));
+    double T = c - obj->size;
+
+
+    return T / ev;
+}
+
+double getTwoBallCollisionTime(ball *b1, ball *b2) {
+    vector v_relative = b1->vitesse - b2->vitesse;
+    vector LM = b1->pos - b2->pos;
+    double d = b1->size + b2->size;
+
+    vector n = {
+        .x = -v_relative.y,
+        .y = v_relative.x,
+    };
+
+    double c = abs(dotProduct(LM, n) / norme(n));
+    double ev = abs(dotProduct(LM, v_relative) / norme(v_relative));
+    double pprime = sqrt(pow(d, 2) - pow(c, 2));
+
+    return (ev - pprime) / norme(v_relative);
+}
+
+collisionList *Game::getObjectCollisionList(int objId,
+                                            collisionList *listToAppend) {
     struct ball *selected;
     if (objId == -1) {
-        std::cout << "C'est la balle" << std::endl;
         selected = &ball;
     } else {
-        std::cout << "C'est le joueur " << objId << std::endl;
         selected = &(this->players[objId]);
     }
-    collisionList *c = NULL;
 
     for (int i = 0; i < wallNumber; i++) {
         wall &w = this->walls[i];
@@ -75,87 +108,50 @@ collisionList *Game::getCollisionList(int objId) {
         double d = dotProduct(selected->pos - w.pos, normal) / norme(normal);
         if (abs(d) <
             selected->size) { // la balle est trop près du mur, il y a collision
-            c = insert(c, &w, WALL);
+            listToAppend = insert(listToAppend, selected, &w, WALL);
         }
     }
 
-    for (int i = 0; i < playerNumber; i++) {
-        if (i == objId)
-            continue;
+    // test de collisions triangulaire
+    for (int i = objId + 1; i < playerNumber; i++) {
         if (distancecarre(*selected, this->players[i]) <
-            pow(2 * PLAYER_SIZE, 2)) {
-            c = insert(c, &this->players[i], CIRCLE);
+            pow(selected->size + PLAYER_SIZE, 2)) {
+            listToAppend =
+                insert(listToAppend, selected, &this->players[i], CIRCLE);
         }
     }
 
-    if (objId != -1 &&
+    // la balle va tester ses propres collisions avec tout le monde.
+    /*if (objId != -1 &&
         distancecarre(*selected, ball) < pow(PLAYER_SIZE + BALL_SIZE, 2)) {
-        c = insert(c, &this->ball, CIRCLE);
-    }
+        c = insert(c, selected, &ball, CIRCLE);
+    }*/
 
-    return c;
+    return listToAppend;
 }
 
-// Fonction pour trouver la première collision étant arrivé
-backtrackCollisionReport backTrackCollisions(collisionList *collision,
-                                             ball &obj) {
-    if (collision == NULL) {
-        return {.distanceBefore = 0, .obj = NULL};
+void timeCollisionList(collisionList *collision) {
+    if (!collision) {
+        return;
     }
-    double p;
-    if (collision->type == CIRCLE) {
-        vector d1 = collision->obj->pos - obj.pos;
-        double d = collision->obj->size + obj.size;
-
-        std::cout << "DEBUT CIRCLE =========" << std::endl;
-        std::cout << "Pos de l'objet " << obj.pos << " vitessse de l'objet "
-                  << obj.vitesse << " pos de l'objet collisionné "
-                  << collision->obj->pos << std::endl;
-
-        vector vNormal = {.x = -obj.vitesse.y, .y = obj.vitesse.x};
-        // p + p'
-        double lTotale = abs(dotProduct(d1, obj.vitesse) / norme(obj.vitesse));
-
-        std::cout << "d1: " << d1 << "vNormal: " << vNormal
-                  << " vNormal.v = " << dotProduct(vNormal, obj.vitesse)
-                  << std::endl;
-        std::cout << "d: " << d << std::endl;
-
-        double pprime = sqrt(pow(d, 2) - (pow(dotProduct(vNormal, d1), 2) /
-                                          normeCarre(vNormal)));
-
-        std::cout << "membres : " << lTotale << " " << pprime << std::endl;
-        p = -abs(lTotale - pprime);
-        std::cout << "FIN CIRCLE =========, p: " << p << std::endl;
-    }
-
     if (collision->type == WALL) {
-        auto o = collision->obj->pos;
-        auto m = collision->obj->vitesse;
-        auto a = obj.pos;
-        auto v = obj.vitesse;
-        auto d = obj.size;
-
-        // calcul en double, on le fait déjà lors du test de collision
-        vector normal = {.x = -m.y, .y = m.x};
-        double pp = abs(dotProduct(a - o, normal) / norme(normal));
-        double pv = abs(dotProduct(v, normal) / norme(normal));
-
-        double r = (d - pp) / pv;
-
-        p = -r * norme(v);
+        collision->time =
+            getWallCollisionTime(collision->actor, collision->secondary);
+    } else {
+        collision->time =
+            getTwoBallCollisionTime(collision->actor, collision->secondary);
     }
-
-    auto n = backTrackCollisions(collision->next, obj);
-    std::cout << "p calculé: " << p << std::endl;
-    if (n.distanceBefore <= p)
-        return n;
-    else
-        return {.distanceBefore = p, .obj = collision};
+    timeCollisionList(collision->next);
 }
 
-void computeCollisionCircle(vector x1, vector &v1, double m1, vector x2,
-                            vector &v2, double m2) {
+void computeCollisionCircle(ball *obj1, ball *obj2) {
+    vector x1 = obj1->pos;
+    double &m1 = obj1->mass;
+    vector &v1 = obj1->vitesse;
+
+    vector x2 = obj2->pos;
+    vector &v2 = obj2->vitesse;
+    double &m2 = obj2->mass;
 
     auto dv1 = (x1 - x2) *
                (dotProduct(v1 - v2, x1 - x2) / normeCarre(x1 - x2)) *
@@ -168,154 +164,86 @@ void computeCollisionCircle(vector x1, vector &v1, double m1, vector x2,
     v2 = v2 - dv2;
 }
 
-void computeCollisionWall(ball *w, ball &b) {
-    std::cout << "um" << std::endl;
+void computeCollisionWall(ball &b, ball *w) {
     vector um = w->vitesse / norme(w->vitesse);
-    std::cout << "num" << std::endl;
     vector normal_um = {.x = um.y, .y = -um.x};
 
-    std::cout << "vitesse" << std::endl;
     b.vitesse = dotProduct(-b.vitesse, normal_um) * normal_um +
                 dotProduct(b.vitesse, um) * um;
 }
 
-void computeCollision(collisionList *collision, ball &b) {
-    std::cout << "Entrée de collision" << std::endl;
-    std::cout << collision << std::endl;
-    std::cout << collision->obj << std::endl;
-    if (collision->type == CIRCLE) {
-        auto &v1 = b.vitesse;
-        auto &v2 = collision->obj->vitesse;
-        auto &x1 = b.pos;
-        auto &x2 = collision->obj->pos;
-        auto m1 = b.mass;
-        auto m2 = collision->obj->mass;
-        computeCollisionCircle(x1, v1, m1, x2, v2, m2);
-    } else {
-        computeCollisionWall(collision->obj, b);
+collisionList *findFirstCollision(collisionList *list) {
+    if (!list)
+        return NULL;
+
+    switch (list->type) {
+    case CIRCLE:
+        list->time = getTwoBallCollisionTime(list->actor, list->secondary);
+        break;
+    case WALL:
+        list->time = getWallCollisionTime(list->actor, list->secondary);
+        break;
     }
+
+    auto nextBest = findFirstCollision(list->next);
+    if (nextBest && nextBest->time < list->time) {
+        return nextBest;
+    }
+    return list;
 }
 
-// fait avancer l'objet n°id, -1 représente la balle.
-void Game::tickBall(int objId, double progress) {
-    if (progress >= 1)
+void printCollisionList(collisionList *list) {
+    if (list == NULL) {
+        std::cout << "Fin de liste" << std::endl;
         return;
+    }
 
-    struct ball *selected;
-    if (objId == -1) {
-        selected = &ball;
+    if (list->type == CIRCLE) {
+        std::cout << "Collision à " << list->time << " de " << list->actor->pos
+                  << " avec la sphere " << list->secondary->pos << std::endl;
     } else {
-        selected = &(this->players[objId]);
+        std::cout << "Collision à " << list->time << " de " << list->actor->pos
+                  << " avec un mur" << std::endl;
     }
-
-    selected->pos += selected->vitesse * GAME_RESOLUTION * (1 - progress);
-
-    collisionList *list = this->getCollisionList(objId);
-    if (list) {
-        auto nv = norme(selected->vitesse);
-        // on regarde de combien il faut reculer
-        auto res = backTrackCollisions(list, *selected);
-        // on recule
-        std::cout << "before pos update " << res.distanceBefore << std::endl;
-
-        if (list->type == CIRCLE && false) {
-            std::cout << "progress " << progress << std::endl;
-            std::cout << selected->pos << " " << selected->vitesse << std::endl;
-            fflush(stdout);
-            std::this_thread::sleep_for(std::chrono::milliseconds(1500));
-        }
-
-        this->players[0].pos += selected->vitesse / nv * res.distanceBefore;
-        // on update le progress
-        progress = 1 - abs(res.distanceBefore) / nv + progress;
-        // on update la collision (update la vitesse des objets impliqués)
-        std::cout << "before compute collision " << selected->pos << " "
-                  << selected->vitesse << std::endl;
-        computeCollision(res.obj, *selected);
-
-        if (list->type == CIRCLE && false) {
-            std::cout << "progress " << progress << std::endl;
-            std::cout << selected->pos << " " << selected->vitesse << std::endl;
-            fflush(stdout);
-            std::this_thread::sleep_for(std::chrono::milliseconds(1500));
-        }
-
-        tickBall(objId, progress);
-
-        /*
-        print();
-        std::cout << res.distanceBefore << " " << norme(selected->vitesse)
-                  << std::endl;
-        std::cout << selected->pos << " " << selected->vitesse << std::endl;
-        fflush(stdout);
-        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
-        */
-    }
+    printCollisionList(list->next);
 }
 
-void Game::tick() {
-    ball.pos += ball.vitesse * GAME_RESOLUTION;
-
-    /*if (ball.pos.x + BALL_SIZE > MAP_LENGTH && ball.vitesse.x > 0) {
-        ball.vitesse.x = -ball.vitesse.x;
-    } else if (ball.pos.x - BALL_SIZE < 0 && ball.vitesse.x < 0) {
-        ball.vitesse.x = -ball.vitesse.x;
-    } else if (ball.pos.y + BALL_SIZE > MAP_HEIGHT && ball.vitesse.y > 0) {
-        ball.vitesse.y = -ball.vitesse.y;
-    } else if (ball.pos.y - BALL_SIZE < 0 && ball.vitesse.y < 0) {
-        ball.vitesse.y = -ball.vitesse.y;
-    }*/
-    ball.vitesse += -ball.vitesse / BALL_MASS;
-
+void Game::tick(double timeToAdvance) {
+    // on fait tout avancer
+    ball.pos += ball.vitesse * timeToAdvance;
     for (int i = 0; i < playerNumber; i++) {
-        // std::cout << "computing player " << i << " of " << playerNumber <<
-        // std::endl;
-        player &p = players[i];
-        if (p.acceleration > 0) {
-            // on multiplie par la résolution pour compenser le fait que le
-            // joueur accélère plus de fois
-            p.vitesse.x +=
-                p.acceleration * cos(p.orientation) * GAME_RESOLUTION;
-            p.vitesse.y +=
-                p.acceleration * sin(p.orientation) * GAME_RESOLUTION;
-            p.acceleration = 0;
+        players[i].pos += players[i].vitesse * timeToAdvance;
+    }
+
+    collisionList *c = NULL;
+
+    for (int i = 0; i < playerNumber + 1; i++) {
+        c = getObjectCollisionList(i - 1, c);
+    }
+    if (c != NULL) {
+        ball.pos -= ball.vitesse * timeToAdvance;
+
+        for (int i = 0; i < playerNumber; i++) {
+            players[i].pos -= players[i].vitesse * timeToAdvance;
         }
 
-        p.pos += p.vitesse * GAME_RESOLUTION;
+        collisionList *firstCollision = findFirstCollision(c);
 
-        /*if (p.pos.x + p.size > MAP_LENGTH && p.vitesse.x > 0) {
-            p.vitesse.x = -p.vitesse.x;
-        } else if (p.pos.x - p.size < 0 && p.vitesse.x < 0) {
-            p.vitesse.x = -p.vitesse.x;
-        } else if (p.pos.y + p.size > MAP_HEIGHT && p.vitesse.y > 0) {
-            p.vitesse.y = -p.vitesse.y;
-        } else if (p.pos.y - p.size < 0 && p.vitesse.y < 0) {
-            p.vitesse.y = -p.vitesse.y;
-        }*/
+        ball.pos += ball.vitesse * firstCollision->time;
 
-        p.vitesse += -p.vitesse / PLAYER_MASS;
-
-        /*if (distancecarre(p, ball) < pow(PLAYER_SIZE + BALL_SIZE, 2)) {
-            auto &v1 = p.vitesse;
-            auto &v2 = ball.vitesse;
-            auto &x1 = p.pos;
-            auto &x2 = ball.pos;
-            auto m1 = PLAYER_MASS;
-            auto m2 = BALL_MASS;
-            computeCollision(x1, v1, m1, x2, v2, m2);
+        for (int i = 0; i < playerNumber; i++) {
+            players[i].pos += players[i].vitesse * firstCollision->time;
         }
-        for (int i2 = i + 1; i2 < playerNumber; i2++) {
-            player &p2 = players[i2];
-            if (distancecarre(p, p2) < pow(2 * PLAYER_SIZE, 2)) {
-                auto &v1 = p.vitesse;
-                auto &v2 = p2.vitesse;
-                auto &x1 = p.pos;
-                auto &x2 = p2.pos;
-                auto m1 = PLAYER_MASS;
-                auto m2 = PLAYER_MASS;
-                computeCollision(x1, v1, m1, x2, v2, m2);
-            }
-        }*/
+        switch (firstCollision->type) {
+        case CIRCLE:
+            computeCollisionCircle(firstCollision->actor,
+                                   firstCollision->secondary);
+            break;
+        case WALL:
+            computeCollisionWall(*firstCollision->actor,
+                                 firstCollision->secondary);
+        }
+		tick(timeToAdvance - firstCollision->time);
     }
 };
 
@@ -356,12 +284,16 @@ void Game::print() { // affichage provisoire de la partie, sur le terminal
 
     d.clear();
     d.drawCircle('.', ball.pos.x, ball.pos.y, ball.size, TERM_YELLOW);
+    d.drawLine('=', ball.pos.x, ball.pos.y, ball.pos.x + ball.vitesse.x,
+               ball.pos.y + ball.vitesse.y, TERM_RED);
 
     for (int i = 0; i < playerNumber; i++) {
         player &p = players[i];
         d.drawCircle('X', p.pos.x, p.pos.y, PLAYER_SIZE, TERM_BLUE);
         d.drawLine('-', p.pos.x, p.pos.y, p.pos.x + cos(p.orientation) * p.size,
                    p.pos.y + sin(p.orientation) * p.size);
+        d.drawLine('=', p.pos.x, p.pos.y, p.pos.x + p.vitesse.x,
+                   p.pos.y + p.vitesse.y, TERM_RED);
     }
 
     d.cursorToBottom();

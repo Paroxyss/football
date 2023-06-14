@@ -1,4 +1,3 @@
-
 /*
     Je n'ai pas supprimé le fichier parce que j'ai peur de faire
     une bêtise même si toutes les fonctionnalités ont été adaptées dans

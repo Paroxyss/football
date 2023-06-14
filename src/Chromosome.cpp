@@ -1,5 +1,5 @@
 #include "Chromosome.hpp"
-#include "Activation.cpp"
+#include "Activation.hpp"
 #include "Matrix.h"
 #include "config.h"
 #include <array>

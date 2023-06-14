@@ -1,3 +1,4 @@
+#pragma once
 // représente un "écran" virtuel, qui s'affichera pour le moment dans le
 // terminal. À terme, on pourrait faire une interface web qui se connecte en
 // websocket, de manière à pouvoir lancer le programme sur un serveur et le

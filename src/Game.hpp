@@ -19,9 +19,9 @@ struct wall : ball {};
 enum CollisionType { WALL, CIRCLE };
 
 struct collisionList {
-	double time;
+    double time;
     ball *actor;
-	ball *secondary;
+    ball *secondary;
     CollisionType type;
     collisionList *next;
 };
@@ -40,6 +40,8 @@ class Game {
     unsigned int wallNumber;
     wall *walls;
 
+    void set_players(int conf[], int n, bool t);
+
     Game(int playerNumber);
     ~Game();
 
@@ -51,11 +53,12 @@ class Game {
     void setBall(vector pos, vector vitesse = {.x = 0, .y = 0},
                  double size = BALL_SIZE, double mass = BALL_MASS);
 
-	// liste les collisions futures d'un objet
-    collisionList *getObjectCollisionList(int objId, collisionList* listToAppend = NULL);
+    // liste les collisions futures d'un objet
+    collisionList *getObjectCollisionList(int objId,
+                                          collisionList *listToAppend = NULL);
 
-	// bouge tous les objets du pourcentage/portion de tick donnée.
-	void moveAllObj(double percent);
+    // bouge tous les objets du pourcentage/portion de tick donnée.
+    void moveAllObj(double percent);
 
     void setPlayer(int id, vector pos, vector speed, double orientation,
                    double size = PLAYER_SIZE, double mass = BALL_MASS);

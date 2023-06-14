@@ -16,17 +16,11 @@
 int main() {
     auto g = Game(4);
 
-    g.players[0].pos = {.x = 300, .y = 500};
-    g.players[0].vitesse = {.x = 50, .y = 60};
-    g.players[1].pos = {.x = 600, .y = 500};
-    g.players[1].vitesse = {.x = 40, .y = 60};
-    g.players[2].pos = {.x = 900, .y = 500};
-    g.players[2].vitesse = {.x = 50, .y = 60};
-    g.players[3].pos = {.x = 1200, .y = 500};
-    g.players[3].vitesse = {.x = 40, .y = 60};
+    g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
+    g.ball.vitesse = {.x = 50, .y = -3};
 
-    g.ball.pos = {.x = 600, .y = 900};
-    g.ball.vitesse = {.x = 1, .y = -3};
+    int c[] = {2, 2};
+    g.set_players(c, 2, false);
 
     int i = 0;
     auto start = std::chrono::high_resolution_clock::now();
@@ -38,6 +32,7 @@ int main() {
     total = 0;
     peak = 0;
 
+    g.print();
     while (true) {
         auto start = std::chrono::high_resolution_clock::now();
         g.tick();
@@ -46,7 +41,7 @@ int main() {
         auto actual =
             std::chrono::duration_cast<std::chrono::microseconds>(end - start)
                 .count();
-		total += actual;
+        total += actual;
         if (actual > peak)
             peak = total;
         i++;
@@ -57,5 +52,6 @@ int main() {
 
         fflush(stdout);
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        break;
     }
 }

@@ -11,8 +11,12 @@ void Chromosome::initialize() {
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             this->matrix[i][j] =
-                new Matrix(LAYER_CONFIG[j + 1], LAYER_CONFIG[j]);
+                new Matrix(PLAYER_LAYERS[j + 1], PLAYER_LAYERS[j]);
         }
+    }
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        this->didier[i] = new Matrix(DIDIER_LAYERS[i + 1], DIDIER_LAYERS[i]);
     }
 }
 
@@ -21,6 +25,10 @@ Chromosome::~Chromosome() {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             delete this->matrix[i][j];
         }
+    }
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        delete this->didier[i];
     }
 }
 
@@ -47,6 +55,10 @@ void Chromosome::randomize() {
             this->matrix[i][j]->randomize();
         }
     }
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        this->didier[i]->randomize();
+    }
 }
 
 /*
@@ -64,6 +76,10 @@ Chromosome *mutate(Chromosome *c) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             nw->matrix[i][j] = mutation(c->matrix[i][j]);
         }
+    }
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        nw->didier[i] = mutation(c->didier[i]);
     }
 
     return nw;

@@ -43,6 +43,39 @@ Game::~Game() {
     free(players);
 }
 
+/*
+    pour 3 joueurs, on peut par exemple avoir {2, 1}
+    true for left team
+    false for right team
+
+    Si on place l'équipe de droite les joueurs sont placés dans l'ordre inverse
+    d'apparition dans la configuration.
+*/
+void Game::set_players(int conf[], int n, bool t) {
+    int s = 0, c = 0;
+
+    for (int i = 0; i < n; i++) {
+        s += conf[i];
+    }
+
+    if (s != this->playerNumber)
+        std::invalid_argument("conf incorrect");
+
+    double spx = MAP_LENGTH / 2. / (double)(n + 1);
+
+    for (int i = 0 + (t ? 0 : n - 1); (t && i < n || (i >= 0));
+         i += 2 * t - 1) {
+        double spy = MAP_HEIGHT / (double)(conf[i] + 1);
+
+        for (int k = 1; k <= conf[i]; k++) {
+            this->players[c].pos = {.x = (!t ? MAP_LENGTH : 0) - (i + 1) * spx,
+                                    .y = k * spy};
+            // déterminisme?
+            this->players[c++].orientation = (t ? 0 : M_PI);
+        }
+    }
+}
+
 inline double distancecarre(ball &p, ball &b) {
     return normeCarre(p.pos - b.pos);
 }
@@ -69,7 +102,6 @@ double getWallCollisionTime(ball *obj, ball *wall) {
     double c = abs(dotProduct(MO, n) / norme(n));
     double ev = abs(dotProduct(obj->vitesse, n) / norme(n));
     double T = c - obj->size;
-
 
     return T / ev;
 }
@@ -102,8 +134,8 @@ collisionList *Game::getObjectCollisionList(int objId,
 
     for (int i = 0; i < wallNumber; i++) {
         wall &w = this->walls[i];
-        // on regarde la distance au mur, si elle est inférieure au rayon de la
-        // balle, c'est que la balle est en collision
+        // on regarde la distance au mur, si elle est inférieure au rayon de
+        // la balle, c'est que la balle est en collision
         vector normal = {.x = -w.vitesse.y, .y = w.vitesse.x};
         double d = dotProduct(selected->pos - w.pos, normal) / norme(normal);
         if (abs(d) <
@@ -243,7 +275,7 @@ void Game::tick(double timeToAdvance) {
             computeCollisionWall(*firstCollision->actor,
                                  firstCollision->secondary);
         }
-		tick(timeToAdvance - firstCollision->time);
+        tick(timeToAdvance - firstCollision->time);
     }
 };
 

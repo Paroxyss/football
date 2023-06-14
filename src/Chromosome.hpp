@@ -6,6 +6,7 @@
 class Chromosome {
   public:
     Matrix *matrix[EQUIPE_SIZE][NETWORK_SIZE - 1];
+    Matrix *didier[DIDIER_NETWORK_SIZE - 1];
 
     void initialize();
     ~Chromosome();

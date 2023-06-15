@@ -14,14 +14,13 @@
 #include <unistd.h>
 
 int main() {
-    auto g = Game(50);
+    auto g = Game(6);
 
     g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
     g.ball.vitesse = {.x = 3, .y = 3};
 
-    int c[] = {10, 10, 10, 10, 10};
-
-    g.set_players(c, 5, true);
+    int c[] = {2, 1};
+    g.set_players(c, 2);
 
     int i = 0;
     auto start = std::chrono::high_resolution_clock::now();

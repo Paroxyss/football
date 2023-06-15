@@ -45,34 +45,33 @@ Game::~Game() {
 
 /*
     pour 3 joueurs, on peut par exemple avoir {2, 1}
-    true for left team
-    false for right team
 
     Si on place l'équipe de droite les joueurs sont placés dans l'ordre inverse
     d'apparition dans la configuration.
 */
-void Game::set_players(int conf[], int n, bool t) {
-    int s = 0, c = 0;
+void Game::set_players(int conf[], int n) {
+    int c = 0, s = 0, t = true;
+    double spx = MAP_LENGTH / 2. / (double)(n + 1);
 
     for (int i = 0; i < n; i++) {
-        s += conf[i];
+        s += 2 * conf[i];
     }
 
     if (s != this->playerNumber)
-        std::invalid_argument("conf incorrect");
+        throw std::invalid_argument("invalid conf");
 
-    double spx = MAP_LENGTH / 2. / (double)(n + 1);
-
-    // Parcours à l'envers si !t, à l'endroit sinon.
-    for (int i = !t * (n - 1); ((t && i < n) || (!t && i >= 0));
-         i += 2 * t - 1) {
+    for (int i = 0; i < n; i++) {
         double spy = MAP_HEIGHT / (double)(conf[i] + 1);
-
         for (int k = 1; k <= conf[i]; k++) {
-            this->players[c].pos = {.x = (i + 1) * spx + (!t ? -MAP_LENGTH : 0),
-                                    .y = k * spy};
-            // déterminisme?
-            this->players[c++].orientation = (t ? 0 : M_PI);
+            this->players[c++].pos = {.x = (i + 1) * spx, .y = k * spy};
+        }
+    }
+
+    for (int i = n - 1; i >= 0; i--) {
+        double spy = MAP_HEIGHT / (double)(conf[i] + 1);
+        for (int k = 1; k <= conf[i]; k++) {
+            this->players[c++].pos = {.x = MAP_LENGTH - (i + 1) * spx,
+                                      .y = k * spy};
         }
     }
 }

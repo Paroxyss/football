@@ -40,7 +40,7 @@ class Game {
     unsigned int wallNumber;
     wall *walls;
 
-    void set_players(int conf[], int n, bool t);
+    void set_players(int conf[], int n);
 
     Game(int playerNumber);
     ~Game();

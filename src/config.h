@@ -26,3 +26,5 @@ const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, 15, 20,
 
 #define BALL_MASS 100
 #define BALL_SIZE 0.5 * 10
+
+#define LOGGAME

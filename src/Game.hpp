@@ -2,6 +2,8 @@
 #include "Vector.hpp"
 #include "config.h"
 
+#include <fstream>
+
 struct ball {
     vector pos, vitesse;
     double size, mass;
@@ -33,6 +35,10 @@ struct backtrackCollisionReport {
 
 class Game {
   public:
+	
+#ifdef LOGGAME
+#endif
+
     player *players;
     unsigned int playerNumber;
     ball ball;
@@ -45,8 +51,7 @@ class Game {
     Game(int playerNumber);
     ~Game();
 
-    void tick(double timeToAdvance = 1);
-    bool tickBall(int id, double progress = 0);
+    virtual void tick(double timeToAdvance = 1, bool root = true);
 
     void doAction(unsigned int id, double rotation, double acceleration);
 
@@ -59,6 +64,12 @@ class Game {
 
     // bouge tous les objets du pourcentage/portion de tick donnée.
     void moveAllObj(double percent);
+
+    void writePlayers()
+#ifndef LOGGAME
+        {}
+#endif
+    ;
 
     void setPlayer(int id, vector pos, vector speed, double orientation,
                    double size = PLAYER_SIZE, double mass = BALL_MASS);

@@ -14,12 +14,12 @@
 #include <unistd.h>
 
 int main() {
-    auto g = Game(6);
+    Game g = Game(4);
 
     g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
-    g.ball.vitesse = {.x = 3, .y = 3};
+    g.ball.vitesse = {.x = 3, .y = 0};
 
-    int c[] = {2, 1};
+    int c[] = {1, 1};
     g.set_players(c, 2);
 
     int i = 0;
@@ -32,7 +32,7 @@ int main() {
     total = 0;
     peak = 0;
 
-    while (true) {
+    while (i < 100) {
         auto start = std::chrono::high_resolution_clock::now();
 
         for (int i = 0; i < 8; i++) {

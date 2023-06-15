@@ -15,6 +15,14 @@
 #include "config.h"
 #include "stdlib.h"
 
+std::ofstream csvOutputFile;
+
+#ifdef LOGGAME
+#define writeToLogFile(qqch) csvOutputFile << qqch << std::endl;
+#else
+#define writeToLogFile(eventType) ;
+#endif
+
 #define SETWALL(id, px, py, dx, dy)                                            \
     this->walls[id].pos.x = px;                                                \
     this->walls[id].pos.y = py;                                                \
@@ -22,6 +30,11 @@
     this->walls[id].vitesse.y = dy;
 
 Game::Game(int playerNumber) {
+#ifdef LOGGAME
+    csvOutputFile.open("game.csv");
+	csvOutputFile << "STARTGAME, " << playerNumber / 2 << ", " << MAP_HEIGHT << ", " << MAP_LENGTH << ", " << BALL_SIZE << ", " << PLAYER_SIZE << std::endl;
+# endif
+	
     this->playerNumber = playerNumber;
     this->players = (player *)malloc(playerNumber * sizeof(player));
 
@@ -41,7 +54,7 @@ Game::Game(int playerNumber) {
 
 Game::~Game() {
     free(players);
-	free(walls);
+    free(walls);
 }
 
 /*
@@ -225,12 +238,12 @@ collisionList *findFirstCollision(collisionList *list) {
     return list;
 }
 
-void freeCollisionList(collisionList *list){
-	if(list == NULL){
-		return;
-	}
-	freeCollisionList(list->next);
-	free(list);
+void freeCollisionList(collisionList *list) {
+    if (list == NULL) {
+        return;
+    }
+    freeCollisionList(list->next);
+    free(list);
 }
 
 void printCollisionList(collisionList *list) {
@@ -249,7 +262,10 @@ void printCollisionList(collisionList *list) {
     printCollisionList(list->next);
 }
 
-void Game::tick(double timeToAdvance) {
+void Game::tick(double timeToAdvance, bool root) {
+    if (root) {
+        writeToLogFile("TICK");
+    }
     // on fait tout avancer
     ball.pos += ball.vitesse * timeToAdvance;
     for (int i = 0; i < playerNumber; i++) {
@@ -284,10 +300,26 @@ void Game::tick(double timeToAdvance) {
             computeCollisionWall(*firstCollision->actor,
                                  firstCollision->secondary);
         }
-        tick(timeToAdvance - firstCollision->time);
+        tick(timeToAdvance - firstCollision->time, false);
     }
-	freeCollisionList(c);
+#ifdef LOGGAME
+    if (root) {
+        writePlayers();
+    }
+#endif
+    freeCollisionList(c);
 };
+
+#ifdef LOGGAME
+void Game::writePlayers() {
+    csvOutputFile << "ALLSETPOS";
+    csvOutputFile << ", " << ball.pos.x << ", " << ball.pos.y;
+    for (int i = 0; i < playerNumber; i++) {
+        csvOutputFile << ", " << players[i].pos.x << ", " << players[i].pos.y;
+    }
+    csvOutputFile << std::endl;
+}
+#endif
 
 void Game::doAction(unsigned int id, double rotation, double acceleration){
 

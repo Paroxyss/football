@@ -17,3 +17,5 @@ class Chromosome {
 };
 
 Matrix *evaluate(Matrix *inputs, Chromosome *c);
+Chromosome *mutate(Chromosome *c);
+Chromosome *crossover(Chromosome *a, Chromosome *b);

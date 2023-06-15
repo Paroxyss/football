@@ -1,14 +1,18 @@
 #pragma once
 #define PI 3.1415
 
-#define NETWORK_SIZE 4
-#define NETWORK_OUTPUT_SIZE 5
-#define NETWORK_INPUT_SIZE 4
+#define COM_SIZE 1
 
-#define EQUIPE_SIZE 3
+#define NETWORK_SIZE 4
 #define DIDIER_NETWORK_SIZE 5
 
-#define COM_SIZE 1
+// pour l'instant le réseau ne prend pas l'accélération en entrée
+// pour pouvoir évoluer plus facilement.
+// x, y, vx, vy, theta, com1, .. , com{COM_SIZE}
+#define NETWORK_OUTPUT_SIZE 5 + COM_SIZE
+#define NETWORK_INPUT_SIZE 5 + COM_SIZE
+
+#define EQUIPE_SIZE 3
 
 const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 15, 25, NETWORK_OUTPUT_SIZE};
 const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, 15, 20,

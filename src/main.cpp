@@ -1,7 +1,6 @@
 #include "Chromosome.hpp"
 #include "Game.hpp"
 #include "Matrix.h"
-#include "Network.hpp"
 #include "config.h"
 #include "util.hpp"
 
@@ -17,7 +16,7 @@ int main() {
     Game g = Game(6);
 
     g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
-    g.ball.vitesse = {.x = 3, .y = 3};
+    g.ball.vitesse = {.x = randomDouble(), .y = randomDouble()};
 
     int c[] = {2, 1};
     g.set_players(c, 2);

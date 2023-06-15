@@ -1,5 +1,7 @@
 #include "Chromosome.hpp"
 #include "Activation.hpp"
+#include "Crossover.hpp"
+
 #include "Matrix.h"
 #include "config.h"
 #include <array>
@@ -113,12 +115,7 @@ Matrix *evaluate(Matrix *inputs, Chromosome *c) {
 
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             o->mult_inv(c->matrix[i][j]);
-
-            for (int k = 0; k < o->ligne; k++) {
-                for (int v = 0; v < o->col; v++) {
-                    o->set(k, v, a_tanh(o->get(k, v)));
-                }
-            }
+            apply_activation(o);
         }
 
         for (int j = 0; j < NETWORK_OUTPUT_SIZE; j++) {
@@ -127,4 +124,53 @@ Matrix *evaluate(Matrix *inputs, Chromosome *c) {
     }
 
     return output;
+}
+
+/*
+    Didier est toujours évalué avant les joueurs. Lors de ce premier
+    appel, inputs == NULL et il est alors évalués sur des 0.
+    Sinon, inputs est une matrice colonne de taille COM_SIZE * EQUIPE_SIZE où
+    les coefficients (inputs_i, ..., inputs_{i + COM_SIZE}) correspond aux
+   sorties du canal de communication du joueur i lors de l'évaluation
+   précédente.
+*/
+
+Matrix *compute_didier(Chromosome *c, Matrix *inputs) {
+    if (!inputs) {
+        Matrix *inputs = new Matrix(COM_SIZE * EQUIPE_SIZE, 1);
+    }
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        inputs->mult_inv(c->didier[i]);
+        apply_activation(inputs);
+    }
+
+    return inputs;
+}
+
+Chromosome *crossover(Chromosome *a, Chromosome *b) {
+    Chromosome *child = new Chromosome();
+
+    for (int k = 0; k < EQUIPE_SIZE; k++) {
+        for (int i = 0; i < NETWORK_SIZE - 1; i++) {
+            Matrix *m = average_crossover(a->matrix[k][i], b->matrix[k][i]);
+
+            for (int j = 0; j < m->ligne; j++) {
+                for (int k = 0; k < m->col; k++) {
+                    child->matrix[k][i]->set(j, k, m->get(j, k));
+                }
+            }
+        }
+    }
+
+    for (int j = 0; j < DIDIER_NETWORK_SIZE - 1; j++) {
+        Matrix *m = average_crossover(a->didier[j], b->didier[j]);
+        for (int k = 0; k < m->ligne; k++) {
+            for (int l = 0; l < m->col; l++) {
+                child->didier[j]->set(k, l, m->get(k, l));
+            }
+        }
+    }
+
+    return child;
 }

@@ -41,6 +41,7 @@ Game::Game(int playerNumber) {
 
 Game::~Game() {
     free(players);
+	free(walls);
 }
 
 /*
@@ -224,6 +225,14 @@ collisionList *findFirstCollision(collisionList *list) {
     return list;
 }
 
+void freeCollisionList(collisionList *list){
+	if(list == NULL){
+		return;
+	}
+	freeCollisionList(list->next);
+	free(list);
+}
+
 void printCollisionList(collisionList *list) {
     if (list == NULL) {
         std::cout << "Fin de liste" << std::endl;
@@ -277,6 +286,7 @@ void Game::tick(double timeToAdvance) {
         }
         tick(timeToAdvance - firstCollision->time);
     }
+	freeCollisionList(c);
 };
 
 void Game::doAction(unsigned int id, double rotation, double acceleration){

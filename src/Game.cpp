@@ -63,12 +63,13 @@ void Game::set_players(int conf[], int n, bool t) {
 
     double spx = MAP_LENGTH / 2. / (double)(n + 1);
 
-    for (int i = 0 + (t ? 0 : n - 1); (t && i < n || (i >= 0));
+    // Parcours à l'envers si !t, à l'endroit sinon.
+    for (int i = !t * (n - 1); ((t && i < n) || (!t && i >= 0));
          i += 2 * t - 1) {
         double spy = MAP_HEIGHT / (double)(conf[i] + 1);
 
         for (int k = 1; k <= conf[i]; k++) {
-            this->players[c].pos = {.x = (!t ? MAP_LENGTH : 0) - (i + 1) * spx,
+            this->players[c].pos = {.x = (i + 1) * spx + (!t ? -MAP_LENGTH : 0),
                                     .y = k * spy};
             // déterminisme?
             this->players[c++].orientation = (t ? 0 : M_PI);

@@ -14,13 +14,14 @@
 #include <unistd.h>
 
 int main() {
-    auto g = Game(4);
+    auto g = Game(50);
 
     g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
-    g.ball.vitesse = {.x = 50, .y = -3};
+    g.ball.vitesse = {.x = 3, .y = 3};
 
-    int c[] = {2, 2};
-    g.set_players(c, 2, false);
+    int c[] = {10, 10, 10, 10, 10};
+
+    g.set_players(c, 5, true);
 
     int i = 0;
     auto start = std::chrono::high_resolution_clock::now();
@@ -32,10 +33,13 @@ int main() {
     total = 0;
     peak = 0;
 
-    g.print();
     while (true) {
         auto start = std::chrono::high_resolution_clock::now();
-        g.tick();
+
+        for (int i = 0; i < 8; i++) {
+            g.tick();
+        }
+
         auto end = std::chrono::high_resolution_clock::now();
 
         auto actual =
@@ -52,6 +56,5 @@ int main() {
 
         fflush(stdout);
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
-        break;
     }
 }

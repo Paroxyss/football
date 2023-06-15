@@ -16,13 +16,13 @@ const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, 15, 20,
 
 #define GAME_RESOLUTION 1
 
-#define MAP_LENGTH 2000
-#define MAP_HEIGHT 1000
-#define GOAL_HEIGHT 25
+#define MAP_LENGTH 119 * 10
+#define MAP_HEIGHT 75 * 10
+#define GOAL_HEIGHT 15 * 10
 
 #define PLAYER_MASS 100
-#define PLAYER_SIZE 100
+#define PLAYER_SIZE 2 * 10
 #define PLAYER_ACCELERATION 1
 
 #define BALL_MASS 100
-#define BALL_SIZE 100
+#define BALL_SIZE 0.5 * 10

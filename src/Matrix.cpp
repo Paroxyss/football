@@ -41,8 +41,8 @@ void Matrix::set(int i, int j, double x) {
 
 void Matrix::print() {
     std::cout << "Matrice : " << this->ligne << "x" << this->col << std::endl;
-    for (int i = 0; i < ligne; i++) {
-        for (int j = 0; j < col; j++) {
+    for (int i = 0; i < this->ligne; i++) {
+        for (int j = 0; j < this->col; j++) {
             std::cout << this->t[i][j] << " ";
         }
         std::cout << this->t[i] << "\n";

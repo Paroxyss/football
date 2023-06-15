@@ -8,18 +8,14 @@
 
 Population::Population(int size) {
     this->size = size;
-    this->pop = new Chromosome *[size];
+    this->pop = (Chromosome *)malloc(size * sizeof(Chromosome));
 
     for (int i = 0; i < size; i++) {
-        this->pop[i] = (new Chromosome());
-        this->pop[i]->randomize();
+        this->pop[i] = Chromosome();
     }
 }
 
 Population::~Population() {
-    for (int i = 0; i < this->size; i++) {
-        delete this->pop[i];
-    }
     delete[] this->pop;
 }
 
@@ -39,11 +35,11 @@ Population *Population::next() {
         // il y a certaines méthodes de crossover qui retournent directement 2
         // enfants par exemple one_pointer_crossover(a, b) !=
         // one_pointer_crossover(b, a) on peut donc avoir les 2;
-        p->pop[c++] = crossover(cpl.first, cpl.second);
+        p->pop[c++] = *crossover(cpl.first, cpl.second);
     }
 
     while (m < this->size * 0.1) {
-        p->pop[c++] = mutate(this->pop[rand() % this->size]);
+        p->pop[c++] = *mutate(&this->pop[rand() % this->size]);
         m++;
     }
 
@@ -55,7 +51,7 @@ Population *Population::next() {
 }
 
 std::pair<Chromosome *, Chromosome *> Population::tournament(int k) {
-    Chromosome **r = new Chromosome *[k];
+    Chromosome *r = (Chromosome *)malloc(k * sizeof(Chromosome));
     std::pair<Chromosome *, Chromosome *> p;
 
     for (int i = 0; i < k; i++) {
@@ -63,7 +59,7 @@ std::pair<Chromosome *, Chromosome *> Population::tournament(int k) {
     }
 
     for (int i = 1; i < k; ++i) {
-        Chromosome *c = this->pop[i];
+        Chromosome c = this->pop[i];
         int j = i - 1;
 
         while (j >= 0 /* && score_match(this->pop[j], c) > 0 */) {
@@ -74,8 +70,8 @@ std::pair<Chromosome *, Chromosome *> Population::tournament(int k) {
         this->pop[j + 1] = c;
     }
 
-    p.first = r[k - 1];
-    p.second = r[k - 2];
+    p.first = &r[k - 1];
+    p.second = &r[k - 2];
 
     return p;
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Game.hpp"
 #include "Matrix.h"
 #include "config.h"
 
@@ -18,4 +19,6 @@ class Chromosome {
 
 Matrix *evaluate(Matrix *inputs, Chromosome *c);
 Chromosome *mutate(Chromosome *c);
+Matrix *compute_didier(Chromosome *c, Matrix *inputs);
 Chromosome *crossover(Chromosome *a, Chromosome *b);
+Matrix *collect_inputs(Matrix *didier, player *p);

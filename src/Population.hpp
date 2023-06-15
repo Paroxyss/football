@@ -6,7 +6,7 @@
 class Population {
   public:
     int size;
-    Chromosome **pop;
+    Chromosome *pop;
 
   public:
     Population(int size);

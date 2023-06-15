@@ -2,6 +2,7 @@
 #include "Activation.hpp"
 #include "Crossover.hpp"
 
+#include "Game.hpp"
 #include "Matrix.h"
 #include "config.h"
 #include <array>
@@ -173,4 +174,26 @@ Chromosome *crossover(Chromosome *a, Chromosome *b) {
     }
 
     return child;
+}
+
+/*
+ Relecture très fortement nécessaire.
+*/
+
+Matrix collect_inputs(Matrix *didier, Chromosome *c, player *p) {
+    Matrix *m = new Matrix(NETWORK_INPUT_SIZE, EQUIPE_SIZE);
+    Matrix *com = compute_didier(c, didier);
+
+    for (int i = 0; i < EQUIPE_SIZE; i++) {
+        m->set(0, i, p->pos.x);
+        m->set(1, i, p->pos.y);
+        m->set(2, i, p->vitesse.x);
+        m->set(3, i, p->vitesse.y);
+        m->set(4, i, p->orientation);
+        for (int j = 0; j < COM_SIZE; j++) {
+            m->set(5 + j, i, didier->get(i + j, 0));
+        }
+    }
+
+    return *m;
 }

@@ -67,7 +67,7 @@ void Display::drawCircle(char c, int x, int y, int radius, displayColor color) {
 // mets le curseur en bas à gauche, notamment pour que le terminal écrive le
 // prompt après
 void Display::cursorToBottom() {
-    moveToVirtualPos(fakeLen, fakeHeight);
+    moveToVirtualPos(fakeLen, fakeHeight - 2 * (1 / heightFactor));
 }
 
 void Display::drawLine(char c, int startx, int starty, int endx, int endy,

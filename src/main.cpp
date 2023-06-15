@@ -14,46 +14,21 @@
 #include <unistd.h>
 
 int main() {
-    Game g = Game(4);
+    Game g = Game(6);
 
     g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
-    g.ball.vitesse = {.x = 3, .y = 0};
+    g.ball.vitesse = {.x = 3, .y = 3};
 
-    int c[] = {1, 1};
+    int c[] = {2, 1};
     g.set_players(c, 2);
 
     int i = 0;
-    auto start = std::chrono::high_resolution_clock::now();
-    auto end = std::chrono::high_resolution_clock::now();
-    auto total =
-        std::chrono::duration_cast<std::chrono::microseconds>(end - start)
-            .count();
-    auto peak = total;
-    total = 0;
-    peak = 0;
 
-    while (i < 100) {
-        auto start = std::chrono::high_resolution_clock::now();
-
-        for (int i = 0; i < 8; i++) {
+    while (i++ < 500) {
+        for (int k = 0; k < 8; k++) {
             g.tick();
         }
 
-        auto end = std::chrono::high_resolution_clock::now();
-
-        auto actual =
-            std::chrono::duration_cast<std::chrono::microseconds>(end - start)
-                .count();
-        total += actual;
-        if (actual > peak)
-            peak = total;
-        i++;
-
-        g.print();
-        std::cout << "moyenne : " << total / i << " us | "
-                  << "peak : " << peak << " us" << std::endl;
-
         fflush(stdout);
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }

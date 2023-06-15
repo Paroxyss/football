@@ -1,31 +1,36 @@
 import pygame as pg
-from math import pi
-from time import sleep
 
 from functions import *
+from readcsv import *
 from config import *
 
 
 pg.init()
 running = True
+clock = pg.time.Clock()
+data = read("game.csv")
 
+nb_joueurs = int(data[0][1] * 2)
 
-while running:
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            running = False
+for i in range(1, len(data)):
+    match data[i][0]:
+        case 1.0:
+            clock.tick(60)
+        case 2.0:
+            draw_field()
+            draw_goal()
 
-    screen.fill(BLACK)
-    draw_field()
-    draw_player(1, 100, 50, pi / 3)
-    draw_player(2, 250, 250, 0)
-    draw_player(2, 300, 30, pi / 2)
+            draw_ball(data[i][1], data[i][2])
+            for k in range(1, nb_joueurs + 1):
+                draw_player(
+                    1 if k > (nb_joueurs + 1) / 2 else 2,
+                    data[i][3 * k],
+                    data[i][3 * k + 1],
+                    data[i][3 * k + 2],
+                )
+        case default:
+            print("error", data[i][0])
 
-    draw_ball(300, 300)
-
-    draw_goal()
-
-    sleep(1 / 60)
     pg.display.flip()
 
 pg.quit()

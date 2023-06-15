@@ -271,7 +271,7 @@ void printCollisionList(collisionList *list) {
 
 void Game::tick(double timeToAdvance, bool root) {
     if (root) {
-        writeToLogFile("0");
+        writeToLogFile("1");
     }
     // on fait tout avancer
     ball.pos += ball.vitesse * timeToAdvance;
@@ -322,8 +322,8 @@ void Game::writePlayers() {
     csvOutputFile << "2";
     csvOutputFile << "," << (int)ball.pos.x << "," << (int)ball.pos.y;
     for (int i = 0; i < playerNumber; i++) {
-        csvOutputFile << "," << (int)players[i].pos.x << ","
-                      << (int)players[i].pos.y
+        csvOutputFile << "," << (double)players[i].pos.x << ","
+                      << (double)players[i].pos.y << ","
                       << (float)((int)(players[i].orientation * 10) /
                                  (float)10);
     }

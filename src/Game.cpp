@@ -14,6 +14,7 @@
 #include "Vector.hpp"
 #include "config.h"
 #include "stdlib.h"
+#include "util.hpp"
 
 std::ofstream csvOutputFile;
 
@@ -68,24 +69,28 @@ void Game::set_players(int conf[], int n) {
     double spx = MAP_LENGTH / 2. / (double)(n + 1);
 
     for (int i = 0; i < n; i++) {
-        s += 2 * conf[i];
+        s += conf[i];
     }
 
-    if (s != this->playerNumber)
+    if (2 * s != this->playerNumber)
         throw std::invalid_argument("invalid conf");
 
     for (int i = 0; i < n; i++) {
         double spy = MAP_HEIGHT / (double)(conf[i] + 1);
         for (int k = 1; k <= conf[i]; k++) {
-            this->players[c++].pos = {.x = (i + 1) * spx, .y = k * spy};
+            this->players[c].pos = {.x = (i + 1) * spx, .y = k * spy};
+            this->players[c++].orientation = randomDouble() * M_PI;
         }
     }
 
     for (int i = n - 1; i >= 0; i--) {
         double spy = MAP_HEIGHT / (double)(conf[i] + 1);
         for (int k = 1; k <= conf[i]; k++) {
-            this->players[c++].pos = {.x = MAP_LENGTH - (i + 1) * spx,
-                                      .y = k * spy};
+            this->players[c].pos = {.x = MAP_LENGTH - (i + 1) * spx,
+                                    .y = k * spy};
+            this->players[c].orientation =
+                this->players[this->playerNumber - (c + 1)].orientation - M_PI;
+            c++;
         }
     }
 }

@@ -15,10 +15,12 @@ class Chromosome {
     void print();
 
     void randomize();
+
+    Matrix *compute_didier(Matrix *inputs);
+    Matrix *collect_and_evaluate(player *p, Matrix *didier);
+    Matrix *evaluate(Matrix *inputs);
 };
 
-Matrix *evaluate(Matrix *inputs, Chromosome *c);
 Chromosome *mutate(Chromosome *c);
 Matrix *compute_didier(Chromosome *c, Matrix *inputs);
 Chromosome *crossover(Chromosome *a, Chromosome *b);
-Matrix *collect_inputs(Matrix *didier, player *p);

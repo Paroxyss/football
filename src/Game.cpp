@@ -33,9 +33,11 @@ std::ofstream csvOutputFile;
 Game::Game(int playerNumber) {
 #ifdef LOGGAME
     csvOutputFile.open("game.csv");
-	csvOutputFile << "STARTGAME, " << playerNumber / 2 << ", " << MAP_HEIGHT << ", " << MAP_LENGTH << ", " << BALL_SIZE << ", " << PLAYER_SIZE << std::endl;
-# endif
-	
+    csvOutputFile << "STARTGAME, " << playerNumber / 2 << "," << MAP_HEIGHT
+                  << "," << MAP_LENGTH << "," << BALL_SIZE << "," << PLAYER_SIZE
+                  << std::endl;
+#endif
+
     this->playerNumber = playerNumber;
     this->players = (player *)malloc(playerNumber * sizeof(player));
 
@@ -269,7 +271,7 @@ void printCollisionList(collisionList *list) {
 
 void Game::tick(double timeToAdvance, bool root) {
     if (root) {
-        writeToLogFile("TICK");
+        writeToLogFile("0");
     }
     // on fait tout avancer
     ball.pos += ball.vitesse * timeToAdvance;
@@ -317,10 +319,13 @@ void Game::tick(double timeToAdvance, bool root) {
 
 #ifdef LOGGAME
 void Game::writePlayers() {
-    csvOutputFile << "ALLSETPOS";
-    csvOutputFile << ", " << ball.pos.x << ", " << ball.pos.y;
+    csvOutputFile << "2";
+    csvOutputFile << "," << (int)ball.pos.x << "," << (int)ball.pos.y;
     for (int i = 0; i < playerNumber; i++) {
-        csvOutputFile << ", " << players[i].pos.x << ", " << players[i].pos.y;
+        csvOutputFile << "," << (int)players[i].pos.x << ","
+                      << (int)players[i].pos.y
+                      << (float)((int)(players[i].orientation * 10) /
+                                 (float)10);
     }
     csvOutputFile << std::endl;
 }

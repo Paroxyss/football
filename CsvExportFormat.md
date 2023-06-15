@@ -5,7 +5,7 @@ Le format de sauvegarde est basé sur un principe d'évènements, ils sont écri
 
 Voici la liste des évènements :
 
-## STARTGAME
+## STARTGAME : 0
 Commence une partie en en définissant les paramètres.\
 Paramètres: 
  - Nombre de joueurs par équipe (il y a donc en vrai 2 fois plus de joueurs).
@@ -14,7 +14,10 @@ Paramètres:
  - Taille de la balle
  - Taille des joueurs
 
-## ALLSETPOS
+## TICK : 1
+Informe l'interpreteur qu'un tick est passé
+
+## ALLSETPOS : 2
 Définit les positiones de tous les joueurs. \
 Paramètres: 
  - pos x de la balle
@@ -22,12 +25,10 @@ Paramètres:
  - \<I FOIS>
    - pos x du joueur i
    - pos y du joueur i
+   - rotation
 
-## SETSCORE
+## SETSCORE : 3
 Définit le score. \
 Paramètres:
  - Score équipe 1
  - Score équipe 2
-
-## TICK
-Informe l'interpreteur qu'un tick est passé

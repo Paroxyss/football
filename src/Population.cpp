@@ -12,6 +12,7 @@ Population::Population(int size) {
 
     for (int i = 0; i < size; i++) {
         this->pop[i] = Chromosome();
+        this->pop[i].randomize();
     }
 }
 

@@ -24,8 +24,8 @@ int main() {
 
     int i = 0;
 
-    Population *p = new Population(1000);
-    Matrix *didier = NULL;
+    // Population *p = new Population(1000);
+    // Matrix *didier = NULL;
 
     while (i++ < 500) {
         for (int k = 0; k < 8; k++) {

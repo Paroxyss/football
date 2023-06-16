@@ -35,7 +35,6 @@ struct backtrackCollisionReport {
 
 class Game {
   public:
-	
 #ifdef LOGGAME
 #endif
 
@@ -75,4 +74,6 @@ class Game {
                    double size = PLAYER_SIZE, double mass = BALL_MASS);
 
     void print();
+
+    void aller_chercher_du_paun(int n);
 };

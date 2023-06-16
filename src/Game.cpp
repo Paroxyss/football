@@ -382,3 +382,12 @@ void Game::print() { // affichage provisoire de la partie, sur le terminal
 
     d.cursorToBottom();
 };
+
+/*
+    Permet d'aller chercher du pain dans la boulangerie la plus proche du stade
+*/
+void Game::aller_chercher_du_paun(int n) {
+    for (int i = 0; i < n; i++) {
+        std::cout << "du pain!!" << std::endl;
+    }
+}

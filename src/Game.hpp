@@ -75,5 +75,6 @@ class Game {
 
     void print();
 
-    void aller_chercher_du_paun(int n);
+    void aller_chercher_du_pain(int n);
+	
 };

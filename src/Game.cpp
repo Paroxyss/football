@@ -19,36 +19,44 @@
 
 std::ofstream csvOutputFile;
 
-#ifdef LOGGAME
-#define writeToLogFile(qqch) csvOutputFile << qqch << std::endl;
-#else
-#define writeToLogFile(eventType) ;
-#endif
-
 #define SETWALL(id, px, py, dx, dy)                                            \
     this->walls[id].pos.x = px;                                                \
     this->walls[id].pos.y = py;                                                \
     this->walls[id].vitesse.x = dx;                                            \
     this->walls[id].vitesse.y = dy;
 
-Game::Game(int playerNumber) {
-#ifdef LOGGAME
-    csvOutputFile.open("game.csv");
-    csvOutputFile << "STARTGAME, " << playerNumber / 2 << "," << MAP_HEIGHT
-                  << "," << MAP_LENGTH << "," << BALL_SIZE << "," << PLAYER_SIZE
-                  << std::endl;
-#endif
+#define SETGOAL(id, px, py, dx, dy, s)                                         \
+    this->goals[id].pos.x = px;                                                \
+    this->goals[id].pos.y = py;                                                \
+    this->goals[id].vitesse.x = dx;                                            \
+    this->goals[id].vitesse.y = dy;                                            \
+    this->goals[id].size = s;
 
+Game::Game(int playerNumber, bool logToFile) {
+    this->logToFile = logToFile;
+    if (this->logToFile) {
+        csvOutputFile.open("game.csv");
+        csvOutputFile << "STARTGAME, " << playerNumber / 2 << "," << MAP_HEIGHT
+                      << "," << MAP_LENGTH << "," << BALL_SIZE << ","
+                      << PLAYER_SIZE << std::endl;
+    }
     this->playerNumber = playerNumber;
     this->players = (player *)malloc(playerNumber * sizeof(player));
 
     this->wallNumber = 4;
     this->walls = (wall *)malloc(this->wallNumber * sizeof(wall));
 
+    this->goals = (wall *)malloc(2 * sizeof(wall));
+
     SETWALL(0, 0, 0, 1, 0)
     SETWALL(1, 0, 0, 0, 1)
     SETWALL(2, MAP_LENGTH, MAP_HEIGHT, 1, 0)
     SETWALL(3, MAP_LENGTH, MAP_HEIGHT, 0, 1)
+
+    SETGOAL(0, 0, (float)MAP_HEIGHT / 2 - (float)GOAL_HEIGHT / 2, 0, 1,
+            GOAL_HEIGHT)
+    SETGOAL(1, MAP_LENGTH, (float)MAP_HEIGHT / 2 - (float)GOAL_HEIGHT / 2, 0, 1,
+            GOAL_HEIGHT)
 
     setBall({.x = 0, .y = 0}, {.x = 0, .y = 0}, BALL_SIZE);
     for (int i = 0; i < playerNumber; i++) {
@@ -82,7 +90,9 @@ void Game::set_players(int conf[], int n) {
         double spy = MAP_HEIGHT / (double)(conf[i] + 1);
         for (int k = 1; k <= conf[i]; k++) {
             this->players[c].pos = {.x = (i + 1) * spx, .y = k * spy};
-            this->players[c++].orientation = randomDouble() * M_PI;
+            this->players[c].vitesse = {.x = 0, .y = 0};
+            this->players[c].orientation = randomDouble() * M_PI;
+            c++;
         }
     }
 
@@ -91,6 +101,7 @@ void Game::set_players(int conf[], int n) {
         for (int k = 1; k <= conf[i]; k++) {
             this->players[c].pos = {.x = MAP_LENGTH - (i + 1) * spx,
                                     .y = k * spy};
+            this->players[c].vitesse = {.x = 0, .y = 0};
             this->players[c].orientation =
                 this->players[this->playerNumber - (c + 1)].orientation - M_PI;
             c++;
@@ -279,8 +290,12 @@ void Game::moveAllObj(double percent) {
 
 void Game::tick(double timeToAdvance, bool root) {
     if (root) {
-        writeToLogFile("1");
-        ball.vitesse -= norme(ball.vitesse) * ball.vitesse / 100;
+
+        if (logToFile) {
+            csvOutputFile << "1" << std::endl;
+        }
+
+        ball.vitesse -= norme(ball.vitesse) * ball.vitesse / 500;
         for (int i = 0; i < playerNumber; i++) {
             players[i].vitesse -=
                 norme(players[i].vitesse) * players[i].vitesse / 40;
@@ -312,15 +327,12 @@ void Game::tick(double timeToAdvance, bool root) {
         }
         tick(timeToAdvance - firstCollision->time, false);
     }
-#ifdef LOGGAME
-    if (root) {
+    if (root && logToFile) {
         writePlayers();
     }
-#endif
     freeCollisionList(c);
 };
 
-#ifdef LOGGAME
 void Game::writePlayers() {
     csvOutputFile << "2";
     csvOutputFile << "," << (int)ball.pos.x << "," << (int)ball.pos.y;
@@ -332,7 +344,6 @@ void Game::writePlayers() {
     }
     csvOutputFile << std::endl;
 }
-#endif
 
 void Game::doAction(unsigned int id, double rotation, double acceleration) {
     players[id].orientation += rotation;
@@ -398,8 +409,26 @@ void Game::aller_chercher_du_pain(int n) {
     }
 }
 
-double Game::play_match(Chromosome *c1, Chromosome *c2) {
-    auto jé = Game(2 * EQUIPE_SIZE);
+bool Game::checkGoal(int id) {
+    double cage = getWallCollisionTime(&this->ball, &this->goals[id]);
+
+    if (cage < 0 || cage > 1)
+        return false;
+
+    auto dist = this->ball.pos - goals[id].pos;
+
+    auto vertical = dotProduct(this->goals[id].vitesse, dist) /
+                    norme(this->goals[id].vitesse);
+
+    if (0 < vertical && vertical < GOAL_HEIGHT) {
+        return true;
+    }
+
+    return false;
+}
+
+double Game::play_match(Chromosome *c1, Chromosome *c2, bool save) {
+    auto jé = Game(2 * EQUIPE_SIZE, save);
 
     jé.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
     jé.ball.vitesse = {.x = randomDouble(), .y = randomDouble()};
@@ -411,6 +440,8 @@ double Game::play_match(Chromosome *c1, Chromosome *c2) {
         Matrix(COM_SIZE * EQUIPE_SIZE, 1),
         Matrix(COM_SIZE * EQUIPE_SIZE, 1),
     };
+
+    int score = 0;
 
     for (int i = 0; i < GAME_DURATION; i++) {
 
@@ -432,11 +463,35 @@ double Game::play_match(Chromosome *c1, Chromosome *c2) {
             }
         }
 
-		delete r1;
-		delete r2;
+        delete r1;
+        delete r2;
 
         jé.tick();
-    }
 
-    return 0;
+        bool c1 = jé.checkGoal(0);
+        bool c2 = jé.checkGoal(1);
+        if (c1 || c2) {
+
+            score += 1;//c1 ? -1 : 1;
+
+            std::cout << "But au tick j'ai modif " << i << std::endl;
+
+            if (save) {
+                csvOutputFile << "3, " << score << " BONJOUR J'AI MARQUÉ"
+                              << std::endl;
+            }
+            std::cout << "Ouais j'ai écris" << i << std::endl;
+
+            jé.ball.pos.x = (float)MAP_LENGTH / 2;
+            jé.ball.pos.y = (float)MAP_HEIGHT / 2;
+            jé.ball.vitesse.x = randomDouble();
+            jé.ball.vitesse.y = randomDouble();
+
+            jé.set_players(c, 2);
+        }
+    }
+    if (save) {
+        csvOutputFile.close();
+    }
+    return score;
 };

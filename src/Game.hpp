@@ -40,8 +40,7 @@ struct backtrackCollisionReport {
 
 class Game {
   public:
-#ifdef LOGGAME
-#endif
+    bool logToFile;
 
     player *players;
     unsigned int playerNumber;
@@ -49,10 +48,11 @@ class Game {
 
     unsigned int wallNumber;
     wall *walls;
+    wall *goals;
 
     void set_players(int conf[], int n);
 
-    Game(int playerNumber);
+    Game(int playerNumber, bool logToFile = false);
     ~Game();
 
     virtual void tick(double timeToAdvance = 1, bool root = true);
@@ -66,14 +66,12 @@ class Game {
     collisionList *getObjectCollisionList(int objId,
                                           collisionList *listToAppend = NULL);
 
+    bool checkGoal(int id);
+
     // bouge tous les objets du pourcentage/portion de tick donnée.
     void moveAllObj(double percent);
 
-    void writePlayers()
-#ifndef LOGGAME
-        {}
-#endif
-    ;
+    void writePlayers();
 
     void setPlayer(int id, vector pos, vector speed, double orientation,
                    double size = PLAYER_SIZE, double mass = PLAYER_MASS);
@@ -82,5 +80,5 @@ class Game {
 
     void aller_chercher_du_pain(int n);
 
-	double static play_match(Chromosome *c1, Chromosome *c2);
+    double static play_match(Chromosome *c1, Chromosome *c2, bool save = false);
 };

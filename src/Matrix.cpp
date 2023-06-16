@@ -29,13 +29,15 @@ Matrix::~Matrix() {
 
 double Matrix::get(int i, int j) {
     if (i > this->ligne || j > this->col)
-        std::cout << "BAD CASE" << std::endl;
+        std::cout << "BAD CASE GET : getting (" << i << ", " << j
+                  << ") in a matrix of size " << this->ligne << "x" << this->col
+                  << std::endl;
     return this->t[i][j];
 }
 
 void Matrix::set(int i, int j, double x) {
     if (i > this->ligne || j > this->col)
-        std::cout << "BAD CASE" << std::endl;
+        std::cout << "BAD CASE SET" << std::endl;
     this->t[i][j] = x;
 }
 
@@ -52,7 +54,7 @@ void Matrix::print() {
 // Multiple deux matrices en place dans this (a * this)
 void Matrix::mult_inv(Matrix *a) {
     if (this->ligne != a->col) {
-        throw std::invalid_argument("lol");
+        throw std::invalid_argument("lol multinv");
     }
 
     double **newT = new double *[a->ligne];

@@ -9,7 +9,7 @@
 // pour l'instant le réseau ne prend pas l'accélération en entrée
 // pour pouvoir évoluer plus facilement.
 // x, y, vx, vy, theta, com1, .. , com{COM_SIZE}
-#define NETWORK_OUTPUT_SIZE 5 + COM_SIZE
+#define NETWORK_OUTPUT_SIZE 2 + COM_SIZE
 #define NETWORK_INPUT_SIZE 5 + COM_SIZE
 
 #define EQUIPE_SIZE 3
@@ -19,6 +19,7 @@ const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, 15, 20,
                              COM_SIZE *EQUIPE_SIZE};
 
 #define GAME_RESOLUTION 1
+#define GAME_DURATION 90 * 60
 
 #define MAP_LENGTH 119 * 10
 #define MAP_HEIGHT 75 * 10

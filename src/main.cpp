@@ -14,25 +14,11 @@
 #include <unistd.h>
 
 int main() {
-    Game g = Game(6);
+	auto c1 = Chromosome();
+	c1.randomize();
+	auto c2 = Chromosome();
+	c2.randomize();
 
-    g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
-    g.ball.vitesse = {.x = randomDouble(), .y = randomDouble()};
-
-    int c[] = {2, 1};
-    g.set_players(c, 2);
-
-    int i = 0;
-
-    // Population *p = new Population(1000);
-    // Matrix *didier = NULL;
-
-    while (i++ < 500) {
-        for (int k = 0; k < 8; k++) {
-
-            g.tick();
-        }
-
-        fflush(stdout);
-    }
+	std::cout << "starting game" << std::endl;
+	Game::play_match(&c1, &c2);
 }

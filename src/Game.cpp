@@ -11,6 +11,7 @@
 
 #include "Display.h"
 #include "Game.hpp"
+#include "Matrix.h"
 #include "Vector.hpp"
 #include "config.h"
 #include "stdlib.h"
@@ -269,15 +270,24 @@ void printCollisionList(collisionList *list) {
     printCollisionList(list->next);
 }
 
+void Game::moveAllObj(double percent) {
+    ball.pos += ball.vitesse * percent;
+    for (int i = 0; i < playerNumber; i++) {
+        players[i].pos += players[i].vitesse * percent;
+    }
+}
+
 void Game::tick(double timeToAdvance, bool root) {
     if (root) {
         writeToLogFile("1");
+        ball.vitesse -= norme(ball.vitesse) * ball.vitesse / 100;
+        for (int i = 0; i < playerNumber; i++) {
+            players[i].vitesse -=
+                norme(players[i].vitesse) * players[i].vitesse / 40;
+        }
     }
     // on fait tout avancer
-    ball.pos += ball.vitesse * timeToAdvance;
-    for (int i = 0; i < playerNumber; i++) {
-        players[i].pos += players[i].vitesse * timeToAdvance;
-    }
+    moveAllObj(timeToAdvance);
 
     collisionList *c = NULL;
 
@@ -285,19 +295,12 @@ void Game::tick(double timeToAdvance, bool root) {
         c = getObjectCollisionList(i - 1, c);
     }
     if (c != NULL) {
-        ball.pos -= ball.vitesse * timeToAdvance;
-
-        for (int i = 0; i < playerNumber; i++) {
-            players[i].pos -= players[i].vitesse * timeToAdvance;
-        }
+        moveAllObj(-timeToAdvance);
 
         collisionList *firstCollision = findFirstCollision(c);
 
-        ball.pos += ball.vitesse * firstCollision->time;
+        moveAllObj(firstCollision->time);
 
-        for (int i = 0; i < playerNumber; i++) {
-            players[i].pos += players[i].vitesse * firstCollision->time;
-        }
         switch (firstCollision->type) {
         case CIRCLE:
             computeCollisionCircle(firstCollision->actor,
@@ -331,8 +334,11 @@ void Game::writePlayers() {
 }
 #endif
 
-void Game::doAction(unsigned int id, double rotation, double acceleration){
-
+void Game::doAction(unsigned int id, double rotation, double acceleration) {
+    players[id].orientation += rotation;
+    players[id].vitesse.x += acceleration * cos(players[id].orientation);
+    players[id].vitesse.y += acceleration * sin(players[id].orientation);
+    players[id].acceleration = 0;
 };
 
 void Game::setBall(vector pos, vector vitesse, double size, double mass) {
@@ -391,3 +397,46 @@ void Game::aller_chercher_du_pain(int n) {
         std::cout << "du pain!!" << std::endl;
     }
 }
+
+double Game::play_match(Chromosome *c1, Chromosome *c2) {
+    auto jé = Game(2 * EQUIPE_SIZE);
+
+    jé.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
+    jé.ball.vitesse = {.x = randomDouble(), .y = randomDouble()};
+
+    int c[] = {2, 1};
+    jé.set_players(c, 2);
+
+    Matrix didierInputs[2] = {
+        Matrix(COM_SIZE * EQUIPE_SIZE, 1),
+        Matrix(COM_SIZE * EQUIPE_SIZE, 1),
+    };
+
+    for (int i = 0; i < GAME_DURATION; i++) {
+
+        auto r1 = c1->collect_and_apply(jé.players, didierInputs[0]);
+        auto r2 =
+            c1->collect_and_apply(jé.players + EQUIPE_SIZE, didierInputs[0]);
+
+        for (int a = 0; a < 2; a++) {
+            for (int i = 0; i < EQUIPE_SIZE; i++) {
+                Matrix *r = (a == 0) ? r1 : r2;
+
+                double rotation = r->get(0, i) / 5;
+                double acceleration = r->get(1, i);
+
+                if (acceleration < 0) {
+                    acceleration = 0;
+                }
+                jé.doAction(i + a * EQUIPE_SIZE, rotation, acceleration);
+            }
+        }
+
+		delete r1;
+		delete r2;
+
+        jé.tick();
+    }
+
+    return 0;
+};

@@ -10,7 +10,7 @@
 #include <iostream>
 #include <ostream>
 
-void Chromosome::initialize() {
+Chromosome::Chromosome() {
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             this->matrix[i][j] =
@@ -36,10 +36,16 @@ Chromosome::~Chromosome() {
 }
 
 void Chromosome::print() {
+    std::cout << "Chromosome, " << EQUIPE_SIZE << " joueurs" << std::endl;
     for (int i = 0; i < EQUIPE_SIZE; i++) {
+        std::cout << "Joueur " << i << std::endl;
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             this->matrix[i][j]->print();
         }
+    }
+    std::cout << "Didier" << std::endl;
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        this->didier[i]->print();
     }
 }
 
@@ -80,27 +86,23 @@ void Chromosome::randomize() {
    dimensions dans le bute d'éviter les "inégalités"
 */
 
-Matrix *Chromosome::evaluate(Matrix *inputs) {
-    Matrix *output = new Matrix(NETWORK_OUTPUT_SIZE, EQUIPE_SIZE);
-
+void Chromosome::apply(Matrix &inputs) {
     for (int i = 0; i < EQUIPE_SIZE; i++) {
-        Matrix *o = new Matrix(NETWORK_INPUT_SIZE, 1);
+        Matrix o = Matrix(NETWORK_INPUT_SIZE, 1);
 
         for (int j = 0; j < NETWORK_INPUT_SIZE; j++) {
-            o->set(j, 0, inputs->get(j, i));
+            o.set(j, 0, inputs.get(j, i));
         }
 
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
-            o->mult_inv(this->matrix[i][j]);
+            o.mult_inv(this->matrix[i][j]);
             apply_activation(o);
         }
 
         for (int j = 0; j < NETWORK_OUTPUT_SIZE; j++) {
-            output->set(j, i, o->get(j, 0));
+            inputs.set(j, i, o.get(j, 0));
         }
     }
-
-    return output;
 }
 
 /*
@@ -112,17 +114,11 @@ Matrix *Chromosome::evaluate(Matrix *inputs) {
    précédente.
 */
 
-Matrix *Chromosome::compute_didier(Matrix *inputs) {
-    if (!inputs) {
-        Matrix *inputs = new Matrix(COM_SIZE * EQUIPE_SIZE, 1);
-    }
-
+void Chromosome::apply_didier(Matrix &inputs) {
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        inputs->mult_inv(this->didier[i]);
+        inputs.mult_inv(this->didier[i]);
         apply_activation(inputs);
     }
-
-    return inputs;
 }
 
 /*
@@ -133,35 +129,32 @@ Matrix *Chromosome::compute_didier(Matrix *inputs) {
 
 */
 
-Matrix *Chromosome::collect_and_evaluate(player *p, Matrix *lastcom) {
+Matrix *Chromosome::collect_and_apply(player *p, Matrix &didier_output) {
     Matrix *m = new Matrix(NETWORK_INPUT_SIZE, EQUIPE_SIZE);
-    Matrix *didier_output = compute_didier(lastcom);
+    apply_didier(didier_output);
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
-        m->set(0, i, p->pos.x);
-        m->set(1, i, p->pos.y);
-        m->set(2, i, p->vitesse.x);
-        m->set(3, i, p->vitesse.y);
-        m->set(4, i, p->orientation);
+        m->set(0, i, p[i].pos.x);
+        m->set(1, i, p[i].pos.y);
+        m->set(2, i, p[i].vitesse.x);
+        m->set(3, i, p[i].vitesse.y);
+        m->set(4, i, p[i].orientation);
         for (int j = 0; j < COM_SIZE; j++) {
-            m->set(5 + j, i, didier_output->get(j, i));
+            m->set(5 + j, i, didier_output.get(j + i * COM_SIZE, 0));
         }
     }
 
     // on prépare les lastcom suivant pour cette équipe
-    Matrix *res = this->evaluate(m);
-    if (!lastcom) {
-        lastcom = new Matrix(COM_SIZE * EQUIPE_SIZE, 1);
-    }
+    this->apply(*m);
 
     for (int k = 0, c = 0; k < EQUIPE_SIZE; k++) {
         for (int i = 0; i < COM_SIZE; i++) {
-            lastcom->set(c++, 0,
-                         res->get(NETWORK_OUTPUT_SIZE - COM_SIZE + i, k));
+            didier_output.set(c++, 0,
+                        m->get(NETWORK_OUTPUT_SIZE - COM_SIZE + i, k));
         }
     }
 
-    return res;
+    return m;
 }
 
 /*

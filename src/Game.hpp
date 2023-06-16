@@ -1,7 +1,6 @@
 #pragma once
 #include "Vector.hpp"
 #include "config.h"
-
 #include <fstream>
 
 struct ball {
@@ -12,6 +11,12 @@ struct ball {
 struct player : ball {
     double orientation, acceleration;
 };
+
+// faut la mettre ici sinon ça compile pas (mdr)
+#include "Chromosome.hpp"
+
+// il faut le me mettre ici sinon ça complie pas (mdr)
+class Chromosome;
 
 // alors oui c'est absolument honteux, mais le polymorphisme c'est la méga fête.
 // pos est le points d'origine, vitesse le vecteur directeur, et size pourra
@@ -71,10 +76,11 @@ class Game {
     ;
 
     void setPlayer(int id, vector pos, vector speed, double orientation,
-                   double size = PLAYER_SIZE, double mass = BALL_MASS);
+                   double size = PLAYER_SIZE, double mass = PLAYER_MASS);
 
     void print();
 
     void aller_chercher_du_pain(int n);
-	
+
+	double static play_match(Chromosome *c1, Chromosome *c2);
 };

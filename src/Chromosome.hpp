@@ -9,16 +9,18 @@ class Chromosome {
     Matrix *matrix[EQUIPE_SIZE][NETWORK_SIZE - 1];
     Matrix *didier[DIDIER_NETWORK_SIZE - 1];
 
-    void initialize();
+    Chromosome();
     ~Chromosome();
 
     void print();
 
     void randomize();
 
-    Matrix *compute_didier(Matrix *inputs);
-    Matrix *collect_and_evaluate(player *p, Matrix *didier);
-    Matrix *evaluate(Matrix *inputs);
+    void apply_didier(Matrix &inputs);
+	
+    Matrix *collect_and_apply(player *p, Matrix &didier);
+	
+    void apply(Matrix &inputs);
 };
 
 Chromosome *mutate(Chromosome *c);

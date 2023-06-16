@@ -11,7 +11,7 @@
 
 Matrix *one_pointer_crossover(Matrix *a, Matrix *b) {
     if (a->ligne != b->ligne || a->col != b->col)
-        throw std::invalid_argument("lol");
+        throw std::invalid_argument("lol opc");
 
     int x = rand() % a->col;
     Matrix *c = new Matrix(a->ligne, a->col);
@@ -29,7 +29,7 @@ Matrix *one_pointer_crossover(Matrix *a, Matrix *b) {
 
 Matrix *double_pointer_crossover(Matrix *a, Matrix *b) {
     if (a->ligne != b->ligne || a->col != b->col)
-        throw std::invalid_argument("lol");
+        throw std::invalid_argument("lol dpc");
 
     int x1 = rand() % a->col;
     int x2 = rand() % a->col + x1;
@@ -48,7 +48,7 @@ Matrix *double_pointer_crossover(Matrix *a, Matrix *b) {
 
 Matrix *uniform_crossover(Matrix *a, Matrix *b) {
     if (a->ligne != b->ligne || a->col != b->col)
-        throw std::invalid_argument("lol");
+        throw std::invalid_argument("lol uc");
 
     Matrix *c = new Matrix(a->ligne, a->col);
 
@@ -64,7 +64,7 @@ Matrix *uniform_crossover(Matrix *a, Matrix *b) {
 
 Matrix *average_crossover(Matrix *a, Matrix *b) {
     if (a->ligne != b->ligne || a->col != b->col)
-        throw std::invalid_argument("lol");
+        throw std::invalid_argument("lol ac");
 
     Matrix *c = new Matrix(a->ligne, a->col);
 
@@ -79,7 +79,7 @@ Matrix *average_crossover(Matrix *a, Matrix *b) {
 
 Matrix *WARP(Matrix *a, Matrix *b) {
     if (a->ligne != b->ligne || a->col != b->col)
-        throw std::invalid_argument("lol");
+        throw std::invalid_argument("lol WARP");
 
     double x = (randomDouble() + 1) / 2;
     Matrix *c = new Matrix(a->ligne, a->col);
@@ -95,7 +95,7 @@ Matrix *WARP(Matrix *a, Matrix *b) {
 
 Matrix *PMX(Matrix *a, Matrix *b) {
     if (a->ligne != b->ligne || a->col != b->col)
-        throw std::invalid_argument("lol");
+        throw std::invalid_argument("lol PMX");
 
     int x = rand() % a->col;
     int y = rand() % a->ligne;
@@ -114,7 +114,7 @@ Matrix *PMX(Matrix *a, Matrix *b) {
 // oui oui ça existe vraiment
 Matrix *SAC(Matrix *a, Matrix *b) {
     if (a->ligne != b->ligne || a->col != b->col)
-        throw std::invalid_argument("lol");
+        throw std::invalid_argument("lol SAC");
 
     switch (rand() % 6) {
     case 0:

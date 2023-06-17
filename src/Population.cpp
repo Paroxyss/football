@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "Chromosome.hpp"
+#include "Game.hpp"
 #include "Population.hpp"
 
 Population::Population(int size) {
@@ -11,13 +12,13 @@ Population::Population(int size) {
     this->pop = (Chromosome *)malloc(size * sizeof(Chromosome));
 
     for (int i = 0; i < size; i++) {
-        this->pop[i] = Chromosome();
+        this->pop[i] = *new Chromosome();
         this->pop[i].randomize();
     }
 }
 
 Population::~Population() {
-    delete[] this->pop;
+    free(this->pop);
 }
 
 /*
@@ -26,12 +27,12 @@ Population::~Population() {
     1% par mutation et le reste par clonage.
 */
 
-Population *Population::next() {
+void Population::next(bool save) {
     Population *p = new Population(this->size);
     int c = 0, m = 0;
 
     while (c < this->size * 0.85) {
-        auto cpl = this->tournament(rand() % (this->size / 2) + 1);
+        auto cpl = this->tournament(rand() % (this->size / 2) + 1, save);
 
         // il y a certaines méthodes de crossover qui retournent directement 2
         // enfants par exemple one_pointer_crossover(a, b) !=
@@ -48,10 +49,14 @@ Population *Population::next() {
         p->pop[c + m++] = this->pop[rand() % this->size];
     }
 
-    return p;
+    for (int i = 0; i < this->size; i++) {
+        this->pop[i] = p->pop[i];
+    }
+
+    delete p;
 }
 
-std::pair<Chromosome *, Chromosome *> Population::tournament(int k) {
+std::pair<Chromosome *, Chromosome *> Population::tournament(int k, bool save) {
     Chromosome *r = (Chromosome *)malloc(k * sizeof(Chromosome));
     std::pair<Chromosome *, Chromosome *> p;
 
@@ -63,7 +68,7 @@ std::pair<Chromosome *, Chromosome *> Population::tournament(int k) {
         Chromosome c = this->pop[i];
         int j = i - 1;
 
-        while (j >= 0 /* && score_match(this->pop[j], c) > 0 */) {
+        while (j >= 0 && play_match(&this->pop[j], &c, save) > 0) {
             this->pop[j + 1] = this->pop[j];
             --j;
         }

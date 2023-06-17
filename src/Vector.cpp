@@ -53,6 +53,7 @@ vector operator/(vector a, double factor) {
     vector result = copy(a);
     return result /= factor;
 }
+
 double dotProduct(vector a, vector b) {
     return a.x * b.x + a.y * b.y;
 }
@@ -63,6 +64,10 @@ double normeCarre(vector a) {
 
 double norme(vector a) {
     return sqrt(normeCarre(a));
+}
+
+double vangle(vector v) {
+    return atan(v.y / v.x);
 }
 
 std::ostream &operator<<(std::ostream &os, const vector &obj) {

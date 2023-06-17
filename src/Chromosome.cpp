@@ -43,7 +43,7 @@ void Chromosome::print() {
             this->matrix[i][j]->print();
         }
     }
-    std::cout << "Didier" << std::endl;
+
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
         this->didier[i]->print();
     }
@@ -116,6 +116,12 @@ void Chromosome::apply(Matrix &inputs) {
 
 void Chromosome::apply_didier(Matrix &inputs) {
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        if (inputs.ligne != this->didier[i]->col ||
+            inputs.col != this->didier[i]->ligne) {
+
+            // std::cout << "didier: " << this->didier[i]->ligne << " * "
+            //           << this->didier[i]->col << std::endl;
+        }
         inputs.mult_inv(this->didier[i]);
         apply_activation(inputs);
     }
@@ -127,18 +133,28 @@ void Chromosome::apply_didier(Matrix &inputs) {
      sur chaque colonnes les COM_SIZE dernières sorties de communication à
    Didier qui doivent être réinjectés dans compute_didier
 
+   0 -> left
+   1 -> right
 */
 
-Matrix *Chromosome::collect_and_apply(player *p, Matrix &didier_output) {
+Matrix *Chromosome::collect_and_apply(player *p, ball *b, Matrix &didier_output,
+                                      bool team) {
     Matrix *m = new Matrix(NETWORK_INPUT_SIZE, EQUIPE_SIZE);
     apply_didier(didier_output);
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
+        vector relat = p[i].pos - b[i].pos;
+        double balldist = norme(relat);
+        vector fakeball = {.x = MAP_LENGTH - b[i].pos.x, .y = b[i].pos.y};
+
         m->set(0, i, p[i].pos.x);
         m->set(1, i, p[i].pos.y);
         m->set(2, i, p[i].vitesse.x);
         m->set(3, i, p[i].vitesse.y);
         m->set(4, i, p[i].orientation);
+        m->set(5, i, balldist);
+        m->set(6, i, vangle(relat) - p->orientation);
+
         for (int j = 0; j < COM_SIZE; j++) {
             m->set(5 + j, i, didier_output.get(j + i * COM_SIZE, 0));
         }
@@ -150,7 +166,7 @@ Matrix *Chromosome::collect_and_apply(player *p, Matrix &didier_output) {
     for (int k = 0, c = 0; k < EQUIPE_SIZE; k++) {
         for (int i = 0; i < COM_SIZE; i++) {
             didier_output.set(c++, 0,
-                        m->get(NETWORK_OUTPUT_SIZE - COM_SIZE + i, k));
+                              m->get(NETWORK_OUTPUT_SIZE - COM_SIZE + i, k));
         }
     }
 

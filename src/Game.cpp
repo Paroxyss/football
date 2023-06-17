@@ -427,14 +427,14 @@ bool Game::checkGoal(int id) {
     return false;
 }
 
-double Game::play_match(Chromosome *c1, Chromosome *c2, bool save) {
-    auto jé = Game(2 * EQUIPE_SIZE, save);
+double play_match(Chromosome *c1, Chromosome *c2, bool save) {
+    auto g = Game(2 * EQUIPE_SIZE, save);
 
-    jé.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
-    jé.ball.vitesse = {.x = randomDouble(), .y = randomDouble()};
+    g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
+    g.ball.vitesse = {.x = randomDouble(), .y = randomDouble()};
 
     int c[] = {2, 1};
-    jé.set_players(c, 2);
+    g.set_players(c, 2);
 
     Matrix didierInputs[2] = {
         Matrix(COM_SIZE * EQUIPE_SIZE, 1),
@@ -445,9 +445,9 @@ double Game::play_match(Chromosome *c1, Chromosome *c2, bool save) {
 
     for (int i = 0; i < GAME_DURATION; i++) {
 
-        auto r1 = c1->collect_and_apply(jé.players, didierInputs[0]);
-        auto r2 =
-            c1->collect_and_apply(jé.players + EQUIPE_SIZE, didierInputs[0]);
+        auto r1 = c1->collect_and_apply(g.players, &g.ball, didierInputs[0], 0);
+        auto r2 = c1->collect_and_apply(g.players + EQUIPE_SIZE, &g.ball,
+                                        didierInputs[0], 1);
 
         for (int a = 0; a < 2; a++) {
             for (int i = 0; i < EQUIPE_SIZE; i++) {
@@ -459,39 +459,33 @@ double Game::play_match(Chromosome *c1, Chromosome *c2, bool save) {
                 if (acceleration < 0) {
                     acceleration = 0;
                 }
-                jé.doAction(i + a * EQUIPE_SIZE, rotation, acceleration);
+                g.doAction(i + a * EQUIPE_SIZE, rotation, acceleration);
             }
         }
 
         delete r1;
         delete r2;
 
-        jé.tick();
+        g.tick();
 
-        bool c1 = jé.checkGoal(0);
-        bool c2 = jé.checkGoal(1);
+        bool c1 = g.checkGoal(0);
+        bool c2 = g.checkGoal(1);
         if (c1 || c2) {
 
-            score += 1;//c1 ? -1 : 1;
+            score += c1 ? -1 : 1;
 
-            std::cout << "But au tick j'ai modif " << i << std::endl;
+            g.ball.pos.x = (float)MAP_LENGTH / 2;
+            g.ball.pos.y = (float)MAP_HEIGHT / 2;
+            g.ball.vitesse.x = randomDouble();
+            g.ball.vitesse.y = randomDouble();
 
-            if (save) {
-                csvOutputFile << "3, " << score << " BONJOUR J'AI MARQUÉ"
-                              << std::endl;
-            }
-            std::cout << "Ouais j'ai écris" << i << std::endl;
-
-            jé.ball.pos.x = (float)MAP_LENGTH / 2;
-            jé.ball.pos.y = (float)MAP_HEIGHT / 2;
-            jé.ball.vitesse.x = randomDouble();
-            jé.ball.vitesse.y = randomDouble();
-
-            jé.set_players(c, 2);
+            g.set_players(c, 2);
         }
     }
+
     if (save) {
         csvOutputFile.close();
     }
+
     return score;
 };

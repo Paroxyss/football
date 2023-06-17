@@ -79,6 +79,6 @@ class Game {
     void print();
 
     void aller_chercher_du_pain(int n);
-
-    double static play_match(Chromosome *c1, Chromosome *c2, bool save = false);
 };
+
+double play_match(Chromosome *c1, Chromosome *c2, bool save = false);

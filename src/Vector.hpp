@@ -25,5 +25,6 @@ vector operator/(vector, double factor);
 double dotProduct(vector, vector);
 double normeCarre(vector);
 double norme(vector);
+double vangle(vector v);
 
 std::ostream &operator<<(std::ostream &os, const vector &obj);

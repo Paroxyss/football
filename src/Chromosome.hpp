@@ -17,9 +17,9 @@ class Chromosome {
     void randomize();
 
     void apply_didier(Matrix &inputs);
-	
-    Matrix *collect_and_apply(player *p, Matrix &didier);
-	
+
+    Matrix *collect_and_apply(player *p, ball *b, Matrix &didier, bool team);
+
     void apply(Matrix &inputs);
 };
 

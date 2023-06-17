@@ -11,6 +11,6 @@ class Population {
   public:
     Population(int size);
     ~Population();
-    Population *next();
-    std::pair<Chromosome *, Chromosome *> tournament(int k);
+    void next(bool save);
+    std::pair<Chromosome *, Chromosome *> tournament(int k, bool save);
 };

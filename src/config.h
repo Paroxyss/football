@@ -8,9 +8,9 @@
 
 // pour l'instant le réseau ne prend pas l'accélération en entrée
 // pour pouvoir évoluer plus facilement.
-// x, y, vx, vy, theta, com1, .. , com{COM_SIZE}
+// x, y, vx, vy, theta, distance_balle, rthetab, com1, .. , com{COM_SIZE}
 #define NETWORK_OUTPUT_SIZE 2 + COM_SIZE
-#define NETWORK_INPUT_SIZE 5 + COM_SIZE
+#define NETWORK_INPUT_SIZE 7 + COM_SIZE
 
 #define EQUIPE_SIZE 3
 

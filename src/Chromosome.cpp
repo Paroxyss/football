@@ -21,6 +21,8 @@ Chromosome::Chromosome() {
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
         this->didier[i] = new Matrix(DIDIER_LAYERS[i + 1], DIDIER_LAYERS[i]);
     }
+
+    std::cout << "Created chromosome " << this << std::endl;
 }
 
 Chromosome::~Chromosome() {
@@ -202,13 +204,32 @@ Chromosome *crossover(Chromosome *a, Chromosome *b) {
 
     for (int k = 0; k < EQUIPE_SIZE; k++) {
         for (int i = 0; i < NETWORK_SIZE - 1; i++) {
-            Matrix *m = average_crossover(a->matrix[k][i], b->matrix[k][i]);
+			/*
+            std::cout << "begin crossover" << std::endl;
+            std::cout << "Indices : " << k << ", " << i << std::endl;
 
+            std::cout << a << " Taille1 : ";
+            std::cout << a->matrix[k][i]->ligne << "x" << a->matrix[k][i]->col
+                      << std::endl;
+            std::cout << b << " Taille2 : " << std::endl;
+            std::cout << b->matrix[k][i]->ligne << "x" << b->matrix[k][i]->col
+                      << std::endl;
+			*/
+
+            Matrix *m = average_crossover(a->matrix[k][i], b->matrix[k][i]);
+			/*
+            std::cout << "end crossover" << std::endl;
+            std::cout << "got matrice " << m->ligne << "x" << m->col
+                      << std::endl;
+			*/
+
+            //std::cout << "child setting" << std::endl;
             for (int j = 0; j < m->ligne; j++) {
-                for (int k = 0; k < m->col; k++) {
-                    child->matrix[k][i]->set(j, k, m->get(j, k));
+                for (int l = 0; l < m->col; l++) {
+                    child->matrix[k][i]->set(j, l, m->get(j, l));
                 }
             }
+            //std::cout << "ok" << std::endl;
         }
     }
 
@@ -219,6 +240,7 @@ Chromosome *crossover(Chromosome *a, Chromosome *b) {
                 child->didier[j]->set(k, l, m->get(k, l));
             }
         }
+		delete m;
     }
 
     return child;

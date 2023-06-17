@@ -1,5 +1,7 @@
 #include "Matrix.h"
 #include "util.hpp"
+#include <iostream>
+#include <ostream>
 #include <stdexcept>
 
 /*
@@ -63,8 +65,12 @@ Matrix *uniform_crossover(Matrix *a, Matrix *b) {
 }
 
 Matrix *average_crossover(Matrix *a, Matrix *b) {
-    if (a->ligne != b->ligne || a->col != b->col)
-        throw std::invalid_argument("lol ac");
+    std::cout << "AC on [" << a << ", " << b << "]" << std::endl;
+    std::cout << "Taille1 : " << a->ligne << "x" << a->col << std::endl;
+    std::cout << "Taille2 : " << b->ligne << "x" << b->col << std::endl;
+    if (a->ligne != b->ligne || a->col != b->col) {
+        throw std::invalid_argument("erreur average_crossover");
+    }
 
     Matrix *c = new Matrix(a->ligne, a->col);
 

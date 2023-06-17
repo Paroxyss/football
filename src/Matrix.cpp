@@ -2,8 +2,12 @@
 #include "util.hpp"
 #include <cmath>
 #include <iostream>
+#include <stdexcept>
 
 Matrix::Matrix(int ligne, int col) {
+	
+	//std::cout << "Create Matrix [" << this << "]" << std::endl;
+	
     this->ligne = ligne;
     this->col = col;
 
@@ -19,6 +23,7 @@ Matrix::Matrix(int ligne, int col) {
 }
 
 Matrix::~Matrix() {
+	//std::cout << "Delete Matrix [" << this << "]" << std::endl;
     if (!(this->col == 0 && this->ligne == 0)) {
         for (int i = 0; i < ligne; i++) {
             delete[] t[i];
@@ -28,16 +33,22 @@ Matrix::~Matrix() {
 }
 
 double Matrix::get(int i, int j) {
-    if (i > this->ligne || j > this->col)
+    if (i > this->ligne || j > this->col) {
         std::cout << "BAD CASE GET : getting (" << i << ", " << j
                   << ") in a matrix of size " << this->ligne << "x" << this->col
                   << std::endl;
+        throw std::invalid_argument("Bad matrice get");
+    }
     return this->t[i][j];
 }
 
 void Matrix::set(int i, int j, double x) {
-    if (i > this->ligne || j > this->col)
-        std::cout << "BAD CASE SET" << std::endl;
+    if (i > this->ligne || j > this->col) {
+        std::cout << "BAD CASE GET : getting (" << i << ", " << j
+                  << ") in a matrix of size " << this->ligne << "x" << this->col
+                  << std::endl;
+		throw std::invalid_argument("Bad matrice set");
+    }
     this->t[i][j] = x;
 }
 

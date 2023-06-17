@@ -6,11 +6,11 @@
 class Population {
   public:
     int size;
-    Chromosome *pop;
+    Chromosome **pop;
 
   public:
     Population(int size);
     ~Population();
-    void next(bool save);
+    void next(bool save = false);
     std::pair<Chromosome *, Chromosome *> tournament(int k, bool save);
 };

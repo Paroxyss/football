@@ -6,18 +6,24 @@
 #include "Chromosome.hpp"
 #include "Game.hpp"
 #include "Population.hpp"
+#include "config.h"
 
 Population::Population(int size) {
     this->size = size;
-    this->pop = (Chromosome *)malloc(size * sizeof(Chromosome));
+    this->pop = (Chromosome **)malloc(size * sizeof(void *));
 
     for (int i = 0; i < size; i++) {
-        this->pop[i] = *new Chromosome();
-        this->pop[i].randomize();
+        this->pop[i] = new Chromosome();
+        this->pop[i]->randomize();
     }
 }
 
 Population::~Population() {
+    for (int i = 0; i < size; i++) {
+        std::cout << "freeing chromosome " << i << std::endl;
+        delete this->pop[i];
+        std::cout << "ok" << i << std::endl;
+    }
     free(this->pop);
 }
 
@@ -28,56 +34,91 @@ Population::~Population() {
 */
 
 void Population::next(bool save) {
-    Population *p = new Population(this->size);
-    int c = 0, m = 0;
+    Population next_pop = Population(this->size);
+    int crossNumber = 0, mutationNumber = 0;
 
-    while (c < this->size * 0.85) {
-        auto cpl = this->tournament(rand() % (this->size / 2) + 1, save);
+    std::cout << "While 1" << std::endl;
+    while (crossNumber < this->size * 0.85) {
+        auto cpl = this->tournament(rand() % (this->size / 2) + 2, save);
+        std::cout << "gotChromosome " << cpl.first << " and " << cpl.second
+                  << std::endl;
 
         // il y a certaines méthodes de crossover qui retournent directement 2
         // enfants par exemple one_pointer_crossover(a, b) !=
         // one_pointer_crossover(b, a) on peut donc avoir les 2;
-        p->pop[c++] = *crossover(cpl.first, cpl.second);
+        next_pop.pop[crossNumber] = crossover(cpl.first, cpl.second);
+        crossNumber++;
     }
 
-    while (m < this->size * 0.1) {
-        p->pop[c++] = *mutate(&this->pop[rand() % this->size]);
-        m++;
+    std::cout << "While 2" << std::endl;
+    while (mutationNumber < this->size * 0.1) {
+        next_pop.pop[crossNumber] = mutate(this->pop[rand() % this->size]);
+        crossNumber++;
+        mutationNumber++;
     }
 
-    while (c + m < this->size) {
-        p->pop[c + m++] = this->pop[rand() % this->size];
+    std::cout << "While 3" << std::endl;
+    while (crossNumber + mutationNumber < this->size) {
+        next_pop.pop[crossNumber + mutationNumber] =
+            this->pop[rand() % this->size];
+        mutationNumber++;
     }
 
+    std::cout << "While 4" << std::endl;
     for (int i = 0; i < this->size; i++) {
-        this->pop[i] = p->pop[i];
+        this->pop[i] = next_pop.pop[i];
     }
 
-    delete p;
+    // ??? ça va delete les chromosomes
+    // delete next_pop;
 }
 
-std::pair<Chromosome *, Chromosome *> Population::tournament(int k, bool save) {
-    Chromosome *r = (Chromosome *)malloc(k * sizeof(Chromosome));
+std::pair<Chromosome *, Chromosome *> Population::tournament(int tournamentSize,
+                                                             bool save) {
+
+    std::cout << "Tournament of " << tournamentSize << " players" << std::endl;
+    Chromosome **r = (Chromosome **)malloc(tournamentSize * sizeof(void *));
+
     std::pair<Chromosome *, Chromosome *> p;
 
-    for (int i = 0; i < k; i++) {
+    for (int i = 0; i < tournamentSize; i++) {
         r[i] = this->pop[rand() % this->size];
+        std::cout << "Added to r chromosome [" << r[i] << "]" << std::endl;
     }
 
-    for (int i = 1; i < k; ++i) {
-        Chromosome c = this->pop[i];
+    /*   ⠀⠀⠀⠀⣀⣤⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⡿⠿⣿⣿⣿⣿⡿⠿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⢀⣴⣦⡈⠻⣦⣤⣿⣿⣧⣤⣶⠏⢀⣦⣄⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⢀⣴⣿⣿⣿⣷⣤⣈⠙⠛⠛⠛⢉⣠⣴⣿⣿⣿⣷⣄⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⢠⣿⣿⣿⣿⠟⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⢻⣿⣿⣿⣆⠀⠀⠀⠀
+⠀⠀⠀⢀⣿⣿⣿⣿⠃⣰⣿⣿⡿⠛⠋⠉⠛⠻⣿⣿⣷⡀⠹⣿⣿⣿⡆⠀⠀⠀
+⠀⠀⠀⣸⣿⣿⣿⠃⣰⣿⣿⠋⣠⣾⡇⢸⣷⣦⠈⣿⣿⣿⡄⢹⣿⣿⣿⠀⠀⠀
+⠀⠀⠀⣿⣿⣿⠋⠀⠉⠉⠉⠀⣿⣿⡇⢸⣿⣿⡇⠉⠉⠉⠁⠀⢻⣿⣿⡆⠀⠀
+⠀⠀⢰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀
+⠀⠀⠀⠙⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠃⠘⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠁⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠃⠀⠀⠀⠀⠀⠀⠀⠀
+    Prions pour que ça marche
+    */
+    for (int i = 1; i < tournamentSize; ++i) {
+        Chromosome *c = r[i];
         int j = i - 1;
 
-        while (j >= 0 && play_match(&this->pop[j], &c, save) > 0) {
-            this->pop[j + 1] = this->pop[j];
+        while (j >= 0 && play_match(r[j], c, save) > 0) {
+            r[j + 1] = r[j];
             --j;
         }
 
-        this->pop[j + 1] = c;
+        r[j + 1] = c;
     }
 
-    p.first = &r[k - 1];
-    p.second = &r[k - 2];
+    p.first = r[tournamentSize - 1];
+    p.second = r[tournamentSize - 2];
+
+    free(r);
 
     return p;
 }

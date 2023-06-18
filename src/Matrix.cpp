@@ -1,18 +1,19 @@
 #include "Matrix.h"
 #include "util.hpp"
+
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 Matrix::Matrix(int ligne, int col) {
-	//std::cout << "Create Matrix [" << this << "]" << std::endl;
-	
     this->ligne = ligne;
     this->col = col;
-
     this->t = new double *[ligne];
+
     for (int i = 0; i < ligne; i++) {
         double *v = new double[col];
+
         for (int j = 0; j < col; j++) {
             v[j] = 0;
         }
@@ -22,32 +23,26 @@ Matrix::Matrix(int ligne, int col) {
 }
 
 Matrix::~Matrix() {
-	//std::cout << "Delete Matrix [" << this << "]" << std::endl;
-    if (!(this->col == 0 && this->ligne == 0)) {
-        for (int i = 0; i < ligne; i++) {
-            delete[] t[i];
-        }
-        delete[] t;
+    for (int i = 0; i < this->ligne; i++) {
+        delete[] t[i];
     }
+
+    delete[] t;
 }
 
 double Matrix::get(int i, int j) {
-    if (i > this->ligne || j > this->col) {
-        std::cout << "BAD CASE GET : getting (" << i << ", " << j
-                  << ") in a matrix of size " << this->ligne << "x" << this->col
-                  << std::endl;
+    if (i >= this->ligne || j >= this->col) {
         throw std::invalid_argument("Bad matrice get");
     }
+
     return this->t[i][j];
 }
 
 void Matrix::set(int i, int j, double x) {
-    if (i > this->ligne || j > this->col) {
-        std::cout << "BAD CASE GET : getting (" << i << ", " << j
-                  << ") in a matrix of size " << this->ligne << "x" << this->col
-                  << std::endl;
-		throw std::invalid_argument("Bad matrice set");
+    if (i >= this->ligne || j >= this->col) {
+        throw std::invalid_argument("Bad matrice set");
     }
+
     this->t[i][j] = x;
 }
 
@@ -57,7 +52,7 @@ void Matrix::print() {
         for (int j = 0; j < this->col; j++) {
             std::cout << this->t[i][j] << " ";
         }
-        std::cout << this->t[i] << "\n";
+        // std::cout << this->t[i] << "\n";
     }
 }
 
@@ -67,25 +62,22 @@ void Matrix::mult_inv(Matrix *a) {
         throw std::invalid_argument("lol multinv");
     }
 
-    double **newT = new double *[a->ligne];
+    Matrix *res = new Matrix(a->ligne, this->col);
+
     for (int i = 0; i < a->ligne; i++) {
-        double *v = new double[this->col];
         for (int j = 0; j < this->col; j++) {
-            v[j] = 0;
+            int c = 0;
+
             for (int k = 0; k < this->ligne; k++) {
-                v[j] += a->get(i, k) * this->get(k, j);
+                c += a->get(i, k) * this->get(k, j);
             }
+
+            res->set(i, j, c);
         }
-        newT[i] = v;
     }
 
-    for (int i = 0; i < this->ligne; i++) {
-        free(this->t[i]);
-    }
-
-    free(this->t);
-    this->t = newT;
-    this->ligne = a->ligne;
+    delete this;
+    *this = *res;
 }
 
 void Matrix::randomize() {

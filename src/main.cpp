@@ -16,7 +16,7 @@
 
 int main() {
     srand(0);
-    Population p = Population(10);
+    Population p = Population(30);
 
     std::cout << "Matrix : " << sizeof(Matrix) << std::endl;
     std::cout << "Chromosome : " << sizeof(Chromosome) << std::endl;

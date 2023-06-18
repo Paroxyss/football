@@ -8,6 +8,10 @@
 #include "config.h"
 
 Population::Population(int size) {
+    if (size * PRESSION_TOURN < 2) {
+        throw std::invalid_argument("size must be greater than 20");
+    }
+
     this->size = size;
     this->pop = (Chromosome **)malloc(size * sizeof(void *));
 
@@ -46,7 +50,7 @@ void Population::next(bool save) {
         // des 50% sortira) et on obtiendra seulement 2 individus différents à
         // la fin, de plus les petits tournois sont beaucoup plus rapide à faire
         // tourner.
-        int ts = this->size * 0.1;
+        int ts = this->size * PRESSION_TOURN;
         auto cpl = this->tournament(rand() % (ts - 2) + 2, save);
 
         // chaque couple de parents produit 2 enfants, ce qui nécessite 2 fois

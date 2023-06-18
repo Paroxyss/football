@@ -20,9 +20,7 @@ const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, 15, 20,
 
 #define GAME_RESOLUTION 1
 
-// 5 minutes par partie nous permet au moins
-// de tester les réseaux de neurones
-#define GAME_DURATION 5 * 60
+#define GAME_DURATION 60 * 60
 
 #define MAP_LENGTH 119 * 10
 #define MAP_HEIGHT 75 * 10

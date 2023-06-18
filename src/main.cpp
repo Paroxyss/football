@@ -14,24 +14,26 @@
 #include <thread>
 #include <unistd.h>
 
-void generation(Population *pop, int amount) {
-    for (int i = 0; i < amount; i++) {
-		std::cout << "[Thread " << std::this_thread::get_id() << "] starting generation " << i << std::endl;
-        pop->next();
-    }
+void generation(Population *pop) {
+    pop->next();
 }
 
 int main() {
     srand(0);
 
-    Population pops[] = {Population(150), Population(150), Population(150), Population(150)};
+    const int n = 1000 / 4;
+    int gen = 1;
 
-    for (int i = 0; i < 100; i++) {
-		std::cout << "Generation " << 2*i << std::endl;
-		std::thread t1(generation, &pops[0], 2);
-		std::thread t2(generation, &pops[1], 2);
-		std::thread t3(generation, &pops[2], 2);
-		std::thread t4(generation, &pops[3], 2);
+    Population pops[] = {Population(n), Population(n), Population(n),
+                         Population(n)};
+
+    while (gen < 100) {
+        std::cout << "starting generation " << gen << std::endl;
+
+        std::thread t1(generation, &pops[0]);
+        std::thread t2(generation, &pops[1]);
+        std::thread t3(generation, &pops[2]);
+        std::thread t4(generation, &pops[3]);
 
         t1.join();
         t2.join();
@@ -39,7 +41,12 @@ int main() {
         t4.join();
 
         shufflePopulations(pops, 4);
+        gen += 4;
     }
+
+    auto p = joinPopulation(pops, 4);
+    auto meilleurs = p->tournament(p->size, false);
+    play_match(meilleurs.first, meilleurs.second, true);
 
     _exit(EXIT_SUCCESS);
 }

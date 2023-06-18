@@ -29,7 +29,9 @@ for i in range(1, len(data)):
                 draw_ball(data[i][1], data[i][2])
                 for k in range(1, nb_joueurs + 1):
                     draw_player(
-                        1 if k > (nb_joueurs + 1) / 2 else 2,
+                        1
+                        if k > (nb_joueurs + 1) / 2
+                        else 2,
                         data[i][3 * k],
                         data[i][3 * k + 1],
                         data[i][3 * k + 2],
@@ -39,5 +41,4 @@ for i in range(1, len(data)):
 
     pg.display.flip()
 
-print(ticks)
 pg.quit()

@@ -59,7 +59,7 @@ void Population::next(bool save) {
         int randIndice = rand() % this->size;
 
         next_pop[crossNumber + mutationNumber] = mutate(this->pop[randIndice]);
-        toKeep[crossNumber+mutationNumber] = true;
+        toKeep[crossNumber + mutationNumber] = true;
 
         mutationNumber++;
     }
@@ -67,7 +67,8 @@ void Population::next(bool save) {
     while (crossNumber + mutationNumber < this->size) {
         int randIndice = rand() % this->size;
 
-        next_pop[crossNumber + mutationNumber] = cloneChromosome(this->pop[randIndice]);
+        next_pop[crossNumber + mutationNumber] =
+            cloneChromosome(this->pop[randIndice]);
         mutationNumber++;
     }
 
@@ -121,6 +122,24 @@ Chromosome **getChromosomeFromPopulations(Population *pop, unsigned int i) {
     return &pop->pop[i];
 };
 
+Population *joinPopulation(Population *p, int n) {
+    int c = 0;
+    for (int i = 0; i < n; i++) {
+        c += p[i].size;
+    }
+
+    auto np = new Population(c);
+    int k = 0;
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < p[i].size; j++) {
+            np->pop[k++] = p[i].pop[j];
+        }
+    }
+
+    return np;
+}
+
 // m�lange en place les chromosomes d'un tableau de populations
 void shufflePopulations(Population *pop, unsigned int numberOfPop) {
     int popTotale = 0;
@@ -139,23 +158,24 @@ void shufflePopulations(Population *pop, unsigned int numberOfPop) {
     }
 }
 
-Chromosome *cloneChromosome(Chromosome *original){
+Chromosome *cloneChromosome(Chromosome *original) {
     auto clone = new Chromosome();
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
-            for(int k = 0; k < original->matrix[i][j]->ligne; k++){
-                for(int l = 0; l < original->matrix[i][j]->col; l++) {
-                    clone->matrix[i][j]->set(k,l, original->matrix[i][j]->get(k,l));
+            for (int k = 0; k < original->matrix[i][j]->ligne; k++) {
+                for (int l = 0; l < original->matrix[i][j]->col; l++) {
+                    clone->matrix[i][j]->set(k, l,
+                                             original->matrix[i][j]->get(k, l));
                 }
             }
         }
     }
 
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        for(int k = 0; k < original->didier[i]->ligne; k++){
-            for(int l = 0; l < original->didier[i]->col; l++) {
-                clone->didier[i]->set(k,l, original->didier[i]->get(k,l));
+        for (int k = 0; k < original->didier[i]->ligne; k++) {
+            for (int l = 0; l < original->didier[i]->col; l++) {
+                clone->didier[i]->set(k, l, original->didier[i]->get(k, l));
             }
         }
     }

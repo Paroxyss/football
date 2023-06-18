@@ -2,9 +2,9 @@
 class Matrix {
   public:
     int col = 0, ligne = 0;
+    double **t;
 
   private:
-    double **t;
 
   public:
     Matrix(){};

@@ -17,3 +17,4 @@ class Population {
 
 Chromosome **getChromosomeFromPopulations(Population *pop, unsigned int i);
 void shufflePopulations(Population *pop, unsigned int numberOfPop);
+Chromosome *cloneChromosome(Chromosome *original);

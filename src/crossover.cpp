@@ -19,10 +19,10 @@ Matrix *one_pointer_crossover(Matrix *a, Matrix *b) {
     Matrix *c = new Matrix(a->ligne, a->col);
 
     for (int j = 0; j < a->col; j++) {
-        Matrix *t = (j < x ? a : b);
+        Matrix &t = *(j < x ? a : b);
 
         for (int i = 0; i < a->ligne; i++) {
-            c->set(i, j, t->get(i, j));
+            c->set(i, j, t.get(i, j));
         }
     }
 

@@ -30,7 +30,7 @@ Population::~Population() {
 }
 
 /*
-    De ce que je me souvent une mÈthode classique est de gÈnÈration
+    De ce que je me souvent une mÔøΩthode classique est de gÔøΩnÔøΩration
     √† chaque g√©n√©rations entre 80 et 90% des individus par reproduction,
     1% par mutation et le reste par clonage.
 */
@@ -59,6 +59,7 @@ void Population::next(bool save) {
         int randIndice = rand() % this->size;
 
         next_pop[crossNumber + mutationNumber] = mutate(this->pop[randIndice]);
+        toKeep[crossNumber+mutationNumber] = true;
 
         mutationNumber++;
     }
@@ -66,15 +67,12 @@ void Population::next(bool save) {
     while (crossNumber + mutationNumber < this->size) {
         int randIndice = rand() % this->size;
 
-        next_pop[crossNumber + mutationNumber] = this->pop[randIndice];
-        toKeep[randIndice] = true;
+        next_pop[crossNumber + mutationNumber] = cloneChromosome(this->pop[randIndice]);
         mutationNumber++;
     }
 
     for (int i = 0; i < this->size; i++) {
-        if (!toKeep[i]) {
-            delete this->pop[i];
-        }
+        delete this->pop[i];
         this->pop[i] = next_pop[i];
     }
 
@@ -117,20 +115,20 @@ std::pair<Chromosome *, Chromosome *> Population::tournament(int tournamentSize,
 Chromosome **getChromosomeFromPopulations(Population *pop, unsigned int i) {
     while (i >= pop->size) {
         i -= pop->size;
-        // on avance sur la population suivante (arithmétique de pointeurs)
+        // on avance sur la population suivante (arithmÔøΩtique de pointeurs)
         pop += 1;
     }
     return &pop->pop[i];
 };
 
-// mélange en place les chromosomes d'un tableau de populations
+// mÔøΩlange en place les chromosomes d'un tableau de populations
 void shufflePopulations(Population *pop, unsigned int numberOfPop) {
     int popTotale = 0;
     for (int i = 0; i < numberOfPop; i++) {
         popTotale += pop[i].size;
     }
     for (int i = popTotale - 1; i >= 0; i--) {
-        // on pourrait décaler l'indice de la boucle mais ça me semble moins
+        // on pourrait dÔøΩcaler l'indice de la boucle mais ÔøΩa me semble moins
         // clair
         int swapIndice = rand() % (i + 1);
         auto pc1 = getChromosomeFromPopulations(pop, i);
@@ -139,4 +137,28 @@ void shufflePopulations(Population *pop, unsigned int numberOfPop) {
         *pc1 = *pc2;
         *pc2 = tmp;
     }
+}
+
+Chromosome *cloneChromosome(Chromosome *original){
+    auto clone = new Chromosome();
+
+    for (int i = 0; i < EQUIPE_SIZE; i++) {
+        for (int j = 0; j < NETWORK_SIZE - 1; j++) {
+            for(int k = 0; k < original->matrix[i][j]->ligne; k++){
+                for(int l = 0; l < original->matrix[i][j]->col; l++) {
+                    clone->matrix[i][j]->set(k,l, original->matrix[i][j]->get(k,l));
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        for(int k = 0; k < original->didier[i]->ligne; k++){
+            for(int l = 0; l < original->didier[i]->col; l++) {
+                clone->didier[i]->set(k,l, original->didier[i]->get(k,l));
+            }
+        }
+    }
+
+    return clone;
 }

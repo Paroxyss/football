@@ -16,8 +16,7 @@
 
 void generation(Population *pop, int amount) {
     for (int i = 0; i < amount; i++) {
-        std::cout << "[Thread " << std::this_thread::get_id()
-                  << " starting generation " << i << std::endl;
+		std::cout << "[Thread " << std::this_thread::get_id() << "] starting generation " << i << std::endl;
         pop->next();
     }
 }
@@ -25,15 +24,14 @@ void generation(Population *pop, int amount) {
 int main() {
     srand(0);
 
-    Population pops[] = {Population(100), Population(100), Population(100),
-                         Population(100)};
+    Population pops[] = {Population(150), Population(150), Population(150), Population(150)};
 
     for (int i = 0; i < 100; i++) {
-        std::cout << "Generation " << 2 * i << std::endl;
-        std::thread t1(generation, &pops[0], 2);
-        std::thread t2(generation, &pops[1], 2);
-        std::thread t3(generation, &pops[2], 2);
-        std::thread t4(generation, &pops[3], 2);
+		std::cout << "Generation " << 2*i << std::endl;
+		std::thread t1(generation, &pops[0], 2);
+		std::thread t2(generation, &pops[1], 2);
+		std::thread t3(generation, &pops[2], 2);
+		std::thread t4(generation, &pops[3], 2);
 
         t1.join();
         t2.join();

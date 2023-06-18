@@ -140,3 +140,30 @@ std::pair<Chromosome *, Chromosome *> Population::tournament(int tournamentSize,
 
     return p;
 }
+
+// renvoie un pointeur vers celui du i-eme chromosome d'un tableau de populations
+Chromosome **getChromosomeFromPopulations(Population *pop, unsigned int i){
+	while(i >= pop->size){
+		i -= pop->size;
+		// on avance sur la population suivante (arithmétique de pointeurs)
+		pop += 1;
+	}
+	return &pop->pop[i];
+};
+
+// mélange en place les chromosomes d'un tableau de populations
+void shufflePopulations(Population *pop, unsigned int numberOfPop) {
+	int popTotale = 0;
+	for(int i = 0; i < numberOfPop ; i++){
+		popTotale += pop[i].size;
+	}
+	for(int i = popTotale - 1; i >= 0; i--){
+		// on pourrait décaler l'indice de la boucle mais ça me semble moins clair
+		int swapIndice = rand() % (i+1);
+		auto pc1 = getChromosomeFromPopulations(pop, i);
+		auto pc2 = getChromosomeFromPopulations(pop, swapIndice);
+		auto tmp = *pc1;
+		*pc1 = *pc2;
+		*pc2 = tmp;
+	}
+}

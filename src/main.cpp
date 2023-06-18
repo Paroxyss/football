@@ -14,20 +14,31 @@
 #include <thread>
 #include <unistd.h>
 
+void generation(Population *pop, int amount) {
+    for (int i = 0; i < amount; i++) {
+        pop->next();
+    }
+}
+
 int main() {
     srand(0);
-    Population p = Population(30);
 
-    std::cout << "Matrix : " << sizeof(Matrix) << std::endl;
-    std::cout << "Chromosome : " << sizeof(Chromosome) << std::endl;
-    std::cout << "Population : " << sizeof(Population) << std::endl;
+    Population pops[] = {Population(100), Population(100), Population(100), Population(100)};
 
-    for (int i = 0; i < 10; i++) {
-        std::cout << std::endl
-                  << "===== GÉNÉRATION " << i << " =====" << std::endl;
-        p.next();
+    for (int i = 0; i < 1; i++) {
+		std::cout << "Generation " << 2*i << std::endl;
+		std::thread t1(generation, &pops[0], 2);
+		std::thread t2(generation, &pops[1], 2);
+		std::thread t3(generation, &pops[2], 2);
+		std::thread t4(generation, &pops[3], 2);
+
+		t1.join();
+		t2.join();
+		t3.join();
+		t4.join();
+
+		shufflePopulations(pops, 4);
     }
 
-    auto meilleurs = p.tournament(p.size, false);
-    play_match(meilleurs.first, meilleurs.second, true);
+    _exit(EXIT_SUCCESS);
 }

@@ -5,6 +5,7 @@
 #include "Game.hpp"
 #include "Matrix.h"
 #include "config.h"
+
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -154,7 +155,7 @@ Matrix *Chromosome::collect_and_apply(player *p, ball *b, Matrix &didier_output,
             // le joueur est du "mauvais coté" de la map, il faut adapter ses
             // entrées
             vector mapSize = {MAP_LENGTH, MAP_HEIGHT};
-            fakeOrientation = PI - selected.orientation;
+            fakeOrientation = M_PI - selected.orientation;
             fakePos = mapSize - selected.pos;
             fakeVitesse.x = -fakeVitesse.x;
         } else {

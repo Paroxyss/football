@@ -1,10 +1,9 @@
 #pragma once
-#define PI 3.1415
 
 #define COM_SIZE 1
 
 #define NETWORK_SIZE 4
-#define DIDIER_NETWORK_SIZE 5
+#define DIDIER_NETWORK_SIZE 3
 
 // pour l'instant le réseau ne prend pas l'accélération en entrée
 // pour pouvoir évoluer plus facilement.
@@ -14,13 +13,12 @@
 
 #define EQUIPE_SIZE 3
 
-const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 15, 25, NETWORK_OUTPUT_SIZE};
-const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, 15, 20,
-                             COM_SIZE *EQUIPE_SIZE};
+const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 10, 10, NETWORK_OUTPUT_SIZE};
+const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 5, COM_SIZE *EQUIPE_SIZE};
 
 #define GAME_RESOLUTION 1
 
-#define GAME_DURATION 60 * 60
+#define GAME_DURATION 5 * 60
 
 #define MAP_LENGTH 119 * 10
 #define MAP_HEIGHT 75 * 10

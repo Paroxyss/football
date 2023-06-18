@@ -65,9 +65,9 @@ Matrix *uniform_crossover(Matrix *a, Matrix *b) {
 }
 
 Matrix *average_crossover(Matrix *a, Matrix *b) {
-    std::cout << "AC on [" << a << ", " << b << "]" << std::endl;
-    std::cout << "Taille1 : " << a->ligne << "x" << a->col << std::endl;
-    std::cout << "Taille2 : " << b->ligne << "x" << b->col << std::endl;
+    //std::cout << "AC on [" << a << ", " << b << "]" << std::endl;
+    //std::cout << "Taille1 : " << a->ligne << "x" << a->col << std::endl;
+    //std::cout << "Taille2 : " << b->ligne << "x" << b->col << std::endl;
     if (a->ligne != b->ligne || a->col != b->col) {
         throw std::invalid_argument("erreur average_crossover");
     }

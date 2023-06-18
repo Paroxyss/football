@@ -145,15 +145,30 @@ Matrix *Chromosome::collect_and_apply(player *p, ball *b, Matrix &didier_output,
     apply_didier(didier_output);
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
+        player &selected = p[i];
         vector relat = p[i].pos - b[i].pos;
         double balldist = norme(relat);
-        vector fakeball = {.x = MAP_LENGTH - b[i].pos.x, .y = b[i].pos.y};
 
-        m->set(0, i, p[i].pos.x);
-        m->set(1, i, p[i].pos.y);
-        m->set(2, i, p[i].vitesse.x);
-        m->set(3, i, p[i].vitesse.y);
-        m->set(4, i, p[i].orientation);
+        double fakeOrientation;
+        vector fakePos;
+        vector fakeVitesse = selected.vitesse;
+        if(team){
+            // le joueur est du "mauvais coté" de la map, il faut adapter ses entrées
+            vector mapSize = {MAP_LENGTH, MAP_HEIGHT};
+            fakeOrientation = PI - selected.orientation;
+            fakePos = mapSize - selected.pos;
+            fakeVitesse.x = -fakeVitesse.x;
+        }
+        else{
+            fakeOrientation = selected.orientation;
+            fakePos = selected.pos;
+        }
+
+        m->set(0, i, fakePos.x);
+        m->set(1, i, fakePos.y);
+        m->set(2, i, fakeVitesse.x);
+        m->set(3, i, fakeVitesse.y);
+        m->set(4, i, fakeOrientation);
         m->set(5, i, balldist);
         m->set(6, i, vangle(relat) - p->orientation);
 
@@ -167,8 +182,9 @@ Matrix *Chromosome::collect_and_apply(player *p, ball *b, Matrix &didier_output,
 
     for (int k = 0, c = 0; k < EQUIPE_SIZE; k++) {
         for (int i = 0; i < COM_SIZE; i++) {
-            didier_output.set(c++, 0,
+            didier_output.set(c, 0,
                               m->get(NETWORK_OUTPUT_SIZE - COM_SIZE + i, k));
+            c++;
         }
     }
 
@@ -188,11 +204,13 @@ Chromosome *mutate(Chromosome *c) {
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
+			delete nw->matrix[i][j];
             nw->matrix[i][j] = mutation(c->matrix[i][j]);
         }
     }
 
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+		delete nw->didier[i];
         nw->didier[i] = mutation(c->didier[i]);
     }
 
@@ -204,32 +222,16 @@ Chromosome *crossover(Chromosome *a, Chromosome *b) {
 
     for (int k = 0; k < EQUIPE_SIZE; k++) {
         for (int i = 0; i < NETWORK_SIZE - 1; i++) {
-			/*
-            std::cout << "begin crossover" << std::endl;
-            std::cout << "Indices : " << k << ", " << i << std::endl;
-
-            std::cout << a << " Taille1 : ";
-            std::cout << a->matrix[k][i]->ligne << "x" << a->matrix[k][i]->col
-                      << std::endl;
-            std::cout << b << " Taille2 : " << std::endl;
-            std::cout << b->matrix[k][i]->ligne << "x" << b->matrix[k][i]->col
-                      << std::endl;
-			*/
-
+			
             Matrix *m = average_crossover(a->matrix[k][i], b->matrix[k][i]);
-			/*
-            std::cout << "end crossover" << std::endl;
-            std::cout << "got matrice " << m->ligne << "x" << m->col
-                      << std::endl;
-			*/
 
-            //std::cout << "child setting" << std::endl;
             for (int j = 0; j < m->ligne; j++) {
                 for (int l = 0; l < m->col; l++) {
                     child->matrix[k][i]->set(j, l, m->get(j, l));
                 }
             }
-            //std::cout << "ok" << std::endl;
+
+			delete m;
         }
     }
 

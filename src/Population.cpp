@@ -34,40 +34,57 @@ Population::~Population() {
 */
 
 void Population::next(bool save) {
-    Population next_pop = Population(this->size);
+    Chromosome **next_pop = (Chromosome **)malloc(this->size * sizeof(void *));
+
+    // tableau de la population qu'il ne faudra pas free
+    bool *toKeep = (bool*) malloc(this->size *sizeof(bool));
+    for(int i = 0; i < this->size ; i++){
+        toKeep[i] = false;
+    }
+
     int crossNumber = 0, mutationNumber = 0;
 
-    std::cout << "While 1" << std::endl;
+    std::cout << "CrossMutation" << std::endl;
     while (crossNumber < this->size * 0.85) {
         auto cpl = this->tournament(rand() % (this->size / 2) + 2, save);
-        std::cout << "gotChromosome " << cpl.first << " and " << cpl.second
-                  << std::endl;
 
         // il y a certaines méthodes de crossover qui retournent directement 2
         // enfants par exemple one_pointer_crossover(a, b) !=
         // one_pointer_crossover(b, a) on peut donc avoir les 2;
-        next_pop.pop[crossNumber] = crossover(cpl.first, cpl.second);
+        next_pop[crossNumber] = crossover(cpl.first, cpl.second);
+
         crossNumber++;
     }
 
-    std::cout << "While 2" << std::endl;
+    std::cout << "Mutation" << std::endl;
     while (mutationNumber < this->size * 0.1) {
-        next_pop.pop[crossNumber] = mutate(this->pop[rand() % this->size]);
-        crossNumber++;
+        int randIndice = rand() % this->size;
+
+        next_pop[crossNumber + mutationNumber] = mutate(this->pop[randIndice]);
+
         mutationNumber++;
     }
 
-    std::cout << "While 3" << std::endl;
+    std::cout << "Filling" << std::endl;
     while (crossNumber + mutationNumber < this->size) {
-        next_pop.pop[crossNumber + mutationNumber] =
-            this->pop[rand() % this->size];
+        int randIndice = rand() % this->size;
+
+        next_pop[crossNumber + mutationNumber] =
+            this->pop[randIndice];
+        toKeep[randIndice] = true;
         mutationNumber++;
     }
 
-    std::cout << "While 4" << std::endl;
     for (int i = 0; i < this->size; i++) {
-        this->pop[i] = next_pop.pop[i];
+        if(!toKeep[i]){
+            // le chromosome ne sera pas conservé, on peut le free
+            delete this->pop[i];
+        }
+        this->pop[i] = next_pop[i];
     }
+
+    free(toKeep);
+    free(next_pop);
 
     // ??? ça va delete les chromosomes
     // delete next_pop;
@@ -83,7 +100,6 @@ std::pair<Chromosome *, Chromosome *> Population::tournament(int tournamentSize,
 
     for (int i = 0; i < tournamentSize; i++) {
         r[i] = this->pop[rand() % this->size];
-        std::cout << "Added to r chromosome [" << r[i] << "]" << std::endl;
     }
 
     /*   ⠀⠀⠀⠀⣀⣤⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀

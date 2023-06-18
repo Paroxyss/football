@@ -5,7 +5,6 @@
 #include <stdexcept>
 
 Matrix::Matrix(int ligne, int col) {
-	
 	//std::cout << "Create Matrix [" << this << "]" << std::endl;
 	
     this->ligne = ligne;
@@ -108,6 +107,7 @@ void Matrix::randomize() {
    matrice pour accélérer l'exploration de l'ensemble solution.
 */
 Matrix *mutation(Matrix *m) {
+    Matrix *muted = new Matrix(m->ligne, m->col);
     int np = m->ligne * m->col;
 
     for (int i = 0; i < m->ligne; i++) {
@@ -116,9 +116,9 @@ Matrix *mutation(Matrix *m) {
                 continue;
             }
 
-            m->set(i, j, m->get(i, j) * mutation_scalar());
+            muted->set(i, j, m->get(i, j) * mutation_scalar());
         }
     }
 
-    return m;
+    return muted;
 }

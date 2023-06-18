@@ -2,3 +2,5 @@
 tests/*
 *.pyc
 *.csv
+
+.idea

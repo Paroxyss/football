@@ -67,6 +67,7 @@ Game::Game(int playerNumber, bool logToFile) {
 Game::~Game() {
     free(players);
     free(walls);
+    free(goals);
 }
 
 /*
@@ -428,10 +429,10 @@ bool Game::checkGoal(int id) {
 }
 
 double play_match(Chromosome *c1, Chromosome *c2, bool save) {
+    std::cout << "Match " << c1 << " vs " << c2 << " ... ";
     auto g = Game(2 * EQUIPE_SIZE, save);
-
     g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
-    g.ball.vitesse = {.x = randomDouble(), .y = randomDouble()};
+    g.ball.vitesse = {.x = 0, .y = 0};
 
     int c[] = {2, 1};
     g.set_players(c, 2);
@@ -453,7 +454,7 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
             for (int i = 0; i < EQUIPE_SIZE; i++) {
                 Matrix *r = (a == 0) ? r1 : r2;
 
-                double rotation = r->get(0, i) / 5;
+                double rotation = r->get(0, i) / 10;
                 double acceleration = r->get(1, i);
 
                 if (acceleration < 0) {
@@ -476,8 +477,8 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
 
             g.ball.pos.x = (float)MAP_LENGTH / 2;
             g.ball.pos.y = (float)MAP_HEIGHT / 2;
-            g.ball.vitesse.x = randomDouble();
-            g.ball.vitesse.y = randomDouble();
+            g.ball.vitesse.x = 0;
+            g.ball.vitesse.y = 0;
 
             g.set_players(c, 2);
         }
@@ -487,5 +488,6 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
         csvOutputFile.close();
     }
 
+    std::cout << "score: " << score << std::endl;
     return score;
 };

@@ -16,6 +16,7 @@
 
 void generation(Population *pop, int amount) {
     for (int i = 0; i < amount; i++) {
+		std::cout << "[Thread " << std::this_thread::get_id() << " starting generation " << i << std::endl;
         pop->next();
     }
 }

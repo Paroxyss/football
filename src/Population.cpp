@@ -112,7 +112,6 @@ Prions pour que ça marche
 std::pair<Chromosome *, Chromosome *> Population::tournament(int tournamentSize,
                                                              bool save) {
 
-    std::cout << "Tournament of " << tournamentSize << " players" << std::endl;
     Chromosome **r = (Chromosome **)malloc(tournamentSize * sizeof(void *));
 
     std::pair<Chromosome *, Chromosome *> p;

@@ -385,7 +385,6 @@ bool Game::checkGoal(int id) {
 }
 
 double play_match(Chromosome *c1, Chromosome *c2, bool save) {
-    std::cout << "Match " << c1 << " vs " << c2 << " ... ";
     auto g = Game(2 * EQUIPE_SIZE, save);
     g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
     g.ball.vitesse = {.x = 0, .y = 0};
@@ -444,6 +443,5 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
         csvOutputFile.close();
     }
 
-    std::cout << "score: " << score << std::endl;
     return score;
 };

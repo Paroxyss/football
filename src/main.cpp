@@ -15,15 +15,14 @@
 #include <unistd.h>
 
 int main() {
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     srand(0);
-    Population p = Population(20);
+    Population p = Population(1000);
 
     std::cout << "Matrix : " << sizeof(Matrix) << std::endl;
     std::cout << "Chromosome : " << sizeof(Chromosome) << std::endl;
     std::cout << "Population : " << sizeof(Population) << std::endl;
 
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 10; i++) {
         std::cout << std::endl
                   << "===== GÉNÉRATION " << i << " =====" << std::endl;
         p.next();
@@ -31,7 +30,4 @@ int main() {
 
     auto meilleurs = p.tournament(p.size, false);
     play_match(meilleurs.first, meilleurs.second, true);
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    _exit(EXIT_SUCCESS);
 }

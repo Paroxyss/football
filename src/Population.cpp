@@ -34,8 +34,6 @@ Population::~Population() {
 
 void Population::next(bool save) {
     Chromosome **next_pop = (Chromosome **)malloc(this->size * sizeof(void *));
-
-    // tableau de la population qu'il ne faudra pas free
     bool *toKeep = (bool *)malloc(this->size * sizeof(bool));
 
     for (int i = 0; i < this->size; i++) {
@@ -44,19 +42,23 @@ void Population::next(bool save) {
 
     int crossNumber = 0, mutationNumber = 0;
 
-    std::cout << "CrossMutation" << std::endl;
     while (crossNumber < this->size * 0.85) {
-        auto cpl = this->tournament(rand() % (this->size / 2) + 2, save);
+        // le tournois ne doit pas être trop grand: si on prend 50% de la
+        // population totale alors 1 fois sur 2 le même individu (le meilleur
+        // des 50% sortira) et on obtiendra seulement 2 individus différents à
+        // la fin, de plus les petits tournois sont beaucoup plus rapide à faire
+        // tourner.
+        int ts = this->size * 0.2;
+        auto cpl = this->tournament(rand() % ts + 2, save);
 
-        // il y a certaines méthodes de crossover qui retournent directement 2
-        // enfants par exemple one_pointer_crossover(a, b) !=
-        // one_pointer_crossover(b, a) on peut donc avoir les 2;
+        // chaque couple de parents produit 2 enfants, ce qui nécessite 2 fois
+        // moins de tournois.
         next_pop[crossNumber] = crossover(cpl.first, cpl.second);
+        next_pop[crossNumber + 1] = crossover(cpl.second, cpl.first);
 
-        crossNumber++;
+        crossNumber += 2;
     }
 
-    std::cout << "Mutation" << std::endl;
     while (mutationNumber < this->size * 0.1) {
         int randIndice = rand() % this->size;
 
@@ -65,7 +67,6 @@ void Population::next(bool save) {
         mutationNumber++;
     }
 
-    std::cout << "Filling" << std::endl;
     while (crossNumber + mutationNumber < this->size) {
         int randIndice = rand() % this->size;
 
@@ -89,19 +90,7 @@ void Population::next(bool save) {
     // delete next_pop;
 }
 
-std::pair<Chromosome *, Chromosome *> Population::tournament(int tournamentSize,
-                                                             bool save) {
-
-    std::cout << "Tournament of " << tournamentSize << " players" << std::endl;
-    Chromosome **r = (Chromosome **)malloc(tournamentSize * sizeof(void *));
-
-    std::pair<Chromosome *, Chromosome *> p;
-
-    for (int i = 0; i < tournamentSize; i++) {
-        r[i] = this->pop[rand() % this->size];
-    }
-
-    /*   ⠀⠀⠀⠀⣀⣤⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+/*   ⠀⠀⠀⠀⣀⣤⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -116,8 +105,20 @@ std::pair<Chromosome *, Chromosome *> Population::tournament(int tournamentSize,
 ⠀⠀⠀⠙⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠃⠘⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠁⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠃⠀⠀⠀⠀⠀⠀⠀⠀
-    Prions pour que ça marche
-    */
+Prions pour que ça marche
+*/
+std::pair<Chromosome *, Chromosome *> Population::tournament(int tournamentSize,
+                                                             bool save) {
+
+    std::cout << "Tournament of " << tournamentSize << " players" << std::endl;
+    Chromosome **r = (Chromosome **)malloc(tournamentSize * sizeof(void *));
+
+    std::pair<Chromosome *, Chromosome *> p;
+
+    for (int i = 0; i < tournamentSize; i++) {
+        r[i] = this->pop[rand() % this->size];
+    }
+
     for (int i = 1; i < tournamentSize; ++i) {
         Chromosome *c = r[i];
         int j = i - 1;
@@ -134,8 +135,6 @@ std::pair<Chromosome *, Chromosome *> Population::tournament(int tournamentSize,
     p.second = r[tournamentSize - 2];
 
     free(r);
-
-    std::cout << "Hello world!!" << std::endl;
 
     return p;
 }

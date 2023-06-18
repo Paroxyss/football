@@ -21,8 +21,6 @@ Chromosome::Chromosome() {
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
         this->didier[i] = new Matrix(DIDIER_LAYERS[i + 1], DIDIER_LAYERS[i]);
     }
-
-    std::cout << "Created chromosome " << this << std::endl;
 }
 
 Chromosome::~Chromosome() {
@@ -223,7 +221,7 @@ Chromosome *crossover(Chromosome *a, Chromosome *b) {
     for (int k = 0; k < EQUIPE_SIZE; k++) {
         for (int i = 0; i < NETWORK_SIZE - 1; i++) {
 
-            Matrix *m = average_crossover(a->matrix[k][i], b->matrix[k][i]);
+            Matrix *m = one_pointer_crossover(a->matrix[k][i], b->matrix[k][i]);
 
             for (int j = 0; j < m->ligne; j++) {
                 for (int l = 0; l < m->col; l++) {
@@ -236,7 +234,7 @@ Chromosome *crossover(Chromosome *a, Chromosome *b) {
     }
 
     for (int j = 0; j < DIDIER_NETWORK_SIZE - 1; j++) {
-        Matrix *m = average_crossover(a->didier[j], b->didier[j]);
+        Matrix *m = one_pointer_crossover(a->didier[j], b->didier[j]);
         for (int k = 0; k < m->ligne; k++) {
             for (int l = 0; l < m->col; l++) {
                 child->didier[j]->set(k, l, m->get(k, l));

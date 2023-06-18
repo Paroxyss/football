@@ -442,6 +442,5 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
     if (save) {
         csvOutputFile.close();
     }
-
     return score;
 };

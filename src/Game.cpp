@@ -40,33 +40,37 @@ Game::Game(int playerNumber, bool logToFile) {
                       << PLAYER_SIZE << std::endl;
     }
     this->playerNumber = playerNumber;
-    this->players = (player *)malloc(playerNumber * sizeof(player));
+    this->players = new player[playerNumber];
 
     this->wallNumber = 4;
-    this->walls = (wall *)malloc(this->wallNumber * sizeof(wall));
+    this->walls = new wall[this->wallNumber];
 
-    this->goals = (wall *)malloc(2 * sizeof(wall));
+    this->goals = new wall[2];
 
-    SETWALL(0, 0, 0, 1, 0)
-    SETWALL(1, 0, 0, 0, 1)
-    SETWALL(2, MAP_LENGTH, MAP_HEIGHT, 1, 0)
-    SETWALL(3, MAP_LENGTH, MAP_HEIGHT, 0, 1)
+    SETWALL(0, 0, 0, 1, 0);
+    SETWALL(1, 0, 0, 0, 1);
+    SETWALL(2, MAP_LENGTH, MAP_HEIGHT, 1, 0);
+    SETWALL(3, MAP_LENGTH, MAP_HEIGHT, 0, 1);
 
-    SETGOAL(0, 0, (float)MAP_HEIGHT / 2 - (float)GOAL_HEIGHT / 2, 0, 1,
-            GOAL_HEIGHT)
-    SETGOAL(1, MAP_LENGTH, (float)MAP_HEIGHT / 2 - (float)GOAL_HEIGHT / 2, 0, 1,
-            GOAL_HEIGHT)
+    SETGOAL(0, 0,
+            static_cast<float>(MAP_HEIGHT) / 2 -
+                static_cast<float>(GOAL_HEIGHT) / 2,
+            0, 1, GOAL_HEIGHT);
+    SETGOAL(1, MAP_LENGTH,
+            static_cast<float>(MAP_HEIGHT) / 2 -
+                static_cast<float>(GOAL_HEIGHT) / 2,
+            0, 1, GOAL_HEIGHT);
 
     setBall({.x = 0, .y = 0}, {.x = 0, .y = 0}, BALL_SIZE);
     for (int i = 0; i < playerNumber; i++) {
         setPlayer(i, {.x = 0, .y = 0}, {.x = 0, .y = 0}, 0, PLAYER_SIZE);
-    };
+    }
 }
 
 Game::~Game() {
-    free(players);
-    free(walls);
-    free(goals);
+    delete[] players;
+    delete[] walls;
+    delete[] goals;
 }
 
 /*
@@ -115,7 +119,7 @@ inline double distancecarre(ball &p, const ball &b) {
 
 inline collisionList *insert(collisionList *list, ball *actor, ball *secondary,
                              CollisionType type, double time = INFINITY) {
-    collisionList *l = (collisionList *)malloc(sizeof(collisionList));
+    collisionList *l = new collisionList;
     l->actor = actor;
     l->secondary = secondary;
     l->time = time;
@@ -123,7 +127,6 @@ inline collisionList *insert(collisionList *list, ball *actor, ball *secondary,
     l->next = list;
     return l;
 }
-
 double getWallCollisionTime(ball *obj, ball *wall) {
     vector MO = obj->pos - wall->pos;
 
@@ -262,7 +265,7 @@ void freeCollisionList(collisionList *list) {
         return;
     }
     freeCollisionList(list->next);
-    free(list);
+    delete[] list;
 }
 
 void printCollisionList(collisionList *list) {

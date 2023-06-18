@@ -13,7 +13,7 @@ Population::Population(int size) {
     }
 
     this->size = size;
-    this->pop = (Chromosome **)malloc(size * sizeof(void *));
+    this->pop = new Chromosome *[size];
 
     for (int i = 0; i < size; i++) {
         this->pop[i] = new Chromosome();
@@ -25,18 +25,19 @@ Population::~Population() {
     for (int i = 0; i < size; i++) {
         delete this->pop[i];
     }
-    free(this->pop);
+
+    delete[] this->pop;
 }
 
 /*
-    De ce que je me souvent une méthode classique est de généré
+    De ce que je me souvent une m�thode classique est de g�n�ration
     à chaque générations entre 80 et 90% des individus par reproduction,
     1% par mutation et le reste par clonage.
 */
 
 void Population::next(bool save) {
-    Chromosome **next_pop = (Chromosome **)malloc(this->size * sizeof(void *));
-    bool *toKeep = (bool *)malloc(this->size * sizeof(bool));
+    Chromosome **next_pop = new Chromosome *[this->size];
+    bool *toKeep = new bool[this->size];
 
     for (int i = 0; i < this->size; i++) {
         toKeep[i] = false;
@@ -45,16 +46,9 @@ void Population::next(bool save) {
     int crossNumber = 0, mutationNumber = 0;
 
     while (crossNumber < this->size * 0.85) {
-        // le tournois ne doit pas être trop grand: si on prend 50% de la
-        // population totale alors 1 fois sur 2 le même individu (le meilleur
-        // des 50% sortira) et on obtiendra seulement 2 individus différents à
-        // la fin, de plus les petits tournois sont beaucoup plus rapide à faire
-        // tourner.
-        int ts = this->size * PRESSION_TOURN;
+        int ts = static_cast<int>(this->size * PRESSION_TOURN);
         auto cpl = this->tournament(rand() % (ts - 2) + 2, save);
 
-        // chaque couple de parents produit 2 enfants, ce qui nécessite 2 fois
-        // moins de tournois.
         next_pop[crossNumber] = crossover(cpl.first, cpl.second);
         next_pop[crossNumber + 1] = crossover(cpl.second, cpl.first);
 
@@ -79,40 +73,18 @@ void Population::next(bool save) {
 
     for (int i = 0; i < this->size; i++) {
         if (!toKeep[i]) {
-            // le chromosome ne sera pas conservé, on peut le free
             delete this->pop[i];
         }
         this->pop[i] = next_pop[i];
     }
 
-    free(toKeep);
-    free(next_pop);
-
-    // ??? ça va delete les chromosomes
-    // delete next_pop;
+    delete[] toKeep;
+    delete[] next_pop;
 }
 
-/*   ⠀⠀⠀⠀⣀⣤⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⡿⠿⣿⣿⣿⣿⡿⠿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⢀⣴⣦⡈⠻⣦⣤⣿⣿⣧⣤⣶⠏⢀⣦⣄⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⢀⣴⣿⣿⣿⣷⣤⣈⠙⠛⠛⠛⢉⣠⣴⣿⣿⣿⣷⣄⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⢠⣿⣿⣿⣿⠟⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⢻⣿⣿⣿⣆⠀⠀⠀⠀
-⠀⠀⠀⢀⣿⣿⣿⣿⠃⣰⣿⣿⡿⠛⠋⠉⠛⠻⣿⣿⣷⡀⠹⣿⣿⣿⡆⠀⠀⠀
-⠀⠀⠀⣸⣿⣿⣿⠃⣰⣿⣿⠋⣠⣾⡇⢸⣷⣦⠈⣿⣿⣿⡄⢹⣿⣿⣿⠀⠀⠀
-⠀⠀⠀⣿⣿⣿⠋⠀⠉⠉⠉⠀⣿⣿⡇⢸⣿⣿⡇⠉⠉⠉⠁⠀⢻⣿⣿⡆⠀⠀
-⠀⠀⢰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀
-⠀⠀⠀⠙⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠃⠘⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠁⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠃⠀⠀⠀⠀⠀⠀⠀⠀
-Prions pour que ça marche
-*/
 std::pair<Chromosome *, Chromosome *> Population::tournament(int tournamentSize,
                                                              bool save) {
-
-    Chromosome **r = (Chromosome **)malloc(tournamentSize * sizeof(void *));
+    Chromosome **r = new Chromosome *[tournamentSize];
 
     std::pair<Chromosome *, Chromosome *> p;
 
@@ -135,34 +107,36 @@ std::pair<Chromosome *, Chromosome *> Population::tournament(int tournamentSize,
     p.first = r[tournamentSize - 1];
     p.second = r[tournamentSize - 2];
 
-    free(r);
+    delete[] r;
 
     return p;
 }
 
-// renvoie un pointeur vers celui du i-eme chromosome d'un tableau de populations
-Chromosome **getChromosomeFromPopulations(Population *pop, unsigned int i){
-	while(i >= pop->size){
-		i -= pop->size;
-		// on avance sur la population suivante (arithmétique de pointeurs)
-		pop += 1;
-	}
-	return &pop->pop[i];
+// renvoie un pointeur vers celui du i-eme chromosome d'un tableau de
+// populations
+Chromosome **getChromosomeFromPopulations(Population *pop, unsigned int i) {
+    while (i >= pop->size) {
+        i -= pop->size;
+        // on avance sur la population suivante (arithm�tique de pointeurs)
+        pop += 1;
+    }
+    return &pop->pop[i];
 };
 
-// mélange en place les chromosomes d'un tableau de populations
+// m�lange en place les chromosomes d'un tableau de populations
 void shufflePopulations(Population *pop, unsigned int numberOfPop) {
-	int popTotale = 0;
-	for(int i = 0; i < numberOfPop ; i++){
-		popTotale += pop[i].size;
-	}
-	for(int i = popTotale - 1; i >= 0; i--){
-		// on pourrait décaler l'indice de la boucle mais ça me semble moins clair
-		int swapIndice = rand() % (i+1);
-		auto pc1 = getChromosomeFromPopulations(pop, i);
-		auto pc2 = getChromosomeFromPopulations(pop, swapIndice);
-		auto tmp = *pc1;
-		*pc1 = *pc2;
-		*pc2 = tmp;
-	}
+    int popTotale = 0;
+    for (int i = 0; i < numberOfPop; i++) {
+        popTotale += pop[i].size;
+    }
+    for (int i = popTotale - 1; i >= 0; i--) {
+        // on pourrait d�caler l'indice de la boucle mais �a me semble moins
+        // clair
+        int swapIndice = rand() % (i + 1);
+        auto pc1 = getChromosomeFromPopulations(pop, i);
+        auto pc2 = getChromosomeFromPopulations(pop, swapIndice);
+        auto tmp = *pc1;
+        *pc1 = *pc2;
+        *pc2 = tmp;
+    }
 }

@@ -28,7 +28,7 @@ int main() {
     Population pops[] = {Population(100), Population(100), Population(100),
                          Population(100)};
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 100; i++) {
         std::cout << "Generation " << 2 * i << std::endl;
         std::thread t1(generation, &pops[0], 2);
         std::thread t2(generation, &pops[1], 2);

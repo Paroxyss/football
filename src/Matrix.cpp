@@ -22,20 +22,12 @@ Matrix::Matrix(int ligne, int col) {
 }
 
 Matrix::~Matrix() {
+
     for (int i = 0; i < this->ligne; i++) {
         delete[] t[i];
     }
 
     delete[] t;
-}
-
-Matrix &Matrix::operator=(Matrix &m) {
-    if (this != &m) {
-        delete this;
-        *this = m;
-    }
-
-    return *this;
 }
 
 double Matrix::get(int i, int j) {
@@ -60,7 +52,6 @@ void Matrix::print() {
         for (int j = 0; j < this->col; j++) {
             std::cout << this->t[i][j] << " ";
         }
-        // std::cout << this->t[i] << "\n";
     }
 }
 
@@ -83,10 +74,10 @@ void Matrix::mult_inv(Matrix *a) {
     }
 
     for (int i = 0; i < this->ligne; i++) {
-        free(this->t[i]);
+        delete this->t[i];
     }
 
-    free(this->t);
+    delete[] t;
     this->t = newT;
     this->ligne = a->ligne;
 }

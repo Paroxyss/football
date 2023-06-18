@@ -19,9 +19,7 @@ Population::Population(int size) {
 
 Population::~Population() {
     for (int i = 0; i < size; i++) {
-        std::cout << "freeing chromosome " << i << std::endl;
         delete this->pop[i];
-        std::cout << "ok" << i << std::endl;
     }
     free(this->pop);
 }
@@ -49,7 +47,7 @@ void Population::next(bool save) {
         // la fin, de plus les petits tournois sont beaucoup plus rapide à faire
         // tourner.
         int ts = this->size * 0.1;
-        auto cpl = this->tournament(rand() % ts + 2, save);
+        auto cpl = this->tournament(rand() % (ts - 2) + 2, save);
 
         // chaque couple de parents produit 2 enfants, ce qui nécessite 2 fois
         // moins de tournois.

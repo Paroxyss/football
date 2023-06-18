@@ -48,7 +48,7 @@ void Population::next(bool save) {
         // des 50% sortira) et on obtiendra seulement 2 individus différents à
         // la fin, de plus les petits tournois sont beaucoup plus rapide à faire
         // tourner.
-        int ts = this->size * 0.2;
+        int ts = this->size * 0.1;
         auto cpl = this->tournament(rand() % ts + 2, save);
 
         // chaque couple de parents produit 2 enfants, ce qui nécessite 2 fois

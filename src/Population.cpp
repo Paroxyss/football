@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include <iostream>
-#include <malloc/_malloc.h>
 #include <utility>
 
 #include "Chromosome.hpp"

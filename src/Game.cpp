@@ -9,7 +9,6 @@
 #include <thread>
 #include <unistd.h>
 
-#include "Display.h"
 #include "Game.hpp"
 #include "Matrix.h"
 #include "Vector.hpp"
@@ -76,8 +75,8 @@ Game::~Game() {
     Si on place l'équipe de droite les joueurs sont placés dans l'ordre inverse
     d'apparition dans la configuration.
 */
-void Game::set_players(int conf[], int n) {
-    int c = 0, s = 0, t = true;
+void Game::set_players(const int conf[], int n) {
+    int c = 0, s = 0;
     double spx = MAP_LENGTH / 2. / (double)(n + 1);
 
     for (int i = 0; i < n; i++) {
@@ -110,7 +109,7 @@ void Game::set_players(int conf[], int n) {
     }
 }
 
-inline double distancecarre(ball &p, ball &b) {
+inline double distancecarre(ball &p, const ball &b) {
     return normeCarre(p.pos - b.pos);
 }
 
@@ -367,49 +366,6 @@ void Game::setPlayer(int id, vector pos, vector speed, double orientation,
     this->players[id].mass = mass;
 }
 
-void moveCursor(unsigned int x, unsigned int y) {
-    printf("\033[%d;%df", y, x);
-}
-
-void clearScreen() {
-    std::cout << "\033[2J" << std::endl;
-}
-
-void setPixel(char c, unsigned int x, unsigned int y) {
-    moveCursor(x, y);
-    std::cout << c;
-}
-
-void Game::print() { // affichage provisoire de la partie, sur le terminal
-                     // On obtient la taille du terminal
-    auto d = Display(MAP_LENGTH, MAP_HEIGHT);
-
-    d.clear();
-    d.drawCircle('.', ball.pos.x, ball.pos.y, ball.size, TERM_YELLOW);
-    d.drawLine('=', ball.pos.x, ball.pos.y, ball.pos.x + ball.vitesse.x,
-               ball.pos.y + ball.vitesse.y, TERM_RED);
-
-    for (int i = 0; i < playerNumber; i++) {
-        player &p = players[i];
-        d.drawCircle('X', p.pos.x, p.pos.y, PLAYER_SIZE, TERM_BLUE);
-        d.drawLine('-', p.pos.x, p.pos.y, p.pos.x + cos(p.orientation) * p.size,
-                   p.pos.y + sin(p.orientation) * p.size);
-        d.drawLine('=', p.pos.x, p.pos.y, p.pos.x + p.vitesse.x,
-                   p.pos.y + p.vitesse.y, TERM_RED);
-    }
-
-    d.cursorToBottom();
-};
-
-/*
-    Permet d'aller chercher du pain dans la boulangerie la plus proche du stade
-*/
-void Game::aller_chercher_du_pain(int n) {
-    for (int i = 0; i < n; i++) {
-        std::cout << "du pain!!" << std::endl;
-    }
-}
-
 bool Game::checkGoal(int id) {
     double cage = getWallCollisionTime(&this->ball, &this->goals[id]);
 
@@ -444,7 +400,7 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
 
     int score = 0;
 
-    for (int i = 0; i < GAME_DURATION; i++) {
+    for (int k = 0; k < GAME_DURATION; k++) {
 
         auto r1 = c1->collect_and_apply(g.players, &g.ball, didierInputs[0], 0);
         auto r2 = c1->collect_and_apply(g.players + EQUIPE_SIZE, &g.ball,
@@ -469,11 +425,11 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
 
         g.tick();
 
-        bool c1 = g.checkGoal(0);
-        bool c2 = g.checkGoal(1);
-        if (c1 || c2) {
+        bool bc1 = g.checkGoal(0);
+        bool bc2 = g.checkGoal(1);
+        if (bc1 || bc2) {
 
-            score += c1 ? -1 : 1;
+            score += bc1 ? -1 : 1;
 
             g.ball.pos.x = (float)MAP_LENGTH / 2;
             g.ball.pos.y = (float)MAP_HEIGHT / 2;

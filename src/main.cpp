@@ -23,8 +23,9 @@ int main() {
     std::cout << "Chromosome : " << sizeof(Chromosome) << std::endl;
     std::cout << "Population : " << sizeof(Population) << std::endl;
 
-    for(int i = 0; i < 20; i++) {
-		std::cout << std::endl << "===== GÉNÉRATION " << i  << " =====" << std::endl;
+    for (int i = 0; i < 20; i++) {
+        std::cout << std::endl
+                  << "===== GÉNÉRATION " << i << " =====" << std::endl;
         p.next();
     }
 

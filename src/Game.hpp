@@ -50,7 +50,7 @@ class Game {
     wall *walls;
     wall *goals;
 
-    void set_players(int conf[], int n);
+    void set_players(const int conf[], int n);
 
     Game(int playerNumber, bool logToFile = false);
     ~Game();

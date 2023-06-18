@@ -36,8 +36,9 @@ void Population::next(bool save) {
     Chromosome **next_pop = (Chromosome **)malloc(this->size * sizeof(void *));
 
     // tableau de la population qu'il ne faudra pas free
-    bool *toKeep = (bool*) malloc(this->size *sizeof(bool));
-    for(int i = 0; i < this->size ; i++){
+    bool *toKeep = (bool *)malloc(this->size * sizeof(bool));
+
+    for (int i = 0; i < this->size; i++) {
         toKeep[i] = false;
     }
 
@@ -68,14 +69,13 @@ void Population::next(bool save) {
     while (crossNumber + mutationNumber < this->size) {
         int randIndice = rand() % this->size;
 
-        next_pop[crossNumber + mutationNumber] =
-            this->pop[randIndice];
+        next_pop[crossNumber + mutationNumber] = this->pop[randIndice];
         toKeep[randIndice] = true;
         mutationNumber++;
     }
 
     for (int i = 0; i < this->size; i++) {
-        if(!toKeep[i]){
+        if (!toKeep[i]) {
             // le chromosome ne sera pas conservé, on peut le free
             delete this->pop[i];
         }
@@ -134,6 +134,8 @@ std::pair<Chromosome *, Chromosome *> Population::tournament(int tournamentSize,
     p.second = r[tournamentSize - 2];
 
     free(r);
+
+    std::cout << "Hello world!!" << std::endl;
 
     return p;
 }

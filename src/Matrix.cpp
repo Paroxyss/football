@@ -4,7 +4,6 @@
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
-#include <vector>
 
 Matrix::Matrix(int ligne, int col) {
     this->ligne = ligne;
@@ -28,6 +27,15 @@ Matrix::~Matrix() {
     }
 
     delete[] t;
+}
+
+Matrix &Matrix::operator=(Matrix &m) {
+    if (this != &m) {
+        delete this;
+        *this = m;
+    }
+
+    return *this;
 }
 
 double Matrix::get(int i, int j) {
@@ -62,22 +70,25 @@ void Matrix::mult_inv(Matrix *a) {
         throw std::invalid_argument("lol multinv");
     }
 
-    Matrix *res = new Matrix(a->ligne, this->col);
-
+    double **newT = new double *[a->ligne];
     for (int i = 0; i < a->ligne; i++) {
+        double *v = new double[this->col];
         for (int j = 0; j < this->col; j++) {
-            int c = 0;
-
+            v[j] = 0;
             for (int k = 0; k < this->ligne; k++) {
-                c += a->get(i, k) * this->get(k, j);
+                v[j] += a->get(i, k) * this->get(k, j);
             }
-
-            res->set(i, j, c);
         }
+        newT[i] = v;
     }
 
-    delete this;
-    *this = *res;
+    for (int i = 0; i < this->ligne; i++) {
+        free(this->t[i]);
+    }
+
+    free(this->t);
+    this->t = newT;
+    this->ligne = a->ligne;
 }
 
 void Matrix::randomize() {
@@ -90,8 +101,9 @@ void Matrix::randomize() {
 
 /*
     Chaque coefficients d'une matrice mutée à une probabilité de 1/l d'être
-   modifié où l est le nombre total de coefficients (ici, m->ligne * m->col) de
-   manière qu'en "moyenne", seul 1 coefficient de la matrice ne soit modifié.
+   modifié où l est le nombre total de coefficients (ici, m->ligne * m->col)
+   de manière qu'en "moyenne", seul 1 coefficient de la matrice ne soit
+   modifié.
 
    mutation_scalar() retourne un coefficient multiplicateur comprit
    entre 0 et 2. Seulement, mutation_scalar() à une forte probabilité d'être

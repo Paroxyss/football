@@ -145,21 +145,21 @@ Matrix *Chromosome::collect_and_apply(player *p, ball *b, Matrix &didier_output,
     apply_didier(didier_output);
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
-        player &selected = p[i];
+        const player &selected = p[i];
         vector relat = p[i].pos - b[i].pos;
         double balldist = norme(relat);
 
         double fakeOrientation;
         vector fakePos;
         vector fakeVitesse = selected.vitesse;
-        if(team){
-            // le joueur est du "mauvais coté" de la map, il faut adapter ses entrées
+        if (team) {
+            // le joueur est du "mauvais coté" de la map, il faut adapter ses
+            // entrées
             vector mapSize = {MAP_LENGTH, MAP_HEIGHT};
             fakeOrientation = PI - selected.orientation;
             fakePos = mapSize - selected.pos;
             fakeVitesse.x = -fakeVitesse.x;
-        }
-        else{
+        } else {
             fakeOrientation = selected.orientation;
             fakePos = selected.pos;
         }
@@ -204,13 +204,13 @@ Chromosome *mutate(Chromosome *c) {
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
-			delete nw->matrix[i][j];
+            delete nw->matrix[i][j];
             nw->matrix[i][j] = mutation(c->matrix[i][j]);
         }
     }
 
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-		delete nw->didier[i];
+        delete nw->didier[i];
         nw->didier[i] = mutation(c->didier[i]);
     }
 
@@ -222,7 +222,7 @@ Chromosome *crossover(Chromosome *a, Chromosome *b) {
 
     for (int k = 0; k < EQUIPE_SIZE; k++) {
         for (int i = 0; i < NETWORK_SIZE - 1; i++) {
-			
+
             Matrix *m = average_crossover(a->matrix[k][i], b->matrix[k][i]);
 
             for (int j = 0; j < m->ligne; j++) {
@@ -231,7 +231,7 @@ Chromosome *crossover(Chromosome *a, Chromosome *b) {
                 }
             }
 
-			delete m;
+            delete m;
         }
     }
 
@@ -242,7 +242,7 @@ Chromosome *crossover(Chromosome *a, Chromosome *b) {
                 child->didier[j]->set(k, l, m->get(k, l));
             }
         }
-		delete m;
+        delete m;
     }
 
     return child;

@@ -26,3 +26,4 @@ class Chromosome {
 Chromosome *mutate(Chromosome *c);
 Matrix *compute_didier(Chromosome *c, Matrix *inputs);
 Chromosome *crossover(Chromosome *a, Chromosome *b);
+void writeInputs(Matrix* m, player *p, int i, ball *b, bool team);

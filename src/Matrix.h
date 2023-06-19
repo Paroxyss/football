@@ -15,17 +15,17 @@ class Matrix {
     ~Matrix();
 
     inline double get(int i, int j) {
-        /*if (i >= this->ligne || j >= this->col) {
+        if (i >= this->ligne || j >= this->col) {
             throw std::invalid_argument("Bad matrice get");
-        }*/
+        }
 
         return this->t[i][j];
     }
 
     inline void set(int i, int j, double x) {
-        /*if (i >= this->ligne || j >= this->col) {
+        if (i >= this->ligne || j >= this->col) {
             throw std::invalid_argument("Bad matrice set");
-        }*/
+        }
 
         this->t[i][j] = x;
     }

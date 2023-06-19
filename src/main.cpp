@@ -21,13 +21,13 @@ void generation(Population *pop) {
 int main() {
     srand(0);
 
-    const int n = 1000 / 4;
+    const int n = 180 / 4;
     int gen = 1;
 
     Population pops[] = {Population(n), Population(n), Population(n),
                          Population(n)};
 
-    while (gen < 250) {
+    while (gen < 2) {
         std::cout << "starting generation " << gen << std::endl;
 
         std::thread t1(generation, &pops[0]);

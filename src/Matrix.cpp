@@ -30,6 +30,7 @@ void Matrix::print() {
         for (int j = 0; j < this->col; j++) {
             std::cout << this->t[i][j] << " ";
         }
+		std::cout << std::endl;
     }
 }
 

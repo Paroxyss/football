@@ -67,7 +67,7 @@ double norme(vector a) {
 }
 
 double vangle(vector v) {
-    return atan(v.y / v.x);
+    return -atan(v.y / v.x);
 }
 
 std::ostream &operator<<(std::ostream &os, const vector &obj) {

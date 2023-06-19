@@ -7,6 +7,7 @@
 #include "Game.hpp"
 #include "Population.hpp"
 #include "config.h"
+#include "util.hpp"
 
 Population::Population(int size) {
     this->size = size;
@@ -27,9 +28,9 @@ Population::~Population() {
 }
 
 void Population::next(bool save) {
-    int tournament_size = this->size * PRESSION_TOURN;
+    int max_tournament_size = this->size * PRESSION_TOURN;
 
-    if (tournament_size <= 2) {
+    if (max_tournament_size <= 2) {
         throw std::invalid_argument("invalid population size");
     }
 
@@ -43,7 +44,10 @@ void Population::next(bool save) {
     int crossNumber = 0, mutationNumber = 0;
 
     while (crossNumber < this->size * 0.85) {
-        auto cpl = this->tournament(rand() % (tournament_size - 2) + 2, save);
+        int tournament_size =
+            next_power_of_two(rand() % (max_tournament_size - 2) + 2);
+
+        auto cpl = this->tournament(tournament_size, save);
 
         next_pop[crossNumber] = crossover(cpl.first, cpl.second);
         next_pop[crossNumber + 1] = crossover(cpl.second, cpl.first);
@@ -87,14 +91,12 @@ Population::tournament(int tournament_size, bool save) {
     }
 
     while (tournament_size > 2) {
-        int pool_size = tournament_size / 2 + (tournament_size % 2);
+        int pool_size = tournament_size / 2;
         std::vector<Chromosome *> pool(pool_size);
 
         for (int i = 0; i < pool_size; i++) {
-            if (i * 2 + 1 == tournament_size) {
-                pool[i] = contestants[i * 2];
-            } else if (play_match(contestants[i * 2], contestants[i * 2 + 1],
-                                  save) > 0) {
+            if (play_match(contestants[i * 2], contestants[i * 2 + 1], save) >
+                0) {
                 pool[i] = contestants[i * 2];
             } else {
                 pool[i] = contestants[i * 2 + 1];
@@ -110,6 +112,7 @@ Population::tournament(int tournament_size, bool save) {
 
     return p;
 }
+
 Chromosome **getChromosomeFromPopulations(Population *pop, unsigned int i) {
     while (i >= pop->size) {
         i -= pop->size;

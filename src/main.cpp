@@ -27,7 +27,7 @@ int main() {
     Population pops[] = {Population(n), Population(n), Population(n),
                          Population(n)};
 
-    while (gen < 5) {
+    while (gen < 250) {
         std::cout << "starting generation " << gen << std::endl;
 
         std::thread t1(generation, &pops[0]);
@@ -44,9 +44,10 @@ int main() {
         gen += 4;
     }
 
-    auto p = joinPopulation(pops, 4);
+    Population *p = joinPopulation(pops, 4);
     auto meilleurs = p->tournament(p->size, false);
     play_match(meilleurs.first, meilleurs.second, true);
 
+    delete p;
     _exit(EXIT_SUCCESS);
 }

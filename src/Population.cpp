@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <utility>
+#include <vector>
 
 #include "Chromosome.hpp"
 #include "Game.hpp"
@@ -8,10 +9,6 @@
 #include "config.h"
 
 Population::Population(int size) {
-    if (size * PRESSION_TOURN < 2) {
-        throw std::invalid_argument("size must be greater than 20");
-    }
-
     this->size = size;
     this->pop = new Chromosome *[size];
 
@@ -29,13 +26,13 @@ Population::~Population() {
     delete[] this->pop;
 }
 
-/*
-    De ce que je me souvent une m�thode classique est de g�n�ration
-    à chaque générations entre 80 et 90% des individus par reproduction,
-    1% par mutation et le reste par clonage.
-*/
-
 void Population::next(bool save) {
+    int tournament_size = this->size * PRESSION_TOURN;
+
+    if (tournament_size <= 2) {
+        throw std::invalid_argument("invalid population size");
+    }
+
     Chromosome **next_pop = new Chromosome *[this->size];
     bool *toKeep = new bool[this->size];
 
@@ -46,8 +43,7 @@ void Population::next(bool save) {
     int crossNumber = 0, mutationNumber = 0;
 
     while (crossNumber < this->size * 0.85) {
-        int ts = static_cast<int>(this->size * PRESSION_TOURN);
-        auto cpl = this->tournament(rand() % (ts - 2) + 2, save);
+        auto cpl = this->tournament(rand() % (tournament_size - 2) + 2, save);
 
         next_pop[crossNumber] = crossover(cpl.first, cpl.second);
         next_pop[crossNumber + 1] = crossover(cpl.second, cpl.first);
@@ -81,74 +77,53 @@ void Population::next(bool save) {
     delete[] next_pop;
 }
 
-std::pair<Chromosome *, Chromosome *> Population::tournament(int tournamentSize,
-                                                             bool save) {
-    Chromosome **r = new Chromosome *[tournamentSize];
-
+std::pair<Chromosome *, Chromosome *>
+Population::tournament(int tournament_size, bool save) {
     std::pair<Chromosome *, Chromosome *> p;
 
-    for (int i = 0; i < tournamentSize; i++) {
-        r[i] = this->pop[rand() % this->size];
+    std::vector<Chromosome *> contestants(tournament_size);
+    for (int i = 0; i < tournament_size; i++) {
+        contestants[i] = this->pop[rand() % this->size];
     }
 
-    for (int i = 1; i < tournamentSize; ++i) {
-        Chromosome *c = r[i];
-        int j = i - 1;
+    while (tournament_size > 2) {
+        int pool_size = tournament_size / 2 + (tournament_size % 2);
+        std::vector<Chromosome *> pool(pool_size);
 
-        while (j >= 0 && play_match(r[j], c, save) > 0) {
-            r[j + 1] = r[j];
-            --j;
+        for (int i = 0; i < pool_size; i++) {
+            if (i * 2 + 1 == tournament_size) {
+                pool[i] = contestants[i * 2];
+            } else if (play_match(contestants[i * 2], contestants[i * 2 + 1],
+                                  save) > 0) {
+                pool[i] = contestants[i * 2];
+            } else {
+                pool[i] = contestants[i * 2 + 1];
+            }
         }
 
-        r[j + 1] = c;
+        tournament_size = pool_size;
+        contestants = pool;
     }
 
-    p.first = r[tournamentSize - 1];
-    p.second = r[tournamentSize - 2];
-
-    delete[] r;
+    p.first = contestants[0];
+    p.second = contestants[1];
 
     return p;
 }
-
-// renvoie un pointeur vers celui du i-eme chromosome d'un tableau de
-// populations
 Chromosome **getChromosomeFromPopulations(Population *pop, unsigned int i) {
     while (i >= pop->size) {
         i -= pop->size;
-        // on avance sur la population suivante (arithm�tique de pointeurs)
         pop += 1;
     }
     return &pop->pop[i];
 };
 
-Population *joinPopulation(Population *p, int n) {
-    int c = 0;
-    for (int i = 0; i < n; i++) {
-        c += p[i].size;
-    }
-
-    auto np = new Population(c);
-    int k = 0;
-
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < p[i].size; j++) {
-            np->pop[k++] = p[i].pop[j];
-        }
-    }
-
-    return np;
-}
-
-// m�lange en place les chromosomes d'un tableau de populations
 void shufflePopulations(Population *pop, unsigned int numberOfPop) {
     int popTotale = 0;
     for (int i = 0; i < numberOfPop; i++) {
         popTotale += pop[i].size;
     }
     for (int i = popTotale - 1; i >= 0; i--) {
-        // on pourrait d�caler l'indice de la boucle mais �a me semble moins
-        // clair
         int swapIndice = rand() % (i + 1);
         auto pc1 = getChromosomeFromPopulations(pop, i);
         auto pc2 = getChromosomeFromPopulations(pop, swapIndice);
@@ -181,4 +156,23 @@ Chromosome *cloneChromosome(Chromosome *original) {
     }
 
     return clone;
+}
+
+Population *joinPopulation(Population *p, int n) {
+    int c = 0;
+    for (int i = 0; i < n; i++) {
+        c += p[i].size;
+    }
+
+    auto np = new Population(c);
+    int k = 0;
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < p[i].size; j++) {
+            delete np->pop[k];
+            np->pop[k++] = cloneChromosome(p[i].pop[j]);
+        }
+    }
+
+    return np;
 }

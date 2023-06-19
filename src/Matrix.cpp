@@ -11,13 +11,7 @@ Matrix::Matrix(int ligne, int col) {
     this->t = new double *[ligne];
 
     for (int i = 0; i < ligne; i++) {
-        double *v = new double[col];
-
-        for (int j = 0; j < col; j++) {
-            v[j] = 0;
-        }
-
-        this->t[i] = v;
+        this->t[i] = (double *) calloc(col, sizeof(double));
     }
 }
 
@@ -30,22 +24,6 @@ Matrix::~Matrix() {
     delete[] t;
 }
 
-double Matrix::get(int i, int j) {
-    if (i >= this->ligne || j >= this->col) {
-        throw std::invalid_argument("Bad matrice get");
-    }
-
-    return this->t[i][j];
-}
-
-void Matrix::set(int i, int j, double x) {
-    if (i >= this->ligne || j >= this->col) {
-        throw std::invalid_argument("Bad matrice set");
-    }
-
-    this->t[i][j] = x;
-}
-
 void Matrix::print() {
     std::cout << "Matrice : " << this->ligne << "x" << this->col << std::endl;
     for (int i = 0; i < this->ligne; i++) {
@@ -53,33 +31,6 @@ void Matrix::print() {
             std::cout << this->t[i][j] << " ";
         }
     }
-}
-
-// Multiple deux matrices en place dans this (a * this)
-void Matrix::mult_inv(Matrix *a) {
-    if (this->ligne != a->col) {
-        throw std::invalid_argument("lol multinv");
-    }
-
-    double **newT = new double *[a->ligne];
-    for (int i = 0; i < a->ligne; i++) {
-        double *v = new double[this->col];
-        for (int j = 0; j < this->col; j++) {
-            v[j] = 0;
-            for (int k = 0; k < this->ligne; k++) {
-                v[j] += a->get(i, k) * this->get(k, j);
-            }
-        }
-        newT[i] = v;
-    }
-
-    for (int i = 0; i < this->ligne; i++) {
-        delete this->t[i];
-    }
-
-    delete[] t;
-    this->t = newT;
-    this->ligne = a->ligne;
 }
 
 void Matrix::randomize() {

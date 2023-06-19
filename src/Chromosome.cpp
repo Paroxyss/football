@@ -152,10 +152,10 @@ void writeInputs(Matrix *m, player *p, int i, ball *b, bool team) {
         for (int i = 0; i < EQUIPE_SIZE; i++) {
             vector relat = selected.pos - p[i].pos;
             int dist = norme(relat);
-	
+
             if (dist < minDistOpponent) {
-				minDistOpponent = dist;
-				// pour corriger l'angle
+                minDistOpponent = dist;
+                // pour corriger l'angle
                 vectorToFirstOpponent.x = relat.x;
                 vectorToFirstOpponent.y = -relat.y;
             }
@@ -167,9 +167,9 @@ void writeInputs(Matrix *m, player *p, int i, ball *b, bool team) {
         for (int i = 0; i < EQUIPE_SIZE; i++) {
             vector relat = selected.pos - p[i + EQUIPE_SIZE].pos;
             int dist = norme(relat);
-	
+
             if (dist < minDistOpponent) {
-				minDistOpponent = dist;
+                minDistOpponent = dist;
                 vectorToFirstOpponent.x = relat.x;
                 vectorToFirstOpponent.y = relat.y;
             }
@@ -192,9 +192,9 @@ void writeInputs(Matrix *m, player *p, int i, ball *b, bool team) {
     // cage
     m->set(7, i, dCage);
     m->set(8, i, orientationCage);
-	// joueur le plus proche
+    // joueur le plus proche
     m->set(9, i, minDistOpponent);
-    m->set(10,i, vangle(vectorToFirstOpponent));
+    m->set(10, i, vangle(vectorToFirstOpponent));
 }
 
 /*
@@ -215,9 +215,10 @@ Matrix *Chromosome::collect_and_apply(player *p, ball *b, Matrix &didier_output,
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         writeInputs(m, p, i, b, team);
 
-		// les coms
+        // les coms
         for (int j = 0; j < COM_SIZE; j++) {
-            m->set(NETWORK_INPUT_SIZE - COM_SIZE + j, i, didier_output.get(j + i * COM_SIZE, 0));
+            m->set(NETWORK_INPUT_SIZE - COM_SIZE + j, i,
+                   didier_output.get(j + i * COM_SIZE, 0));
         }
     }
 

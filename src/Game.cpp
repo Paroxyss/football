@@ -298,7 +298,7 @@ void Game::tick(double timeToAdvance, bool root) {
             csvOutputFile << "1" << std::endl;
         }
 
-        ball.vitesse -= norme(ball.vitesse) * ball.vitesse / 500;
+        ball.vitesse -= norme(ball.vitesse) * ball.vitesse / 200;
         for (int i = 0; i < playerNumber; i++) {
             players[i].vitesse -=
                 norme(players[i].vitesse) * players[i].vitesse / 40;

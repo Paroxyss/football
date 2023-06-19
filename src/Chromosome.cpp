@@ -141,6 +141,7 @@ void writeInputs(Matrix *m, player *p, int i, ball *b, bool team) {
 
     double minDistOpponent = INFINITY;
     vector vectorToFirstOpponent;
+
     if (team) {
         // le joueur est du "mauvais coté" de la map, il faut adapter ses
         // entrées
@@ -215,22 +216,23 @@ Matrix *Chromosome::collect_and_apply(player *p, ball *b, Matrix &didier_output,
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         writeInputs(m, p, i, b, team);
 
-        // les coms
         for (int j = 0; j < COM_SIZE; j++) {
-            m->set(NETWORK_INPUT_SIZE - COM_SIZE + j, i,
-                   didier_output.get(j + i * COM_SIZE, 0));
+            m->set(10 + j, i, didier_output.get(j + i * COM_SIZE, 0));
         }
     }
 
     // on prépare les lastcom suivant pour cette équipe
     this->apply(*m);
 
-    for (int k = 0, c = 0; k < EQUIPE_SIZE; k++) {
+    int c = 0;
+
+    while (c < EQUIPE_SIZE) {
         for (int i = 0; i < COM_SIZE; i++) {
-            didier_output.set(c, 0,
-                              m->get(NETWORK_OUTPUT_SIZE - COM_SIZE + i, k));
-            c++;
+            didier_output.set(c * COM_SIZE + i, 0,
+                              m->get(NETWORK_OUTPUT_SIZE - COM_SIZE + i, c));
         }
+
+        c++;
     }
 
     return m;

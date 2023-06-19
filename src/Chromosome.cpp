@@ -195,13 +195,15 @@ void writeInputs(Matrix *m, player *p, int i, ball *b, bool team) {
     m->set(8, i, orientationCage);
     // joueur le plus proche
     m->set(9, i, minDistOpponent);
+    if (vectorToFirstOpponent.x == 0) {
+        vectorToFirstOpponent.x += 0.001;
+    }
     m->set(10, i, vangle(vectorToFirstOpponent));
 }
 
 /*
-     Relecture très fortement nécessaire.
-     lastcom est la matrice (COM_SIZE * EQUIPE_SIZE) contenant
-     sur chaque colonnes les COM_SIZE dernières sorties de communication à
+   lastcom est la matrice (COM_SIZE * EQUIPE_SIZE) contenant
+   sur chaque colonnes les COM_SIZE dernières sorties de communication à
    Didier qui doivent être réinjectés dans compute_didier
 
    0 -> left
@@ -216,8 +218,10 @@ Matrix *Chromosome::collect_and_apply(player *p, ball *b, Matrix &didier_output,
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         writeInputs(m, p, i, b, team);
 
+        // les coms
         for (int j = 0; j < COM_SIZE; j++) {
-            m->set(10 + j, i, didier_output.get(j + i * COM_SIZE, 0));
+            m->set(NETWORK_INPUT_SIZE - COM_SIZE + j, i,
+                   didier_output.get(j + i * COM_SIZE, 0));
         }
     }
 

@@ -28,12 +28,6 @@ Population::~Population() {
 }
 
 void Population::next(bool save) {
-    int max_tournament_size = this->size * PRESSION_TOURN;
-
-    if (max_tournament_size <= 2) {
-        throw std::invalid_argument("invalid population size");
-    }
-
     Chromosome **next_pop = new Chromosome *[this->size];
     bool *toKeep = new bool[this->size];
 
@@ -44,10 +38,8 @@ void Population::next(bool save) {
     int crossNumber = 0, mutationNumber = 0;
 
     while (crossNumber < this->size * 0.85) {
-        int tournament_size =
-            next_power_of_two(rand() % (max_tournament_size - 2) + 2);
-
-        auto cpl = this->tournament(tournament_size, save);
+        int k = log(this->size) - 2;
+        auto cpl = this->tournament(pow(2, (rand() % k) + 2), save);
 
         next_pop[crossNumber] = crossover(cpl.first, cpl.second);
         next_pop[crossNumber + 1] = crossover(cpl.second, cpl.first);

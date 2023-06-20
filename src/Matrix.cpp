@@ -1,4 +1,5 @@
 #include "Matrix.h"
+#include "config.h"
 #include "util.hpp"
 
 #include <cmath>
@@ -11,7 +12,7 @@ Matrix::Matrix(int ligne, int col) {
     this->t = new double *[ligne];
 
     for (int i = 0; i < ligne; i++) {
-        this->t[i] = (double *) calloc(col, sizeof(double));
+        this->t[i] = (double *)calloc(col, sizeof(double));
     }
 }
 
@@ -30,7 +31,7 @@ void Matrix::print() {
         for (int j = 0; j < this->col; j++) {
             std::cout << this->t[i][j] << " ";
         }
-		std::cout << std::endl;
+        std::cout << std::endl;
     }
 }
 
@@ -59,7 +60,9 @@ Matrix *mutation(Matrix *m) {
 
     for (int i = 0; i < m->ligne; i++) {
         for (int j = 0; j < m->col; j++) {
-            if ((rand() % np) != 0) {
+            int p = rand() % np;
+
+            if (0 <= p && p < NB_GEN_MUTATION * 100) {
                 continue;
             }
 

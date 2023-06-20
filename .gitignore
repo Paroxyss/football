@@ -3,4 +3,6 @@ tests/*
 *.pyc
 *.csv
 
+todo.txt
+.DS_Store
 .idea

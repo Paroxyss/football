@@ -268,22 +268,6 @@ void freeCollisionList(collisionList *list) {
     delete[] list;
 }
 
-void printCollisionList(collisionList *list) {
-    if (list == NULL) {
-        std::cout << "Fin de liste" << std::endl;
-        return;
-    }
-
-    if (list->type == CIRCLE) {
-        std::cout << "Collision à " << list->time << " de " << list->actor->pos
-                  << " avec la sphere " << list->secondary->pos << std::endl;
-    } else {
-        std::cout << "Collision à " << list->time << " de " << list->actor->pos
-                  << " avec un mur" << std::endl;
-    }
-    printCollisionList(list->next);
-}
-
 void Game::moveAllObj(double percent) {
     ball.pos += ball.vitesse * percent;
     for (int i = 0; i < playerNumber; i++) {

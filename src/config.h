@@ -33,6 +33,12 @@ const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, COM_SIZE *EQUIPE_SIZE};
 #define BALL_MASS 40
 #define BALL_SIZE 10
 
-#define PRESSION_TOURN 0.2
-
 #define LOGGAME false
+
+/*
+    pourcentage moyen de genomes mutés par matrices.
+    Il est initialement à 1% soit un génome muté en moyenne mais en
+    l'augmentant à 10% ça retire le comportement de ne rien faire.
+*/
+
+#define NB_GEN_MUTATION 0.1

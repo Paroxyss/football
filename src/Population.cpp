@@ -41,8 +41,8 @@ void Population::next(bool save) {
         int k = floor(log(this->size / 4)) - 2;
         auto cpl = this->tournament(pow(2, (rand() % k) + 2), save);
 
-        next_pop[crossNumber] = crossover(cpl.first, cpl.second);
-        next_pop[crossNumber + 1] = crossover(cpl.second, cpl.first);
+        next_pop[crossNumber] = crossover(*cpl.first, *cpl.second);
+        next_pop[crossNumber + 1] = crossover(*cpl.second, *cpl.first);
 
         crossNumber += 2;
     }

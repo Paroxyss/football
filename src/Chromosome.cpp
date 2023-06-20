@@ -96,10 +96,13 @@ void Chromosome::apply(Matrix &inputs) {
             o.set(j, 0, inputs.get(j, i));
         }
 
-        for (int j = 0; j < NETWORK_SIZE - 1; j++) {
+        for (int j = 0; j < NETWORK_SIZE - 2; j++) {
             o.mult_inv(this->matrix[i][j]);
             apply_activation(o);
         }
+
+        o.mult_inv(this->matrix[i][NETWORK_SIZE - 2]);
+        output_activation(o);
 
         for (int j = 0; j < NETWORK_OUTPUT_SIZE; j++) {
             inputs.set(j, i, o.get(j, 0));
@@ -117,10 +120,13 @@ void Chromosome::apply(Matrix &inputs) {
 */
 
 void Chromosome::apply_didier(Matrix &inputs) {
-    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 2; i++) {
         inputs.mult_inv(this->didier[i]);
         apply_activation(inputs);
     }
+
+    inputs.mult_inv(this->didier[DIDIER_NETWORK_SIZE - 2]);
+    output_activation(inputs);
 }
 
 void writeInputs(Matrix *m, player *p, int i, ball *b, bool team) {
@@ -262,13 +268,13 @@ Chromosome *mutate(Chromosome *c) {
     return nw;
 }
 
-Chromosome *crossover(Chromosome *a, Chromosome *b) {
+Chromosome *crossover(Chromosome &a, Chromosome &b) {
     Chromosome *child = new Chromosome();
 
     for (int k = 0; k < EQUIPE_SIZE; k++) {
         for (int i = 0; i < NETWORK_SIZE - 1; i++) {
 
-            Matrix *m = one_pointer_crossover(a->matrix[k][i], b->matrix[k][i]);
+            Matrix *m = one_pointer_crossover(a.matrix[k][i], b.matrix[k][i]);
 
             for (int j = 0; j < m->ligne; j++) {
                 for (int l = 0; l < m->col; l++) {
@@ -281,7 +287,7 @@ Chromosome *crossover(Chromosome *a, Chromosome *b) {
     }
 
     for (int j = 0; j < DIDIER_NETWORK_SIZE - 1; j++) {
-        Matrix *m = one_pointer_crossover(a->didier[j], b->didier[j]);
+        Matrix *m = one_pointer_crossover(a.didier[j], b.didier[j]);
         for (int k = 0; k < m->ligne; k++) {
             for (int l = 0; l < m->col; l++) {
                 child->didier[j]->set(k, l, m->get(k, l));

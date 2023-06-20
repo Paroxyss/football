@@ -26,7 +26,7 @@ inline double ReLu(double x) {
 }
 
 inline double sigmoide(double x) {
-    return 1 / (1 + exp(-x));
+    return 2 / (1 + exp(-x)) - 1;
 }
 
 inline double Heaviside(double x) {
@@ -34,13 +34,13 @@ inline double Heaviside(double x) {
 }
 
 inline double leaky_ReLu(double x) {
-    return fmax(0.1 * x, x);
+    return fmax(0.01 * x, x);
 }
 
 inline void apply_activation(Matrix &c) {
     for (int i = 0; i < c.ligne; i++) {
         for (int j = 0; j < c.col; j++) {
-            c.set(i, j, a_tanh(c.get(i, j)));
+            c.set(i, j, leaky_ReLu(c.get(i, j)));
         }
     }
 }
@@ -48,7 +48,7 @@ inline void apply_activation(Matrix &c) {
 inline void output_activation(Matrix &c) {
     for (int i = 0; i < c.ligne; i++) {
         for (int j = 0; j < c.col; j++) {
-            c.set(i, j, a_tanh(c.get(i, j)));
+            c.set(i, j, sigmoide(c.get(i, j)));
         }
     }
 }

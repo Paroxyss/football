@@ -59,7 +59,7 @@ class Matrix {
     void print();
 
     Matrix *crossover(Matrix *a);
-    void randomize();
+    void He_initialize();
 
     void write(std::ofstream file);
 };

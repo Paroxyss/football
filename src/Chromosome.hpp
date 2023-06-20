@@ -14,7 +14,7 @@ class Chromosome {
 
     void print();
 
-    void randomize();
+    void initialize();
 
     void apply_didier(Matrix &inputs);
 

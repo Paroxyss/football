@@ -60,15 +60,15 @@ void Chromosome::print() {
     coefficients?
 */
 
-void Chromosome::randomize() {
+void Chromosome::initialize() {
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
-            this->matrix[i][j]->randomize();
+            this->matrix[i][j]->He_initialize();
         }
     }
 
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        this->didier[i]->randomize();
+        this->didier[i]->He_initialize();
     }
 }
 

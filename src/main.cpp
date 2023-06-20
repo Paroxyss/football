@@ -15,7 +15,8 @@
 #include <unistd.h>
 
 void generation(Population *pop) {
-    pop->next();
+    for (int i = 0; i < 10; i++)
+        pop->next();
 }
 
 int main() {
@@ -27,7 +28,7 @@ int main() {
     Population pops[] = {Population(n), Population(n), Population(n),
                          Population(n)};
 
-    while (gen < 200) {
+    while (gen < 1000) {
         std::cout << "starting generation " << gen << std::endl;
 
         std::thread t1(generation, &pops[0]);
@@ -41,7 +42,7 @@ int main() {
         t4.join();
 
         shufflePopulations(pops, 4);
-        gen += 4;
+        gen += 4 * 10;
     }
 
     Population *p = joinPopulation(pops, 4);

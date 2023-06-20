@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <random>
 #include <stdexcept>
 
 Matrix::Matrix(int ligne, int col) {
@@ -35,10 +36,16 @@ void Matrix::print() {
     }
 }
 
-void Matrix::randomize() {
+void Matrix::He_initialize() {
+    int n = this->col;
+    double s = 1. / sqrt(M_PI / n);
+
     for (int i = 0; i < this->ligne; i++) {
         for (int j = 0; j < this->col; j++) {
-            this->set(i, j, randomDouble() * 10);
+            double x = randomDouble(0, 1);
+            double r = s * exp(-pow(x, 2) * n / 2.);
+
+            this->set(i, j, x);
         }
     }
 }

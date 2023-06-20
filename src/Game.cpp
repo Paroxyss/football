@@ -100,13 +100,16 @@ void Game::set_players(const int conf[], int n) {
         }
     }
 
-    for (int i = n - 1; i >= 0; i--) {
+    for (int i = n - 1, j = 0; i >= 0; i--) {
         double spy = MAP_HEIGHT / (double)(conf[i] + 1);
-        for (int k = 1; k <= conf[i]; k++) {
-            this->players[c].pos = {.x = MAP_LENGTH - (i + 1) * spx,
+        for (int k = 1; k <= conf[i]; k++, j++) {
+            // inverse la position des joueurs symétriquement.
+            int p = this->playerNumber - 1 - j;
+
+            this->players[p].pos = {.x = MAP_LENGTH - (i + 1) * spx,
                                     .y = k * spy};
-            this->players[c].vitesse = {.x = 0, .y = 0};
-            this->players[c].orientation =
+            this->players[p].vitesse = {.x = 0, .y = 0};
+            this->players[p].orientation =
                 this->players[this->playerNumber - (c + 1)].orientation - M_PI;
             c++;
         }

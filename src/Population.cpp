@@ -38,7 +38,7 @@ void Population::next(bool save) {
     int crossNumber = 0, mutationNumber = 0;
 
     while (crossNumber < this->size * 0.85) {
-        int k = log(this->size) - 2;
+        int k = floor(log(this->size / 4)) - 2;
         auto cpl = this->tournament(pow(2, (rand() % k) + 2), save);
 
         next_pop[crossNumber] = crossover(cpl.first, cpl.second);

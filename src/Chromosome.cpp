@@ -118,12 +118,6 @@ void Chromosome::apply(Matrix &inputs) {
 
 void Chromosome::apply_didier(Matrix &inputs) {
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        if (inputs.ligne != this->didier[i]->col ||
-            inputs.col != this->didier[i]->ligne) {
-
-            // std::cout << "didier: " << this->didier[i]->ligne << " * "
-            //           << this->didier[i]->col << std::endl;
-        }
         inputs.mult_inv(this->didier[i]);
         apply_activation(inputs);
     }

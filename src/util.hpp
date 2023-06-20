@@ -12,7 +12,7 @@ inline double randomDouble() {
 
 inline double mutation_scalar() {
     int x = randomDouble(0, 5);
-    return 0.5 * (tanh(1.75 * (x - 1) + tanh(2 * (x - 4)) + 2));
+    return 0.5 * (tanh(1.75 * (x - 1) + tanh(2 * (x - 4)))) + 1;
 }
 
 // http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2

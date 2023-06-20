@@ -21,7 +21,7 @@ void generation(Population *pop) {
 int main() {
     srand(0);
 
-    const int n = 320 / 4;
+    const int n = 1000 / 4;
     int gen = 1;
 
     Population pops[] = {Population(n), Population(n), Population(n),

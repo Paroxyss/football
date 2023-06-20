@@ -41,4 +41,4 @@ const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, COM_SIZE *EQUIPE_SIZE};
     l'augmentant à 10% ça retire le comportement de ne rien faire.
 */
 
-#define NB_GEN_MUTATION 0.1
+#define NB_GEN_MUTATION 0.05

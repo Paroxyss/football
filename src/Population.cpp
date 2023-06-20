@@ -47,7 +47,7 @@ void Population::next(bool save) {
         crossNumber += 2;
     }
 
-    while (mutationNumber < this->size * 0.1) {
+    while (mutationNumber < this->size * 0.01) {
         int randIndice = rand() % this->size;
 
         next_pop[crossNumber + mutationNumber] = mutate(this->pop[randIndice]);

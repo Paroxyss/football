@@ -61,7 +61,8 @@ class Matrix {
     Matrix *crossover(Matrix *a);
     void He_initialize();
 
-    void write(std::ofstream file);
+    void write(std::ofstream &file);
+	static Matrix* read(std::ifstream &file);
 };
 
 Matrix *mutation(Matrix &m);

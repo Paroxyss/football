@@ -14,6 +14,9 @@ class Population {
 
     void next(bool save = false);
     std::pair<Chromosome *, Chromosome *> tournament(int k, bool save);
+	
+	void write(std::ofstream &file);
+	static Population* read(std::ifstream &file);
 };
 
 Chromosome **getChromosomeFromPopulations(Population **pop, unsigned int i);

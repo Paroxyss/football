@@ -3,6 +3,7 @@
 #include "util.hpp"
 
 #include <cmath>
+#include <fstream>
 #include <iostream>
 #include <random>
 #include <stdexcept>
@@ -75,4 +76,31 @@ Matrix *mutation(Matrix &m) {
     }
 
     return muted;
+}
+
+void Matrix::write(std::ofstream &file){
+	file.write((char *)&this->col, sizeof(this->col));
+	file.write((char *)&this->ligne, sizeof(this->ligne));
+	
+    for (int i = 0; i < this->ligne; i++) {
+        for (int j = 0; j < this->col; j++) {
+			file.write((char*) &t[i][j], sizeof(double));
+        }
+    }
+}
+
+Matrix* Matrix::read(std::ifstream &file){
+	int lignes;
+	int colonnes; 
+	
+	file.read((char *)&colonnes, sizeof(colonnes));
+	file.read((char *)&lignes, sizeof(lignes));
+
+	auto m = new Matrix(lignes, colonnes);
+    for (int i = 0; i < m->ligne; i++) {
+        for (int j = 0; j < m->col; j++) {
+			file.read((char*) &m->t[i][j], sizeof(double));
+        }
+    }
+	return m;
 }

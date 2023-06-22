@@ -2,6 +2,7 @@
 tests/*
 *.pyc
 *.csv
+*.bin
 
 todo.txt
 .DS_Store

@@ -172,3 +172,25 @@ Population *joinPopulation(Population **p, int n) {
 
     return np;
 }
+
+void Population::write(std::ofstream &file) {
+    file.write((char *)&this->size, sizeof(this->size));
+
+	for(int i = 0; i < this->size; i++){
+		this->pop[i]->write(file);
+	}
+}
+
+Population *Population::read(std::ifstream &file){
+	int size;
+	file.read((char *)&size, sizeof(size));
+
+	Population *c = new Population(size);
+
+	for(int i = 0; i < c->size; i++){
+		delete c->pop[i];
+		c->pop[i] = Chromosome::read(file);
+	}
+
+	return c;
+};

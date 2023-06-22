@@ -3,6 +3,7 @@
 #include "Game.hpp"
 #include "Matrix.h"
 #include "config.h"
+#include <fstream>
 
 class Chromosome {
   public:
@@ -21,6 +22,9 @@ class Chromosome {
     Matrix *collect_and_apply(player *p, ball *b, Matrix &didier, bool team);
 
     void apply(Matrix &inputs);
+
+	void write(std::ofstream &file);
+	static Chromosome* read(std::ifstream &file);
 };
 
 Chromosome *mutate(Chromosome *c);

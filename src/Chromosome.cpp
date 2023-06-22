@@ -299,3 +299,84 @@ Chromosome *crossover(Chromosome &a, Chromosome &b) {
 
     return child;
 }
+
+void Chromosome::write(std::ofstream &file) {
+    int equipeSize = EQUIPE_SIZE;
+    int nSize = NETWORK_SIZE;
+    int dSize = DIDIER_NETWORK_SIZE;
+
+    // Par sécurité
+    file.write((char *)&equipeSize, sizeof(int));
+    file.write((char *)&nSize, sizeof(int));
+    file.write((char *)&dSize, sizeof(int));
+
+    // Configs
+    for (int i = 0; i < NETWORK_SIZE; i++) {
+        file.write((char *)&PLAYER_LAYERS[i], sizeof(int));
+    }
+    for (int i = 0; i < DIDIER_NETWORK_SIZE; i++) {
+        file.write((char *)&DIDIER_LAYERS[i], sizeof(int));
+    }
+
+    for (int i = 0; i < EQUIPE_SIZE; i++) {
+        for (int j = 0; j < NETWORK_SIZE - 1; j++) {
+            this->matrix[i][j]->write(file);
+        }
+    }
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        this->didier[i]->write(file);
+    }
+}
+
+Chromosome *Chromosome::read(std::ifstream &file) {
+    int equipeSize;
+    int nSize;
+    int dSize;
+
+    // Par sécurité
+    file.read((char *)&equipeSize, sizeof(int));
+    file.read((char *)&nSize, sizeof(int));
+    file.read((char *)&dSize, sizeof(int));
+
+    if (equipeSize != EQUIPE_SIZE || nSize != NETWORK_SIZE ||
+        dSize != DIDIER_NETWORK_SIZE) {
+        throw std::invalid_argument(
+            "Misconfigured Chromosome file (bad constants)");
+    }
+
+    const int pLayers[NETWORK_SIZE] = {};
+    const int dLayers[DIDIER_NETWORK_SIZE] = {};
+
+    // Configs
+    for (int i = 0; i < NETWORK_SIZE; i++) {
+        file.read((char *)&pLayers[i], sizeof(int));
+        if (pLayers[i] != PLAYER_LAYERS[i]) {
+            throw std::invalid_argument(
+                "Misconfigured Chromosome file (bad player layers)");
+        }
+    }
+    for (int i = 0; i < DIDIER_NETWORK_SIZE; i++) {
+        file.read((char *)&dLayers[i], sizeof(int));
+        if (dLayers[i] != DIDIER_LAYERS[i]) {
+            throw std::invalid_argument(
+                "Misconfigured Chromosome file (bad didier layers)");
+        }
+    }
+
+    Chromosome *c = new Chromosome();
+
+    for (int i = 0; i < EQUIPE_SIZE; i++) {
+        for (int j = 0; j < NETWORK_SIZE - 1; j++) {
+            delete c->matrix[i][j];
+            c->matrix[i][j] = Matrix::read(file);
+        }
+    }
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        delete c->didier[i];
+        c->didier[i] = Matrix::read(file);
+    }
+
+    return c;
+}

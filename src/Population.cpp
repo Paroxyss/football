@@ -29,12 +29,6 @@ Population::~Population() {
 
 void Population::next(bool save) {
     Chromosome **next_pop = new Chromosome *[this->size];
-    bool *toKeep = new bool[this->size];
-
-    for (int i = 0; i < this->size; i++) {
-        toKeep[i] = false;
-    }
-
     int count = 0;
 
     while (count < this->size * 0.9) {
@@ -52,7 +46,6 @@ void Population::next(bool save) {
         int randIndice = rand() % this->size;
 
         next_pop[count] = mutate(this->pop[randIndice]);
-        toKeep[count] = true;
 
         count++;
     }
@@ -69,11 +62,14 @@ void Population::next(bool save) {
     while (count < this->size) {
         int randIndice = rand() % this->size;
         next_pop[count] = cloneChromosome(this->pop[randIndice]);
-        toKeep[count] = true;
         count++;
     }
 
-    delete[] toKeep;
+	for (int i = 0; i < this->size; i++) {
+        delete this->pop[i];
+        this->pop[i] = next_pop[i];
+    }
+
     delete[] next_pop;
 }
 

@@ -1,4 +1,5 @@
 #include "Matrix.h"
+
 #include "util.hpp"
 #include <iostream>
 #include <ostream>
@@ -11,17 +12,17 @@
    compl√©ter ce fichier au fur et √† mesure
 */
 
-Matrix *one_pointer_crossover(Matrix *a, Matrix *b) {
-    if (a->ligne != b->ligne || a->col != b->col)
+Matrix *one_pointer_crossover(Matrix &a, Matrix &b) {
+    if (a.ligne != b.ligne || a.col != b.col)
         throw std::invalid_argument("lol opc");
 
-    int x = rand() % a->col;
-    Matrix *c = new Matrix(a->ligne, a->col);
+    int x = rand() % a.col;
+    Matrix *c = new Matrix(a.ligne, a.col);
 
-    for (int j = 0; j < a->col; j++) {
-        Matrix &t = *(j < x ? a : b);
+    for (int j = 0; j < a.col; j++) {
+        Matrix &t = j < x ? a : b;
 
-        for (int i = 0; i < a->ligne; i++) {
+        for (int i = 0; i < a.ligne; i++) {
             c->set(i, j, t.get(i, j));
         }
     }
@@ -29,34 +30,34 @@ Matrix *one_pointer_crossover(Matrix *a, Matrix *b) {
     return c;
 }
 
-Matrix *double_pointer_crossover(Matrix *a, Matrix *b) {
-    if (a->ligne != b->ligne || a->col != b->col)
+Matrix *double_pointer_crossover(Matrix &a, Matrix &b) {
+    if (a.ligne != b.ligne || a.col != b.col)
         throw std::invalid_argument("lol dpc");
 
-    int x1 = rand() % a->col;
-    int x2 = rand() % a->col + x1;
-    Matrix *c = new Matrix(a->ligne, a->col);
+    int x1 = rand() % a.col;
+    int x2 = rand() % a.col + x1;
+    Matrix *c = new Matrix(a.ligne, a.col);
 
-    for (int j = 0; j < a->col; j++) {
-        Matrix *t = (x1 <= j && j <= x2 ? a : b);
+    for (int j = 0; j < a.col; j++) {
+        Matrix t = (x1 <= j && j <= x2 ? a : b);
 
-        for (int i = 0; i < a->ligne; i++) {
-            c->set(i, j, t->get(i, j));
+        for (int i = 0; i < a.ligne; i++) {
+            c->set(i, j, t.get(i, j));
         }
     }
 
     return c;
 }
 
-Matrix *uniform_crossover(Matrix *a, Matrix *b) {
-    if (a->ligne != b->ligne || a->col != b->col)
+Matrix *uniform_crossover(Matrix &a, Matrix &b) {
+    if (a.ligne != b.ligne || a.col != b.col)
         throw std::invalid_argument("lol uc");
 
-    Matrix *c = new Matrix(a->ligne, a->col);
+    Matrix *c = new Matrix(a.ligne, a.col);
 
-    for (int i = 0; i < a->ligne; i++) {
-        for (int j = 0; j < a->col; j++) {
-            double x = (rand() % 2 == 0 ? a : b)->get(i, j);
+    for (int i = 0; i < a.ligne; i++) {
+        for (int j = 0; j < a.col; j++) {
+            double x = (rand() % 2 == 0 ? a : b).get(i, j);
             c->set(i, j, x);
         }
     }
@@ -64,59 +65,58 @@ Matrix *uniform_crossover(Matrix *a, Matrix *b) {
     return c;
 }
 
-Matrix *average_crossover(Matrix *a, Matrix *b) {
-    if (a->ligne != b->ligne || a->col != b->col) {
+Matrix *average_crossover(Matrix &a, Matrix &b) {
+    if (a.ligne != b.ligne || a.col != b.col) {
         throw std::invalid_argument("erreur average_crossover");
     }
 
-    Matrix *c = new Matrix(a->ligne, a->col);
+    Matrix *c = new Matrix(a.ligne, a.col);
 
-    for (int i = 0; i < a->ligne; i++) {
-        for (int j = 0; j < a->col; j++) {
-            c->set(i, j, (a->get(i, j) + b->get(i, j)) / 2);
+    for (int i = 0; i < a.ligne; i++) {
+        for (int j = 0; j < a.col; j++) {
+            c->set(i, j, (a.get(i, j) + b.get(i, j)) / 2);
         }
     }
 
     return c;
 }
 
-Matrix *WARP(Matrix *a, Matrix *b) {
-    if (a->ligne != b->ligne || a->col != b->col)
+Matrix *WARP(Matrix &a, Matrix &b) {
+    if (a.ligne != b.ligne || a.col != b.col)
         throw std::invalid_argument("lol WARP");
 
     double x = (randomDouble() + 1) / 2;
-    Matrix *c = new Matrix(a->ligne, a->col);
+    Matrix *c = new Matrix(a.ligne, a.col);
 
-    for (int i = 0; i < a->ligne; i++) {
-        for (int j = 0; j < a->col; j++) {
-            c->set(i, j, (a->get(i, j) * x + b->get(i, j) * (1 - x)));
+    for (int i = 0; i < a.ligne; i++) {
+        for (int j = 0; j < a.col; j++) {
+            c->set(i, j, (a.get(i, j) * x + b.get(i, j) * (1 - x)));
         }
     }
 
     return c;
 }
 
-Matrix *PMX(Matrix *a, Matrix *b) {
-    if (a->ligne != b->ligne || a->col != b->col)
+Matrix *PMX(Matrix &a, Matrix &b) {
+    if (a.ligne != b.ligne || a.col != b.col)
         throw std::invalid_argument("lol PMX");
 
-    int x = rand() % a->col;
-    int y = rand() % a->ligne;
-    Matrix *c = new Matrix(a->ligne, a->col);
+    int x = rand() % a.col;
+    int y = rand() % a.ligne;
+    Matrix *c = new Matrix(a.ligne, a.col);
 
-    for (int i = 0; i < a->ligne; i++) {
-        for (int j = 0; j < a->col; j++) {
+    for (int i = 0; i < a.ligne; i++) {
+        for (int j = 0; j < a.col; j++) {
             bool r = i <= y || j >= x;
-            c->set(i, j, (r ? a : b)->get(i, j));
+            c->set(i, j, (r ? a : b).get(i, j));
         }
     }
 
     return c;
 }
 
-// oui oui √ßa existe vraiment
-Matrix *SAC(Matrix *a, Matrix *b) {
-    if (a->ligne != b->ligne || a->col != b->col)
+Matrix *SAC(Matrix &a, Matrix &b) {
+    if (a.ligne != b.ligne || a.col != b.col)
         throw std::invalid_argument("lol SAC");
 
     switch (rand() % 6) {

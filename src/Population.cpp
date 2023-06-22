@@ -52,9 +52,9 @@ void Population::next(bool save) {
 
     // new blood
     while (count < this->size * 0.95) {
-        Chromosome *c = new Chromosome();
-        c->initialize();
-        next_pop[count] = c;
+        Chromosome c = Chromosome();
+        c.initialize();
+        next_pop[count] = &c;
 
         count++;
     }
@@ -65,7 +65,7 @@ void Population::next(bool save) {
         count++;
     }
 
-	for (int i = 0; i < this->size; i++) {
+    for (int i = 0; i < this->size; i++) {
         delete this->pop[i];
         this->pop[i] = next_pop[i];
     }
@@ -109,7 +109,7 @@ Chromosome **getChromosomeFromPopulations(Population **pop, unsigned int i) {
     int ich = 0;
     while (i >= pop[ich]->size) {
         i -= pop[ich]->size;
-        ich+=1;
+        ich += 1;
     }
     return &pop[ich]->pop[i];
 };

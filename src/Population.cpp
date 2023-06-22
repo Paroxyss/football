@@ -52,9 +52,9 @@ void Population::next(bool save) {
 
     // new blood
     while (count < this->size * 0.95) {
-        Chromosome c = Chromosome();
-        c.initialize();
-        next_pop[count] = &c;
+        Chromosome *c = new Chromosome();
+        c->initialize();
+        next_pop[count] = c;
 
         count++;
     }

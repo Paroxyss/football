@@ -18,7 +18,7 @@
 */
 
 inline double a_tanh(double x) {
-    return tanh(x);
+    return tanh(x - 4);
 }
 
 inline double ReLu(double x) {
@@ -40,7 +40,7 @@ inline double leaky_ReLu(double x) {
 inline void apply_activation(Matrix &c) {
     for (int i = 0; i < c.ligne; i++) {
         for (int j = 0; j < c.col; j++) {
-            c.set(i, j, leaky_ReLu(c.get(i, j)));
+            c.set(i, j, tanh(c.get(i, j)));
         }
     }
 }
@@ -48,7 +48,7 @@ inline void apply_activation(Matrix &c) {
 inline void output_activation(Matrix &c) {
     for (int i = 0; i < c.ligne; i++) {
         for (int j = 0; j < c.col; j++) {
-            c.set(i, j, sigmoide(c.get(i, j)));
+            c.set(i, j, tanh(c.get(i, j)));
         }
     }
 }

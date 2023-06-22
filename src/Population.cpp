@@ -35,38 +35,42 @@ void Population::next(bool save) {
         toKeep[i] = false;
     }
 
-    int crossNumber = 0, mutationNumber = 0;
+    int count = 0;
 
-    while (crossNumber < this->size * 0.85) {
-        int k = floor(log(this->size / 4)) - 2;
-        auto cpl = this->tournament(pow(2, (rand() % k) + 2), save);
+    while (count < this->size * 0.9) {
+        int k = log(this->size) - 2;
+        int rdm = (rand() % k) + 2;
+        int c = pow(2, rdm);
 
-        next_pop[crossNumber] = crossover(*cpl.first, *cpl.second);
-        next_pop[crossNumber + 1] = crossover(*cpl.second, *cpl.first);
+        auto cpl = this->tournament(c, save);
+        next_pop[count] = crossover(*cpl.first, *cpl.second);
 
-        crossNumber += 2;
+        count++;
     }
 
-    while (mutationNumber < this->size * 0.01) {
+    while (count < this->size * 0.91) {
         int randIndice = rand() % this->size;
 
-        next_pop[crossNumber + mutationNumber] = mutate(this->pop[randIndice]);
-        toKeep[crossNumber + mutationNumber] = true;
+        next_pop[count] = mutate(this->pop[randIndice]);
+        toKeep[count] = true;
 
-        mutationNumber++;
+        count++;
     }
 
-    while (crossNumber + mutationNumber < this->size) {
+    // new blood
+    while (count < this->size * 0.95) {
+        Chromosome *c = new Chromosome();
+        c->initialize();
+        next_pop[count] = c;
+
+        count++;
+    }
+
+    while (count < this->size) {
         int randIndice = rand() % this->size;
-
-        next_pop[crossNumber + mutationNumber] =
-            cloneChromosome(this->pop[randIndice]);
-        mutationNumber++;
-    }
-
-    for (int i = 0; i < this->size; i++) {
-        delete this->pop[i];
-        this->pop[i] = next_pop[i];
+        next_pop[count] = cloneChromosome(this->pop[randIndice]);
+        toKeep[count] = true;
+        count++;
     }
 
     delete[] toKeep;

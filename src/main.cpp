@@ -15,20 +15,19 @@
 #include <unistd.h>
 
 void generation(Population *pop) {
-    for (int i = 0; i < 10; i++)
-        pop->next();
+    pop->next();
 }
 
 int main() {
-    srand(0);
+    srand(time(NULL));
 
-    const int n = 1000 / 4;
+    const int n = POPULATION_SIZE / 4;
     int gen = 1;
 
     Population pops[] = {Population(n), Population(n), Population(n),
                          Population(n)};
 
-    while (gen < 1000) {
+    while (gen < 10) {
         std::cout << "starting generation " << gen << std::endl;
 
         std::thread t1(generation, &pops[0]);
@@ -42,12 +41,14 @@ int main() {
         t4.join();
 
         shufflePopulations(pops, 4);
-        gen += 4 * 10;
+        gen += 4;
     }
 
     Population *p = joinPopulation(pops, 4);
     auto meilleurs = p->tournament(p->size, false);
     play_match(meilleurs.first, meilleurs.second, true);
+
+    meilleurs.first->print();
 
     delete p;
     _exit(EXIT_SUCCESS);

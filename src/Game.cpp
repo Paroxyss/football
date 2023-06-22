@@ -393,7 +393,7 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
 
         auto r1 = c1->collect_and_apply(g.players, &g.ball, didierInputs[0], 0);
         auto r2 = c1->collect_and_apply(g.players + EQUIPE_SIZE, &g.ball,
-                                        didierInputs[0], 1);
+                                        didierInputs[1], 1);
 
         for (int a = 0; a < 2; a++) {
             for (int i = 0; i < EQUIPE_SIZE; i++) {

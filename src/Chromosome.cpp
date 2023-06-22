@@ -98,11 +98,11 @@ void Chromosome::apply(Matrix &inputs) {
         }
 
         for (int j = 0; j < NETWORK_SIZE - 2; j++) {
-            o.mult_inv(this->matrix[i][j]);
+            o.mult_inv(*this->matrix[i][j]);
             apply_activation(o);
         }
 
-        o.mult_inv(this->matrix[i][NETWORK_SIZE - 2]);
+        o.mult_inv(*this->matrix[i][NETWORK_SIZE - 2]);
         output_activation(o);
 
         for (int j = 0; j < NETWORK_OUTPUT_SIZE; j++) {
@@ -122,11 +122,11 @@ void Chromosome::apply(Matrix &inputs) {
 
 void Chromosome::apply_didier(Matrix &inputs) {
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 2; i++) {
-        inputs.mult_inv(this->didier[i]);
+        inputs.mult_inv(*this->didier[i]);
         apply_activation(inputs);
     }
 
-    inputs.mult_inv(this->didier[DIDIER_NETWORK_SIZE - 2]);
+    inputs.mult_inv(*this->didier[DIDIER_NETWORK_SIZE - 2]);
     output_activation(inputs);
 }
 
@@ -257,13 +257,13 @@ Chromosome *mutate(Chromosome *c) {
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             delete nw->matrix[i][j];
-            nw->matrix[i][j] = mutation(c->matrix[i][j]);
+            nw->matrix[i][j] = mutation(*c->matrix[i][j]);
         }
     }
 
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
         delete nw->didier[i];
-        nw->didier[i] = mutation(c->didier[i]);
+        nw->didier[i] = mutation(*c->didier[i]);
     }
 
     return nw;

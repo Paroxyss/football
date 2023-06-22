@@ -31,17 +31,17 @@ class Matrix {
     }
 
     // Multiple deux matrices en place dans this (a * this)
-    inline void mult_inv(Matrix *a) {
-        if (this->ligne != a->col) {
+    inline void mult_inv(Matrix &a) {
+        if (this->ligne != a.col) {
             throw std::invalid_argument("lol multinv");
         }
 
-        double **newT = new double *[a->ligne];
-        for (int i = 0; i < a->ligne; i++) {
+        double **newT = new double *[a.ligne];
+        for (int i = 0; i < a.ligne; i++) {
             double *v = (double *)calloc(this->col, sizeof(double));
             for (int j = 0; j < this->col; j++) {
                 for (int k = 0; k < this->ligne; k++) {
-                    v[j] += a->get(i, k) * this->get(k, j);
+                    v[j] += a.get(i, k) * this->get(k, j);
                 }
             }
             newT[i] = v;
@@ -53,7 +53,7 @@ class Matrix {
 
         delete[] t;
         this->t = newT;
-        this->ligne = a->ligne;
+        this->ligne = a.ligne;
     }
 
     void print();
@@ -64,4 +64,4 @@ class Matrix {
     void write(std::ofstream file);
 };
 
-Matrix *mutation(Matrix *m);
+Matrix *mutation(Matrix &m);

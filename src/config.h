@@ -39,4 +39,6 @@ const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, COM_SIZE *EQUIPE_SIZE};
 
 #define POPULATION_SIZE 800
 
-#define N 10
+#define N 1
+
+#define NB_THREAD 4

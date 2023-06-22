@@ -36,20 +36,6 @@ void Matrix::print() {
     }
 }
 
-// void Matrix::He_initialize() {
-//     int n = this->col;
-//     double s = 1. / sqrt(M_PI / n);
-
-//     for (int i = 0; i < this->ligne; i++) {
-//         for (int j = 0; j < this->col; j++) {
-//             double x = randomDouble(0, 1);
-//             double r = s * exp(-pow(x, 2) * n / 2.);
-
-//             this->set(i, j, x);
-//         }
-//     }
-// }
-
 void Matrix::He_initialize() {
     for (int i = 0; i < this->ligne; i++) {
         for (int j = 0; j < this->col; j++) {
@@ -71,20 +57,20 @@ void Matrix::He_initialize() {
    proche de 1 il faudrait donc possiblement altérer plus de coefficients de la
    matrice pour accélérer l'exploration de l'ensemble solution.
 */
-Matrix *mutation(Matrix *m) {
-    Matrix *muted = new Matrix(m->ligne, m->col);
-    int np = m->ligne * m->col;
+Matrix *mutation(Matrix &m) {
+    Matrix *muted = new Matrix(m.ligne, m.col);
+    int np = m.ligne * m.col;
     int c = 0;
 
-    for (int i = 0; i < m->ligne; i++) {
-        for (int j = 0; j < m->col; j++) {
+    for (int i = 0; i < m.ligne; i++) {
+        for (int j = 0; j < m.col; j++) {
             int p = rand() % np;
 
             if (0 > p || p >= NB_GEN_MUTATION * 100) {
                 continue;
             }
 
-            muted->set(i, j, m->get(i, j) * mutation_scalar());
+            muted->set(i, j, m.get(i, j) * mutation_scalar());
         }
     }
 

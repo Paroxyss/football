@@ -21,33 +21,37 @@ void generation(Population *pop) {
 int main() {
     srand(time(NULL));
 
-    const int n = POPULATION_SIZE / 4;
+    const int n = POPULATION_SIZE / NB_THREAD;
     int gen = 0;
 
-    Population pops[] = {Population(n), Population(n), Population(n),
-                         Population(n)};
+    Population **pops = new Population *[NB_THREAD];
+    std::thread threads[NB_THREAD];
+
+    for (int i = 0; i < NB_THREAD; i++) {
+        pops[i] = new Population(n);
+    }
 
     while (gen < N) {
         std::cout << "starting generation " << gen << std::endl;
 
-        std::thread t1(generation, &pops[0]);
-        std::thread t2(generation, &pops[1]);
-        std::thread t3(generation, &pops[2]);
-        std::thread t4(generation, &pops[3]);
+        for (int i = 0; i < NB_THREAD; i++) {
+            threads[i] = std::thread(generation, pops[i]);
+        }
 
-        t1.join();
-        t2.join();
-        t3.join();
-        t4.join();
+        for (int i = 0; i < NB_THREAD; i++) {
+            threads[i].join();
+        }
 
-        shufflePopulations(pops, 4);
-        gen += 4;
+        shufflePopulations(*pops, NB_THREAD);
+        gen += NB_THREAD;
     }
 
-    Population *p = joinPopulation(pops, 4);
+    Population *p = joinPopulation(*pops, NB_THREAD);
     auto meilleurs = p->tournament(p->size, false);
 
     play_match(meilleurs.first, meilleurs.second, true);
+
+    delete[] pops;
 
     delete p;
     _exit(EXIT_SUCCESS);

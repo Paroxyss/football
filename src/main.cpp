@@ -38,7 +38,7 @@ int main() {
             threads[i] = new std::thread(generation, pops[i]);
         }
 
-        for (auto & thread : threads) {
+        for (auto &thread : threads) {
             thread->join();
         }
 
@@ -51,6 +51,10 @@ int main() {
 
     play_match(meilleurs.first, meilleurs.second, true);
 
+    for (int i = 0; i < NB_THREAD; i++) {
+        delete pops[i];
+        delete threads[i];
+    }
     delete[] pops;
 
     delete p;

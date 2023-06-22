@@ -109,18 +109,19 @@ Population::tournament(int tournament_size, bool save) {
     return p;
 }
 
-Chromosome **getChromosomeFromPopulations(Population *pop, unsigned int i) {
-    while (i >= pop->size) {
-        i -= pop->size;
-        pop += 1;
+Chromosome **getChromosomeFromPopulations(Population **pop, unsigned int i) {
+    int ich = 0;
+    while (i >= pop[ich]->size) {
+        i -= pop[ich]->size;
+        ich+=1;
     }
-    return &pop->pop[i];
+    return &pop[ich]->pop[i];
 };
 
-void shufflePopulations(Population *pop, unsigned int numberOfPop) {
+void shufflePopulations(Population **pop, unsigned int numberOfPop) {
     int popTotale = 0;
     for (int i = 0; i < numberOfPop; i++) {
-        popTotale += pop[i].size;
+        popTotale += pop[i]->size;
     }
     for (int i = popTotale - 1; i >= 0; i--) {
         int swapIndice = rand() % (i + 1);
@@ -157,19 +158,19 @@ Chromosome *cloneChromosome(Chromosome *original) {
     return clone;
 }
 
-Population *joinPopulation(Population *p, int n) {
+Population *joinPopulation(Population **p, int n) {
     int c = 0;
     for (int i = 0; i < n; i++) {
-        c += p[i].size;
+        c += p[i]->size;
     }
 
     auto np = new Population(c);
     int k = 0;
 
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < p[i].size; j++) {
+        for (int j = 0; j < p[i]->size; j++) {
             delete np->pop[k];
-            np->pop[k++] = cloneChromosome(p[i].pop[j]);
+            np->pop[k++] = cloneChromosome(p[i]->pop[j]);
         }
     }
 

@@ -16,7 +16,7 @@ class Population {
     std::pair<Chromosome *, Chromosome *> tournament(int k, bool save);
 };
 
-Chromosome **getChromosomeFromPopulations(Population *pop, unsigned int i);
-Population *joinPopulation(Population *p, int n);
-void shufflePopulations(Population *pop, unsigned int numberOfPop);
+Chromosome **getChromosomeFromPopulations(Population **pop, unsigned int i);
+Population *joinPopulation(Population **p, int n);
+void shufflePopulations(Population **pop, unsigned int numberOfPop);
 Chromosome *cloneChromosome(Chromosome *original);

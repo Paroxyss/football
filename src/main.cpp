@@ -22,12 +22,12 @@ int main() {
     srand(time(NULL));
 
     const int n = POPULATION_SIZE / 4;
-    int gen = 1;
+    int gen = 0;
 
     Population pops[] = {Population(n), Population(n), Population(n),
                          Population(n)};
 
-    while (gen < 10) {
+    while (gen < N) {
         std::cout << "starting generation " << gen << std::endl;
 
         std::thread t1(generation, &pops[0]);
@@ -46,9 +46,8 @@ int main() {
 
     Population *p = joinPopulation(pops, 4);
     auto meilleurs = p->tournament(p->size, false);
-    play_match(meilleurs.first, meilleurs.second, true);
 
-    meilleurs.first->print();
+    play_match(meilleurs.first, meilleurs.second, true);
 
     delete p;
     _exit(EXIT_SUCCESS);

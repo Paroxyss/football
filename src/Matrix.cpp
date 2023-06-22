@@ -53,7 +53,7 @@ void Matrix::print() {
 void Matrix::He_initialize() {
     for (int i = 0; i < this->ligne; i++) {
         for (int j = 0; j < this->col; j++) {
-            double x = randomDouble(-1, 1);
+            double x = randomDouble(-10, 10);
 
             this->set(i, j, x);
         }

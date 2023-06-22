@@ -1,6 +1,6 @@
 #pragma once
 
-#define COM_SIZE 0
+#define COM_SIZE 1
 
 #define NETWORK_SIZE 4
 #define DIDIER_NETWORK_SIZE 3
@@ -37,6 +37,6 @@ const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, COM_SIZE *EQUIPE_SIZE};
 
 #define NB_GEN_MUTATION 0.1
 
-#define POPULATION_SIZE 200
+#define POPULATION_SIZE 800
 
-#define NUM_GEN = 10
+#define N 10

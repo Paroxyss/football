@@ -1,5 +1,7 @@
 #pragma once
+#include "util.hpp"
 #include <cmath>
+#include <fstream>
 #include <ostream>
 struct vector {
     double x, y;
@@ -71,6 +73,12 @@ inline double norme(vector a) {
     return sqrt(normeCarre(a));
 }
 
+// deuxième fonction testée du programme
 inline double vangle(vector v) {
-    return -atan(v.y / v.x);
+    return angleRounded(atan2(v.y, v.x));
+}
+
+inline std::ostream &operator<<(std::ostream &out, vector vec){
+	out << "Vector{ .x=" << vec.x << ", .y = " << vec.y << "}";
+	return out;
 }

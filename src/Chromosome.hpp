@@ -19,15 +19,17 @@ class Chromosome {
 
     void apply_didier(Matrix &inputs);
 
-    Matrix *collect_and_apply(player *p, ball *b, Matrix &didier, bool team);
+    Matrix *collect_and_apply(player *equipeAlliee, player *equipeAdverse,
+                              ball *b, Matrix &didier_output, bool team);
 
     void apply(Matrix &inputs);
 
-	void write(std::ofstream &file);
-	static Chromosome* read(std::ifstream &file);
+    void write(std::ofstream &file);
+    static Chromosome *read(std::ifstream &file);
 };
 
 Chromosome *mutate(Chromosome *c);
 Matrix *compute_didier(Chromosome *c, Matrix *inputs);
 Chromosome *crossover(Chromosome &a, Chromosome &b);
-void writeInputs(Matrix *m, player *p, int i, ball *b, bool team);
+void writeInputs(Matrix *m, player *equipeAlliee, player *equipeAdverse, int i,
+                 ball *b, bool team);

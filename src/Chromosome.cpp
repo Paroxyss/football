@@ -6,6 +6,7 @@
 #include "Matrix.h"
 #include "Vector.hpp"
 #include "config.h"
+#include "util.hpp"
 
 #include <array>
 #include <cmath>
@@ -130,76 +131,47 @@ void Chromosome::apply_didier(Matrix &inputs) {
     output_activation(inputs);
 }
 
-void writeInputs(Matrix *m, player *p, int i, ball *b, bool team) {
-    const player &selected = p[i];
+void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
+                 int i, ball *b, bool team) {
+    player &selected = equipeAlliee[i];
 
-    vector relat = selected.pos - b->pos;
-    double balldist = norme(relat);
+    // Position du joueur
+    vector mapSize = {.x = MAP_LENGTH, .y = MAP_HEIGHT};
+    vector fakePos = team ? mapSize - selected.pos : selected.pos;
+    mat->set(0, i, fakePos.x);
+    mat->set(1, i, fakePos.y);
 
-    double fakeOrientation;
-    vector fakePos;
-    vector fakeVitesse = selected.vitesse;
+    // Vitesse du joueur
+    double fakeVitesseX = team ? -selected.vitesse.x : selected.vitesse.x;
+    mat->set(2, i, fakeVitesseX);
+    mat->set(3, i, selected.vitesse.y);
 
-    double minDistOpponent = INFINITY;
-    vector vectorToFirstOpponent;
+    // Distance et orientation relative de la balle
+    vector relatBalle = b->pos - selected.pos;
+    mat->set(4, i, norme(relatBalle));
+    mat->set(5, i, angleRounded(vangle(relatBalle) - selected.orientation));
 
-    if (team) {
-        // le joueur est du "mauvais coté" de la map, il faut adapter ses
-        // entrées
-        vector mapSize = {.x = MAP_LENGTH, .y = MAP_HEIGHT};
-        fakePos = mapSize - selected.pos;
-        fakeOrientation = selected.orientation + M_PI;
-        fakeVitesse.x = -fakeVitesse.x;
-
-        for (int i = 0; i < EQUIPE_SIZE; i++) {
-            vector relat = selected.pos - p[i].pos;
-            int dist = norme(relat);
-
-            if (dist < minDistOpponent) {
-                minDistOpponent = dist;
-                // pour corriger l'angle
-                vectorToFirstOpponent.x = relat.x;
-                vectorToFirstOpponent.y = -relat.y;
-            }
-        }
-    } else {
-        fakeOrientation = selected.orientation;
-        fakePos = selected.pos;
-
-        for (int i = 0; i < EQUIPE_SIZE; i++) {
-            vector relat = selected.pos - p[i + EQUIPE_SIZE].pos;
-            int dist = norme(relat);
-
-            if (dist < minDistOpponent) {
-                minDistOpponent = dist;
-                vectorToFirstOpponent.x = relat.x;
-                vectorToFirstOpponent.y = relat.y;
-            }
-        }
-    }
-
+    double fakeOrientation =
+        team ? selected.orientation + M_PI : selected.orientation;
+    // Distance et orientation relative de la cage adverse
     vector cage = {.x = MAP_LENGTH, .y = (double)MAP_HEIGHT / 2};
-    double dCage = norme(cage - fakePos);
-    double orientationCage = vangle(cage - fakePos) - fakeOrientation;
+    mat->set(6, i, norme(cage - fakePos));
+    mat->set(7, i, angleRounded(vangle(cage - fakePos) - fakeOrientation));
 
-    // info joueur
-    m->set(0, i, fakePos.x);
-    m->set(1, i, fakePos.y);
-    m->set(2, i, fakeVitesse.x);
-    m->set(3, i, fakeVitesse.y);
-    m->set(4, i, fakeOrientation);
-    // balle
-    m->set(5, i, balldist);
-    m->set(6, i, vangle(relat));
-    // cage
-    m->set(7, i, dCage);
-    m->set(8, i, orientationCage);
-    // joueur le plus proche
-    m->set(9, i, minDistOpponent);
-    if (vectorToFirstOpponent.x == 0) {
-        vectorToFirstOpponent.x += 0.001;
+    // Joueur le plus proche
+    player *nearest;
+    double d = INFINITY;
+    for (int i = 0; i < EQUIPE_SIZE; i++) {
+        double nd = norme(equipeAdverse[i].pos - selected.pos);
+        if (nd < d) {
+            nearest = &equipeAdverse[i];
+            d = nd;
+        };
     }
-    m->set(10, i, vangle(vectorToFirstOpponent));
+    mat->set(8, i, d);
+    mat->set(9, i,
+             angleRounded(vangle(nearest->pos - selected.pos) -
+                          selected.orientation));
 }
 
 /*
@@ -211,13 +183,14 @@ void writeInputs(Matrix *m, player *p, int i, ball *b, bool team) {
    1 -> right
 */
 
-Matrix *Chromosome::collect_and_apply(player *p, ball *b, Matrix &didier_output,
-                                      bool team) {
+Matrix *Chromosome::collect_and_apply(player *equipeAlliee,
+                                      player *equipeAdverse, ball *b,
+                                      Matrix &didier_output, bool team) {
     Matrix *m = new Matrix(NETWORK_INPUT_SIZE, EQUIPE_SIZE);
     apply_didier(didier_output);
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
-        writeInputs(m, p, i, b, team);
+        writeInputs(m, equipeAlliee, equipeAdverse, i, b, team);
 
         // les coms
         for (int j = 0; j < COM_SIZE; j++) {

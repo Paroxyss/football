@@ -109,8 +109,8 @@ void Game::set_players(const int conf[], int n) {
             this->players[p].pos = {.x = MAP_LENGTH - (i + 1) * spx,
                                     .y = k * spy};
             this->players[p].vitesse = {.x = 0, .y = 0};
-            this->players[p].orientation =
-                this->players[this->playerNumber - (c + 1)].orientation - M_PI;
+            this->players[p].orientation = angleRounded(
+                this->players[this->playerNumber - (c + 1)].orientation - M_PI);
             c++;
         }
     }
@@ -391,9 +391,10 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
 
     for (int k = 0; k < GAME_DURATION; k++) {
 
-        auto r1 = c1->collect_and_apply(g.players, &g.ball, didierInputs[0], 0);
-        auto r2 = c1->collect_and_apply(g.players + EQUIPE_SIZE, &g.ball,
-                                        didierInputs[1], 1);
+        auto r1 = c1->collect_and_apply(g.players, g.players + EQUIPE_SIZE,
+                                        &g.ball, didierInputs[0], false);
+        auto r2 = c1->collect_and_apply(g.players + EQUIPE_SIZE, g.players,
+                                        &g.ball, didierInputs[1], true);
 
         for (int a = 0; a < 2; a++) {
             for (int i = 0; i < EQUIPE_SIZE; i++) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#define COM_SIZE 1
+#define COM_SIZE 2
 
 #define NETWORK_SIZE 4
 #define DIDIER_NETWORK_SIZE 3
@@ -11,7 +11,7 @@
 // cage, distance abverse + proche, angle adverse + proche, com1, .. ,
 // com{COM_SIZE}
 #define NETWORK_OUTPUT_SIZE 2 + COM_SIZE
-#define NETWORK_INPUT_SIZE 11 + COM_SIZE
+#define NETWORK_INPUT_SIZE 10 + COM_SIZE
 
 #define EQUIPE_SIZE 3
 
@@ -33,12 +33,11 @@ const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, COM_SIZE *EQUIPE_SIZE};
 #define BALL_MASS 40
 #define BALL_SIZE 10
 
-#define LOGGAME false
-
 #define NB_GEN_MUTATION 0.1
 
 #define POPULATION_SIZE 800
 
+// nombre de générations
 #define N 1
 
 #define NB_THREAD 4

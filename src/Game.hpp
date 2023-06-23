@@ -38,6 +38,8 @@ struct backtrackCollisionReport {
     collisionList *obj;
 };
 
+extern std::ofstream csvOutputFile;
+
 class Game {
   public:
     bool logToFile;

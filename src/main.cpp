@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <ostream>
+#include <string>
 #include <thread>
 #include <unistd.h>
 
@@ -23,6 +24,7 @@ int main() {
 
     const int n = POPULATION_SIZE / NB_THREAD;
     int gen = 0;
+    int lastSave = 0;
 
     Population **pops = new Population *[NB_THREAD];
     std::thread *threads[NB_THREAD];
@@ -43,7 +45,22 @@ int main() {
         }
 
         shufflePopulations(pops, NB_THREAD);
+
         gen += NB_THREAD;
+        lastSave += NB_THREAD;
+
+        if (lastSave > SAVE_RATE) {
+            Population *p = joinPopulation(pops, NB_THREAD);
+            std::ofstream out;
+            out.open("pops/pop-gen" + std::to_string(gen) + "-at-" +
+                     std::to_string(time(NULL)));
+
+            p->write(out);
+			
+			out.close();
+			delete p;
+			lastSave = 0;
+        }
     }
 
     Population *p = joinPopulation(pops, NB_THREAD);

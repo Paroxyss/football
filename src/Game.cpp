@@ -404,7 +404,7 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
                 double acceleration = r->get(1, i);
 
                 if (acceleration < 0) {
-                    acceleration = 0;
+                    acceleration /= 4;
                 }
                 g.doAction(i + a * EQUIPE_SIZE, rotation, acceleration);
             }
@@ -433,6 +433,10 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
     if (save) {
         csvOutputFile.close();
     }
+
+    if (score == 0) {
+        score = g.ball.pos.x / MAP_LENGTH * 2 - 1;
+    };
 
     return score;
 };

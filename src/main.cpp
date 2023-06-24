@@ -1,82 +1,48 @@
-#include "Chromosome.hpp"
-#include "Game.hpp"
-#include "Matrix.h"
-#include "Population.hpp"
 #include "config.h"
-#include "util.hpp"
-
-#include <array>
-#include <chrono>
-#include <cstdio>
+#include "train.hpp"
+#include <cstddef>
 #include <cstdlib>
+#include <ctime>
 #include <iostream>
-#include <ostream>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <unistd.h>
 
-void generation(Population *pop, gameStatistics *res) {
-    auto infos = pop->next();
-    res->totalCollisions = infos.totalCollisions;
-    res->totalGoals = infos.totalGoals;
-    res->collisionsMean = infos.collisionsMean;
-    res->goalsMean = infos.goalsMean;
-    res->scoreMean = infos.scoreMean;
-}
-
-int main() {
+int main(int argc, char *argv[]) {
     srand(time(NULL));
 
-    const int n = POPULATION_SIZE / NB_THREAD;
-    int gen = 0;
-
-    Population **pops = new Population *[NB_THREAD];
-    std::thread *threads[NB_THREAD];
-    gameStatistics infos[NB_THREAD];
-
-    for (int i = 0; i < NB_THREAD; i++) {
-        pops[i] = new Population(n);
+    if (argc < 2) {
+        std::cerr << "Aucun argument fourni !" << std::endl
+                  << "\t train <genN> <popSize> [nThread] : entraine le "
+                     "réseaux en sauvegardant les populations"
+                  << std::endl
+                  << "\t play <popFile> : fait un tournoi au sein d'une "
+                     "population et sauvegarde un mach entre les meilleurs"
+                  << std::endl;
+        _exit(EXIT_FAILURE);
     }
 
-    while (gen < N) {
-        gameStatistics totalInfos = {.totalCollisions = 0,
-                                     .totalGoals = 0,
-                                     .scoreMean = 0,
-                                     .goalsMean = 0,
-                                     .collisionsMean = 0};
-        for (int i = 0; i < NB_THREAD; i++) {
-            threads[i] = new std::thread(generation, pops[i], &infos[i]);
+    if (strcmp(argv[1], "train") == 0) {
+        unsigned int genN = N;
+        unsigned int popSize = POPULATION_SIZE;
+        unsigned int nThread = std::thread::hardware_concurrency();
+        if (argc >= 3) {
+            genN = std::stoi(argv[2]);
         }
-
-        for (auto &thread : threads) {
-            thread->join();
+        if (argc >= 4) {
+            popSize = std::stoi(argv[3]);
         }
-
-        for (int i = 0; i < NB_THREAD; i++) {
-            totalInfos.totalCollisions += infos[i].totalCollisions;
-            totalInfos.totalGoals += infos[i].totalGoals;
-            totalInfos.collisionsMean += infos[i].collisionsMean / NB_THREAD;
-            totalInfos.goalsMean += infos[i].goalsMean / NB_THREAD;
-            totalInfos.scoreMean += infos[i].scoreMean / NB_THREAD;
+        if (argc >= 5) {
+            nThread = std::stoi(argv[4]);
         }
-
-        shufflePopulations(pops, NB_THREAD);
-        gen += NB_THREAD;
-
-        std::cout << "Stats gen " << gen << " " << totalInfos << std::endl;
+        train(genN, popSize, nThread);
+    } else if (strcmp(argv[1], "play") == 0) {
+        if (argc < 3) {
+            throw std::invalid_argument("Missing argument popFile");
+        }
+        simulateAndSave(argv[2]);
     }
 
-    Population *p = joinPopulation(pops, NB_THREAD);
-    auto meilleurs = p->tournament(p->size, false);
-
-    play_match(std::get<0>(meilleurs), std::get<1>(meilleurs), true);
-
-    for (int i = 0; i < NB_THREAD; i++) {
-        delete pops[i];
-        delete threads[i];
-    }
-    delete[] pops;
-
-    delete p;
     _exit(EXIT_SUCCESS);
 }

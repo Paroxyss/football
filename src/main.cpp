@@ -1,5 +1,7 @@
 #include "config.h"
 #include "train.hpp"
+
+#include <cstring>
 #include <cstddef>
 #include <cstdlib>
 #include <ctime>

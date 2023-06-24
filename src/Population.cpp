@@ -2,6 +2,7 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <tuple>
 
 #include "Chromosome.hpp"
 #include "Game.hpp"

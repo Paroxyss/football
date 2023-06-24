@@ -52,6 +52,8 @@ class Game {
     wall *walls;
     wall *goals;
 
+    gameInformations infos = {.collisions = 0, .goals = 0, .score = 0};
+
     void set_players(const int conf[], int n);
 
     Game(int playerNumber, bool logToFile = false);
@@ -83,4 +85,4 @@ class Game {
     void aller_chercher_du_pain(int n);
 };
 
-double play_match(Chromosome *c1, Chromosome *c2, bool save = false);
+gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save = false);

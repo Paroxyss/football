@@ -27,19 +27,39 @@ Population::~Population() {
     delete[] this->pop;
 }
 
-void Population::next(bool save) {
+gameStatistics Population::next(bool save) {
     Chromosome **next_pop = new Chromosome *[this->size];
     int count = 0;
 
+    gameStatistics tournStats = {.totalCollisions = 0,
+                                 .totalGoals = 0,
+                                 .scoreMean = 0,
+                                 .goalsMean = 0,
+                                 .collisionsMean = 0};
     while (count < this->size * 0.9) {
         int k = log(this->size) - 2;
         int rdm = (rand() % k) + 2;
         int c = pow(2, rdm);
 
-        auto cpl = this->tournament(c, save);
-        next_pop[count] = crossover(*cpl.first, *cpl.second);
+        auto res = this->tournament(c, save);
+        next_pop[count] = crossover(*std::get<0>(res), *std::get<1>(res));
+
+        auto tournResult = std::get<2>(res);
 
         count++;
+		
+        tournStats.totalCollisions += tournResult.totalCollisions;
+        tournStats.totalGoals += tournResult.totalGoals;
+
+        tournStats.collisionsMean =
+            (double)(count - 1) / count * tournStats.collisionsMean +
+            tournResult.collisionsMean / count;
+        tournStats.goalsMean =
+            (double)(count - 1) / count * tournStats.goalsMean +
+            tournResult.goalsMean / count;
+        tournStats.scoreMean =
+            (double)(count - 1) / count * tournStats.scoreMean +
+            tournResult.scoreMean / count;
     }
 
     while (count < this->size * 0.91) {
@@ -71,38 +91,56 @@ void Population::next(bool save) {
     }
 
     delete[] next_pop;
+    return tournStats;
 }
 
-std::pair<Chromosome *, Chromosome *>
+std::tuple<Chromosome *, Chromosome *, gameStatistics>
 Population::tournament(int tournament_size, bool save) {
-    std::pair<Chromosome *, Chromosome *> p;
-
     std::vector<Chromosome *> contestants(tournament_size);
     for (int i = 0; i < tournament_size; i++) {
         contestants[i] = this->pop[rand() % this->size];
     }
+
+    gameStatistics gameStats = {.totalCollisions = 0,
+                                .totalGoals = 0,
+                                .scoreMean = 0,
+                                .goalsMean = 0,
+                                .collisionsMean = 0};
+    unsigned int gameN = 1;
 
     while (tournament_size > 2) {
         int pool_size = tournament_size / 2;
         std::vector<Chromosome *> pool(pool_size);
 
         for (int i = 0; i < pool_size; i++) {
-            if (play_match(contestants[i * 2], contestants[i * 2 + 1], save) >
-                0) {
+            auto matchResult =
+                play_match(contestants[i * 2], contestants[i * 2 + 1], save);
+            if (matchResult.score > 0) {
                 pool[i] = contestants[i * 2];
             } else {
                 pool[i] = contestants[i * 2 + 1];
             }
+
+			// statistiques
+            gameStats.totalCollisions += matchResult.collisions;
+            gameStats.totalGoals += matchResult.goals;
+            gameStats.collisionsMean =
+                (double)(gameN - 1) / gameN * gameStats.collisionsMean +
+                (double)matchResult.collisions / gameN;
+            gameStats.goalsMean =
+                (double)(gameN - 1) / gameN * gameStats.goalsMean +
+                (double)matchResult.goals / gameN;
+            gameStats.scoreMean =
+                (double)(gameN - 1) / gameN * gameStats.scoreMean +
+                matchResult.score / gameN;
+            gameN += 1;
         }
 
         tournament_size = pool_size;
         contestants = pool;
     }
 
-    p.first = contestants[0];
-    p.second = contestants[1];
-
-    return p;
+    return std::make_tuple(contestants[0], contestants[1], gameStats);
 }
 
 Chromosome **getChromosomeFromPopulations(Population **pop, unsigned int i) {
@@ -176,21 +214,21 @@ Population *joinPopulation(Population **p, int n) {
 void Population::write(std::ofstream &file) {
     file.write((char *)&this->size, sizeof(this->size));
 
-	for(int i = 0; i < this->size; i++){
-		this->pop[i]->write(file);
-	}
+    for (int i = 0; i < this->size; i++) {
+        this->pop[i]->write(file);
+    }
 }
 
-Population *Population::read(std::ifstream &file){
-	int size;
-	file.read((char *)&size, sizeof(size));
+Population *Population::read(std::ifstream &file) {
+    int size;
+    file.read((char *)&size, sizeof(size));
 
-	Population *c = new Population(size);
+    Population *c = new Population(size);
 
-	for(int i = 0; i < c->size; i++){
-		delete c->pop[i];
-		c->pop[i] = Chromosome::read(file);
-	}
+    for (int i = 0; i < c->size; i++) {
+        delete c->pop[i];
+        c->pop[i] = Chromosome::read(file);
+    }
 
-	return c;
+    return c;
 };

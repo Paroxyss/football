@@ -301,6 +301,7 @@ void Game::tick(double timeToAdvance, bool root) {
     }
     if (c != NULL) {
         moveAllObj(-timeToAdvance);
+        this->infos.collisions += 1;
 
         collisionList *firstCollision = findFirstCollision(c);
 
@@ -374,7 +375,7 @@ bool Game::checkGoal(int id) {
     return false;
 }
 
-double play_match(Chromosome *c1, Chromosome *c2, bool save) {
+gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     auto g = Game(2 * EQUIPE_SIZE, save);
     g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
     g.ball.vitesse = {.x = 0, .y = 0};
@@ -386,8 +387,6 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
         Matrix(COM_SIZE * EQUIPE_SIZE, 1),
         Matrix(COM_SIZE * EQUIPE_SIZE, 1),
     };
-
-    int score = 0;
 
     for (int k = 0; k < GAME_DURATION; k++) {
 
@@ -418,8 +417,8 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
         bool bc1 = g.checkGoal(0);
         bool bc2 = g.checkGoal(1);
         if (bc1 || bc2) {
-
-            score += bc1 ? -1 : 1;
+            g.infos.score += bc1 ? -1 : 1;
+            g.infos.goals += 1;
 
             g.ball.pos.x = (float)MAP_LENGTH / 2;
             g.ball.pos.y = (float)MAP_HEIGHT / 2;
@@ -434,9 +433,9 @@ double play_match(Chromosome *c1, Chromosome *c2, bool save) {
         csvOutputFile.close();
     }
 
-    if (score == 0) {
-        score = g.ball.pos.x / MAP_LENGTH * 2 - 1;
+    if (g.infos.score == 0) {
+        g.infos.score = g.ball.pos.x / MAP_LENGTH * 2 - 1;
     };
 
-    return score;
+    return g.infos;
 };

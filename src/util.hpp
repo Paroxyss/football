@@ -4,6 +4,20 @@
 #include <iostream>
 #include <ostream>
 
+struct gameInformations {
+    unsigned int collisions;
+    unsigned int goals;
+    double score;
+};
+
+struct gameStatistics {
+    unsigned long totalCollisions;
+	unsigned int totalGoals;
+	double scoreMean;
+	double goalsMean;
+	double collisionsMean;
+};
+
 inline double randomDouble(double min, double max) {
     return (rand() / (double)RAND_MAX) * (max - min) + min;
 }
@@ -38,3 +52,6 @@ inline double angleRounded(double input) {
     // retour de l'angle corrigé
     return input - offset * 2 * M_PI;
 }
+
+std::ostream &operator<<(std::ostream &out, gameStatistics stats);
+std::ostream &operator<<(std::ostream &out, gameInformations stats);

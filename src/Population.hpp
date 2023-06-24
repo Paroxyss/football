@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Chromosome.hpp"
+#include "Game.hpp"
 #include <utility>
 
 class Population {
@@ -12,11 +13,13 @@ class Population {
     Population(int size);
     ~Population();
 
-    void next(bool save = false);
-    std::pair<Chromosome *, Chromosome *> tournament(int k, bool save);
+    gameStatistics next(bool save = false);
 	
-	void write(std::ofstream &file);
-	static Population* read(std::ifstream &file);
+    std::tuple<Chromosome *, Chromosome *, gameStatistics>
+    tournament(int k, bool save);
+
+    void write(std::ofstream &file);
+    static Population *read(std::ifstream &file);
 };
 
 Chromosome **getChromosomeFromPopulations(Population **pop, unsigned int i);

@@ -403,7 +403,7 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
                 double acceleration = r->get(1, i);
 
                 if (acceleration < 0) {
-                    acceleration /= 4;
+                    acceleration = 0;
                 }
                 g.doAction(i + a * EQUIPE_SIZE, rotation, acceleration);
             }

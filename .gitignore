@@ -7,3 +7,5 @@ tests/*
 todo.txt
 .DS_Store
 .idea
+
+pops/*

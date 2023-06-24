@@ -37,7 +37,7 @@ gameStatistics Population::next(bool save) {
                                  .scoreMean = 0,
                                  .goalsMean = 0,
                                  .collisionsMean = 0};
-    while (count < this->size * 0.9) {
+    while (count < this->size * CROSSOVER_RATE) {
         int k = log(this->size) - 2;
         int rdm = (rand() % k) + 2;
         int c = pow(2, rdm);
@@ -48,7 +48,7 @@ gameStatistics Population::next(bool save) {
         auto tournResult = std::get<2>(res);
 
         count++;
-		
+
         tournStats.totalCollisions += tournResult.totalCollisions;
         tournStats.totalGoals += tournResult.totalGoals;
 
@@ -63,7 +63,7 @@ gameStatistics Population::next(bool save) {
             tournResult.scoreMean / count;
     }
 
-    while (count < this->size * 0.91) {
+    while (count < this->size * (CROSSOVER_RATE + MUTATION_RATE)) {
         int randIndice = rand() % this->size;
 
         next_pop[count] = mutate(this->pop[randIndice]);
@@ -72,7 +72,7 @@ gameStatistics Population::next(bool save) {
     }
 
     // new blood
-    while (count < this->size * 0.95) {
+    while (count < this->size) {
         Chromosome *c = new Chromosome();
         c->initialize();
         next_pop[count] = c;
@@ -80,11 +80,11 @@ gameStatistics Population::next(bool save) {
         count++;
     }
 
-    while (count < this->size) {
-        int randIndice = rand() % this->size;
-        next_pop[count] = cloneChromosome(this->pop[randIndice]);
-        count++;
-    }
+    // while (count < this->size) {
+    //     int randIndice = rand() % this->size;
+    //     next_pop[count] = cloneChromosome(this->pop[randIndice]);
+    //     count++;
+    // }
 
     for (int i = 0; i < this->size; i++) {
         delete this->pop[i];
@@ -122,7 +122,7 @@ Population::tournament(int tournament_size, bool save) {
                 pool[i] = contestants[i * 2 + 1];
             }
 
-			// statistiques
+            // statistiques
             gameStats.totalCollisions += matchResult.collisions;
             gameStats.totalGoals += matchResult.goals;
             gameStats.collisionsMean =

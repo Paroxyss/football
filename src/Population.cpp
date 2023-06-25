@@ -1,8 +1,8 @@
 #include <cstdlib>
 #include <iostream>
+#include <tuple>
 #include <utility>
 #include <vector>
-#include <tuple>
 
 #include "Chromosome.hpp"
 #include "Game.hpp"
@@ -38,9 +38,12 @@ gameStatistics Population::next(bool save) {
                                  .goalsMean = 0,
                                  .collisionsMean = 0};
     while (count < this->size * CROSSOVER_RATE) {
-        int k = log(this->size) - 2;
-        int rdm = (rand() % k) + 2;
-        int c = pow(2, rdm);
+        // c'est très compliqué à balancer mais organiser des gros tournois
+        // augmente énormément l'élitisme ce qui permet en théorie à la
+        // population de s'améliorer. Le problème étant la diversité, comme on a
+        // beaucoup de mutation et de nouveaux individus ça devrait être
+        // correcte.
+        int c = previous_power_2(this->size);
 
         auto res = this->tournament(c, save);
         next_pop[count] = crossover(*std::get<0>(res), *std::get<1>(res));

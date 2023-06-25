@@ -35,14 +35,14 @@ const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, COM_SIZE *EQUIPE_SIZE};
 
 #define NB_GEN_MUTATION 0.1
 
-#define POPULATION_SIZE 1000
+#define POPULATION_SIZE 4000
 
 #define CROSSOVER_RATE 0.85
 
 #define MUTATION_RATE 0.1
 
 // nombre de générations
-#define N 300
+#define N 10
 // intervalle (en génération) des sauvegardes
 #define SAVE_RATE 100
 

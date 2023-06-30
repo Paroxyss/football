@@ -2,7 +2,7 @@
 
 #define COM_SIZE 2
 
-#define NETWORK_SIZE 4
+#define NETWORK_SIZE 3
 #define DIDIER_NETWORK_SIZE 3
 
 // pour l'instant le réseau ne prend pas l'accélération en entrée
@@ -15,12 +15,12 @@
 
 #define EQUIPE_SIZE 3
 
-const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 14, 10, NETWORK_OUTPUT_SIZE};
+const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 12, NETWORK_OUTPUT_SIZE};
 const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, COM_SIZE *EQUIPE_SIZE};
 
 #define GAME_RESOLUTION 1
 
-#define GAME_DURATION (20 * 60)
+#define GAME_DURATION (30 * 60)
 
 #define MAP_LENGTH (119 * 10)
 #define MAP_HEIGHT (75 * 10)
@@ -33,13 +33,12 @@ const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, COM_SIZE *EQUIPE_SIZE};
 #define BALL_MASS 40
 #define BALL_SIZE 10
 
-#define NB_GEN_MUTATION 0.1
+#define GENE_MUTATION_PROBABILITY 0.05
 
-#define POPULATION_SIZE 4000
+#define POPULATION_SIZE 1000
 
-#define CROSSOVER_RATE 0.85
-
-#define MUTATION_RATE 0.1
+#define CROSSOVER_PROBABILITY 0.9
+#define MUTATION_PROBABILITY 0.05
 
 // nombre de générations
 #define N 10

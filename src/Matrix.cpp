@@ -1,4 +1,5 @@
 #include "Matrix.h"
+#include "Mutation.hpp"
 #include "config.h"
 #include "util.hpp"
 
@@ -7,6 +8,8 @@
 #include <iostream>
 #include <random>
 #include <stdexcept>
+
+using std::cout;
 
 Matrix::Matrix(int ligne, int col) {
     this->ligne = ligne;
@@ -47,17 +50,6 @@ void Matrix::He_initialize() {
     }
 }
 
-/*
-    Chaque coefficients d'une matrice mutée à une probabilité de 1/l d'être
-   modifié où l est le nombre total de coefficients (ici, m->ligne * m->col)
-   de manière qu'en "moyenne", seul 1 coefficient de la matrice ne soit
-   modifié.
-
-   mutation_scalar() retourne un coefficient multiplicateur comprit
-   entre 0 et 2. Seulement, mutation_scalar() à une forte probabilité d'être
-   proche de 1 il faudrait donc possiblement altérer plus de coefficients de la
-   matrice pour accélérer l'exploration de l'ensemble solution.
-*/
 Matrix *mutation(Matrix &m) {
     Matrix *muted = new Matrix(m.ligne, m.col);
     int np = m.ligne * m.col;
@@ -65,42 +57,46 @@ Matrix *mutation(Matrix &m) {
 
     for (int i = 0; i < m.ligne; i++) {
         for (int j = 0; j < m.col; j++) {
-            int p = rand() % np;
-
-            if (0 > p || p >= NB_GEN_MUTATION * 100) {
+            if (likelyness(1 - GENE_MUTATION_PROBABILITY)) {
                 continue;
             }
 
-            muted->set(i, j, m.get(i, j) * mutation_scalar());
+            /*
+                TODO: il explique énormément un peu comme le crossover
+                de différentes façons de muter une valeur réelle. Il faudrait
+               toutes les tester...
+
+            */
+            muted->set(i, j, replacement());
         }
     }
 
     return muted;
 }
 
-void Matrix::write(std::ofstream &file){
-	file.write((char *)&this->col, sizeof(this->col));
-	file.write((char *)&this->ligne, sizeof(this->ligne));
-	
+void Matrix::write(std::ofstream &file) {
+    file.write((char *)&this->col, sizeof(this->col));
+    file.write((char *)&this->ligne, sizeof(this->ligne));
+
     for (int i = 0; i < this->ligne; i++) {
         for (int j = 0; j < this->col; j++) {
-			file.write((char*) &t[i][j], sizeof(double));
+            file.write((char *)&t[i][j], sizeof(double));
         }
     }
 }
 
-Matrix* Matrix::read(std::ifstream &file){
-	int lignes;
-	int colonnes; 
-	
-	file.read((char *)&colonnes, sizeof(colonnes));
-	file.read((char *)&lignes, sizeof(lignes));
+Matrix *Matrix::read(std::ifstream &file) {
+    int lignes;
+    int colonnes;
 
-	auto m = new Matrix(lignes, colonnes);
+    file.read((char *)&colonnes, sizeof(colonnes));
+    file.read((char *)&lignes, sizeof(lignes));
+
+    auto m = new Matrix(lignes, colonnes);
     for (int i = 0; i < m->ligne; i++) {
         for (int j = 0; j < m->col; j++) {
-			file.read((char*) &m->t[i][j], sizeof(double));
+            file.read((char *)&m->t[i][j], sizeof(double));
         }
     }
-	return m;
+    return m;
 }

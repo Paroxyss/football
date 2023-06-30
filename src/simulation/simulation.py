@@ -13,13 +13,11 @@ data = read("game.csv")
 nb_joueurs = int(data[0][1] * 2)
 
 display = False
-ticks = 0
 
 for i in range(1, len(data)):
     match data[i][0]:
         case 1.0:
-            clock.tick(120)
-            ticks += 1
+            clock.tick(100)
         case 2.0:
             display = not display
             if display:

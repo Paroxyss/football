@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <tuple>
 #include <utility>
@@ -29,73 +30,53 @@ Population::~Population() {
 }
 
 gameStatistics Population::next(bool save) {
-    Chromosome **next_pop = new Chromosome *[this->size];
+    Chromosome **nxt = new Chromosome *[this->size];
     int count = 0;
+    int tourn_size = previous_power_2(this->size);
 
-    gameStatistics tournStats = {.totalCollisions = 0,
-                                 .totalGoals = 0,
-                                 .scoreMean = 0,
-                                 .goalsMean = 0,
-                                 .collisionsMean = 0};
-    while (count < this->size * CROSSOVER_RATE) {
-        // c'est très compliqué à balancer mais organiser des gros tournois
-        // augmente énormément l'élitisme ce qui permet en théorie à la
-        // population de s'améliorer. Le problème étant la diversité, comme on a
-        // beaucoup de mutation et de nouveaux individus ça devrait être
-        // correcte.
-        int c = previous_power_2(this->size);
-
-        auto res = this->tournament(c, save);
-        next_pop[count] = crossover(*std::get<0>(res), *std::get<1>(res));
-
-        auto tournResult = std::get<2>(res);
-
-        count++;
-
-        tournStats.totalCollisions += tournResult.totalCollisions;
-        tournStats.totalGoals += tournResult.totalGoals;
-
-        tournStats.collisionsMean =
-            (double)(count - 1) / count * tournStats.collisionsMean +
-            tournResult.collisionsMean / count;
-        tournStats.goalsMean =
-            (double)(count - 1) / count * tournStats.goalsMean +
-            tournResult.goalsMean / count;
-        tournStats.scoreMean =
-            (double)(count - 1) / count * tournStats.scoreMean +
-            tournResult.scoreMean / count;
-    }
-
-    while (count < this->size * (CROSSOVER_RATE + MUTATION_RATE)) {
-        int randIndice = rand() % this->size;
-
-        next_pop[count] = mutate(this->pop[randIndice]);
-
-        count++;
-    }
-
-    // new blood
+    gameStatistics tourn_stats = {.totalCollisions = 0,
+                                  .totalGoals = 0,
+                                  .scoreMean = 0,
+                                  .goalsMean = 0,
+                                  .collisionsMean = 0};
     while (count < this->size) {
-        Chromosome *c = new Chromosome();
-        c->initialize();
-        next_pop[count] = c;
+        if (likelyness(1 - CROSSOVER_PROBABILITY)) {
+            nxt[count] = cloneChromosome(this->pop[rand() % this->size]);
+
+        } else {
+            auto outcome = this->tournament(tourn_size, save);
+            nxt[count] =
+                crossover(*std::get<0>(outcome), *std::get<1>(outcome));
+            auto tournResult = std::get<2>(outcome);
+
+            tourn_stats.totalCollisions += tournResult.totalCollisions;
+            tourn_stats.totalGoals += tournResult.totalGoals;
+
+            tourn_stats.collisionsMean =
+                (double)(count) / count * tourn_stats.collisionsMean +
+                tournResult.collisionsMean / (count + 1);
+            tourn_stats.goalsMean =
+                (double)(count) / count * tourn_stats.goalsMean +
+                tournResult.goalsMean / (count + 1);
+            tourn_stats.scoreMean =
+                (double)(count) / count * tourn_stats.scoreMean +
+                tournResult.scoreMean / (count + 1);
+        }
+
+        if (likelyness(MUTATION_PROBABILITY)) {
+            nxt[count] = mutate(nxt[count]);
+        }
 
         count++;
     }
-
-    // while (count < this->size) {
-    //     int randIndice = rand() % this->size;
-    //     next_pop[count] = cloneChromosome(this->pop[randIndice]);
-    //     count++;
-    // }
 
     for (int i = 0; i < this->size; i++) {
         delete this->pop[i];
-        this->pop[i] = next_pop[i];
+        this->pop[i] = nxt[i];
     }
 
-    delete[] next_pop;
-    return tournStats;
+    delete[] nxt;
+    return tourn_stats;
 }
 
 std::tuple<Chromosome *, Chromosome *, gameStatistics>

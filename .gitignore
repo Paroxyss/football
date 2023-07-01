@@ -3,6 +3,9 @@ tests/*
 *.pyc
 *.csv
 *.bin
+*.o
+
+bin
 
 todo.txt
 .DS_Store

@@ -353,3 +353,88 @@ Chromosome *Chromosome::read(std::ifstream &file) {
 
     return c;
 }
+
+double Chromosome::getPlayersNorm() {
+    double sum = 0;
+
+    for (int i = 0; i < EQUIPE_SIZE; i++) {
+        for (int j = 0; j < NETWORK_SIZE - 1; j++) {
+            for (int k = 0; k < matrix[i][j]->ligne; k++) {
+                for (int l = 0; l < matrix[i][j]->col; l++) {
+                    sum += pow(matrix[i][j]->get(k, l), 2);
+                }
+            }
+        }
+    }
+	return sum;
+}
+
+double Chromosome::getDidierNorm() {
+	double sum = 0;
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        for (int k = 0; k < didier[i]->ligne; k++) {
+            for (int l = 0; l < didier[i]->col; l++) {
+                sum += pow(didier[i]->get(k, l), 2);
+            }
+        }
+    }
+
+    return sqrt(sum);
+}
+
+double Chromosome::getMatrixesNorm() {
+    double sum = 0;
+
+    for (int i = 0; i < EQUIPE_SIZE; i++) {
+        for (int j = 0; j < NETWORK_SIZE - 1; j++) {
+            for (int k = 0; k < matrix[i][j]->ligne; k++) {
+                for (int l = 0; l < matrix[i][j]->col; l++) {
+                    sum += pow(matrix[i][j]->get(k, l), 2);
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        for (int k = 0; k < didier[i]->ligne; k++) {
+            for (int l = 0; l < didier[i]->col; l++) {
+                sum += pow(didier[i]->get(k, l), 2);
+            }
+        }
+    }
+
+    return sqrt(sum);
+}
+
+double Chromosome::getAngleNorm() {
+    double sum = 0;
+    vector v = {0, 1};
+
+    for (int i = 0; i < EQUIPE_SIZE; i++) {
+        for (int j = 0; j < NETWORK_SIZE - 1; j++) {
+            for (int k = 0; k < matrix[i][j]->ligne; k++) {
+                for (int l = 0; l < matrix[i][j]->col; l++) {
+                    v.x = matrix[i][j]->get(k, l);
+                    sum += vangle(v);
+                }
+                return sum;
+            }
+        }
+    }
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        for (int k = 0; k < didier[i]->ligne; k++) {
+            for (int l = 0; l < didier[i]->col; l++) {
+                v.x = didier[i]->get(k, l);
+                sum += vangle(v);
+            }
+        }
+    }
+
+    return sum;
+}
+
+std::pair<double, double> Chromosome::get2dProjection() {
+    return std::make_pair(this->getPlayersNorm(), this->getDidierNorm());
+}

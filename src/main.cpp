@@ -15,13 +15,17 @@ int main(int argc, char *argv[]) {
     srand(time(NULL));
 
     if (argc < 2) {
-        std::cerr << "Aucun argument fourni !" << std::endl
-                  << "\t train <genN> <popSize> [nThread] : entraine le "
-                     "réseaux en sauvegardant les populations"
-                  << std::endl
-                  << "\t play <popFile> : fait un tournoi au sein d'une "
-                     "population et sauvegarde un mach entre les meilleurs"
-                  << std::endl;
+        std::cerr
+            << "Aucun argument fourni ! " << std::endl
+            << "\t train <genN> <popSize> [nThread] : entraine le "
+               "réseaux en sauvegardant les populations"
+            << std::endl
+            << "\t play <popFile> : fait un tournoi au sein d'une "
+               "population et sauvegarde un mach entre les meilleurs"
+            << std::endl
+            << "\t map <popFile> [output] crée un fichier csv mappant une "
+               "population"
+            << std::endl;
         _exit(EXIT_FAILURE);
     }
 
@@ -44,6 +48,15 @@ int main(int argc, char *argv[]) {
             throw std::invalid_argument("Missing argument popFile");
         }
         simulateAndSave(argv[2]);
+    } else if (strcmp(argv[1], "map") == 0) {
+        if (argc < 3) {
+            throw std::invalid_argument("Missing argument popFile");
+        }
+        if (argc > 3) {
+            saveMap(argv[2], argv[3]);
+        } else {
+            saveMap(argv[2]);
+        }
     }
 
     _exit(EXIT_SUCCESS);

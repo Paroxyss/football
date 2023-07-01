@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <thread>
 
+#include "Chromosome.hpp"
 #include "Population.hpp"
 #include "config.h"
 #include "util.hpp"
@@ -64,7 +65,8 @@ void train(unsigned int generationObjective, unsigned int populationSize,
         shufflePopulations(pops, nbThread);
         gen += nbThread;
 
-        std::cout << "Stats gen " << gen << " " << totalInfos << " in " << elapsed_seconds.count() << "s" << std::endl;
+        std::cout << "Stats gen " << gen << " " << totalInfos << " in "
+                  << elapsed_seconds.count() << "s" << std::endl;
 
         lastSave += nbThread;
 
@@ -100,17 +102,97 @@ void train(unsigned int generationObjective, unsigned int populationSize,
 }
 
 void simulateAndSave(const char *filename) {
+    std::cout << "Opening ... ";
     std::ifstream input;
     input.open(filename);
     if (!input.is_open()) {
         throw std::invalid_argument("File not found");
     }
-
+    std::cout << "Loading ... ";
     Population *p = Population::read(input);
+    std::cout << "Ok ! (" << p->size << " chromosomes)" << std::endl
+              << "Starting tournament" << std::endl;
+
     auto meilleurs = p->tournament(p->size, false);
+
+    std::cout << "Saving match" << std::endl;
 
     play_match(std::get<0>(meilleurs), std::get<1>(meilleurs), true);
 
     input.close();
     delete p;
+}
+
+void play_match(const char *fileC1, const char *fileC2) {
+    std::cout << "Opening ... ";
+    std::ifstream fc1;
+    std::ifstream fc2;
+    fc1.open(fileC1);
+    fc2.open(fileC2);
+    if (!fc1.is_open() || !fc2.is_open()) {
+        throw std::invalid_argument("File not found");
+    }
+    std::cout << "Loading ... ";
+    auto c1 = Chromosome::read(fc1);
+    auto c2 = Chromosome::read(fc2);
+    std::cout << "Ok ! " << std::endl << "Saving match" << std::endl;
+
+    play_match(c1, c2, true);
+}
+
+void saveMap(const char *filename, const char *outputFn) {
+    std::cout << "Opening ... ";
+    std::ifstream input;
+    input.open(filename);
+    if (!input.is_open()) {
+        throw std::invalid_argument("File not found");
+    }
+    std::cout << "Loading ... ";
+    Population *p = Population::read(input);
+    std::cout << "Ok ! (" << p->size << " chromosomes)" << std::endl
+              << "save Mapping" << std::endl;
+
+    std::ofstream output;
+    output.open(outputFn);
+
+    for (int i = 0; i < p->size; i++) {
+        auto data = p->pop[i]->get2dProjection();
+        output << data.first << ", " << data.second << std::endl;
+    }
+
+    input.close();
+    output.close();
+
+    delete p;
+}
+
+void linearMap(const char **files, const char *outputFn, int fileNumber) {
+    std::ofstream output;
+    output.open(outputFn);
+
+    for (int i = 0; i < fileNumber; i++) {
+        std::cout << "Opening ... ";
+        std::ifstream input;
+        input.open(files[i]);
+        if (!input.is_open()) {
+            throw std::invalid_argument("File not found");
+        }
+		
+        std::cout << "Loading ... ";
+		std::fflush(stdout);
+		
+        Population *p = Population::read(input);
+        std::cout << "Ok ! (" << p->size << " chromosomes)" << std::endl
+                  << "Mapping..." << std::endl;
+
+        for (int i = 0; i < p->size; i++) {
+            auto data = p->pop[i]->get2dProjection();
+            output << data.first << ", " << data.second << std::endl;
+        }
+
+        input.close();
+
+        delete p;
+    }
+    output.close();
 }

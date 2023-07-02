@@ -366,11 +366,11 @@ double Chromosome::getPlayersNorm() {
             }
         }
     }
-	return sum;
+    return sum;
 }
 
 double Chromosome::getDidierNorm() {
-	double sum = 0;
+    double sum = 0;
 
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
         for (int k = 0; k < didier[i]->ligne; k++) {

@@ -375,6 +375,11 @@ bool Game::checkGoal(int id) {
     return false;
 }
 
+/*
+    La valeur de g.infos.score est positive lorsque c1 remporte la partie,
+    négative dans le cas contraire. c1 est placé à gauche du terrain tandis que
+    c2 à droite.
+*/
 gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     auto g = Game(2 * EQUIPE_SIZE, save);
     g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
@@ -403,7 +408,7 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
                 double acceleration = r->get(1, i);
 
                 if (acceleration < 0) {
-                    acceleration = 0;
+                    acceleration /= 5;
                 }
                 g.doAction(i + a * EQUIPE_SIZE, rotation, acceleration);
             }
@@ -434,7 +439,7 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     }
 
     if (g.infos.score == 0) {
-        g.infos.score = g.ball.pos.x / MAP_LENGTH * 2 - 1;
+        g.infos.score = g.ball.pos.x >= (double)MAP_LENGTH / 2 ? -1 : 1;
     };
 
     return g.infos;

@@ -101,25 +101,73 @@ void train(unsigned int generationObjective, unsigned int populationSize,
     delete p;
 }
 
+/*
+    Pour choisir les deux équipes dont le match sera visualisé,
+    on organise un tournois en n^2 ce qui maximise l'élitisme.
+
+    Le désavantage étant que ça rallonge considérable le temps d'exécution
+    surtout pour des larges population. Il faudrait donc repenser cette étape
+    hors tests.
+*/
+void play_with_nexts(Population *p, int i, int *scores) {
+    for (int j = i + 1; j < p->size; j++) {
+        auto res = play_match(p->pop[i], p->pop[j], 0);
+        int w = res.score > 0 ? i : j;
+
+        scores[w] += abs(res.score);
+    }
+}
+
 void simulateAndSave(const char *filename) {
-    std::cout << "Opening ... ";
     std::ifstream input;
     input.open(filename);
-    if (!input.is_open()) {
+
+    if (!input.is_open())
         throw std::invalid_argument("File not found");
-    }
-    std::cout << "Loading ... ";
+
+    int n = std::thread::hardware_concurrency();
+    std::thread *threads[n];
+
     Population *p = Population::read(input);
-    std::cout << "Ok ! (" << p->size << " chromosomes)" << std::endl
-              << "Starting tournament" << std::endl;
 
-    auto meilleurs = p->tournament(p->size, false);
+    int *scores = (int *)calloc(p->size, sizeof(int));
+    int b1 = INT_MIN, b2 = INT_MIN;
+    Chromosome *c1, *c2;
 
-    std::cout << "Saving match" << std::endl;
+    int c = 0;
+    while (c < p->size) {
+        int r = p->size - c - n < 0 ? p->size - c : n;
 
-    play_match(std::get<0>(meilleurs), std::get<1>(meilleurs), true);
+        for (int i = 0; i < r; i++) {
+            threads[i] = new std::thread(play_with_nexts, p, c + i, scores);
+        }
 
+        for (int j = 0; j < r; j++) {
+            threads[j]->join();
+        }
+
+        c += r;
+    }
+
+    for (int i = 0; i < p->size; i++) {
+        int v = scores[i];
+        Chromosome *c = p->pop[i];
+
+        if (v > b1) {
+            b2 = b1, c2 = c1;
+            b1 = v, c1 = c;
+        } else if (v > b2 && v != b1) {
+            b2 = v, c2 = c;
+        }
+    }
+
+    play_match(c1, c2, 1);
     input.close();
+
+    for (int i = 0; i < n; i++)
+        delete threads[i];
+
+    free(scores);
     delete p;
 }
 
@@ -177,10 +225,10 @@ void linearMap(const char **files, const char *outputFn, int fileNumber) {
         if (!input.is_open()) {
             throw std::invalid_argument("File not found");
         }
-		
+
         std::cout << "Loading ... ";
-		std::fflush(stdout);
-		
+        std::fflush(stdout);
+
         Population *p = Population::read(input);
         std::cout << "Ok ! (" << p->size << " chromosomes)" << std::endl
                   << "Mapping..." << std::endl;

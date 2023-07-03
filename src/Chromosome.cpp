@@ -65,12 +65,12 @@ void Chromosome::print() {
 void Chromosome::initialize() {
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
-            this->matrix[i][j]->He_initialize();
+            this->matrix[i][j]->initialize();
         }
     }
 
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        this->didier[i]->He_initialize();
+        this->didier[i]->initialize();
     }
 }
 
@@ -131,6 +131,10 @@ void Chromosome::apply_didier(Matrix &inputs) {
     output_activation(inputs);
 }
 
+/*
+    team == false -> gauche
+    team == true -> droite
+*/
 void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
                  int i, ball *b, bool team) {
     player &selected = equipeAlliee[i];
@@ -142,21 +146,23 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
     mat->set(1, i, fakePos.y);
 
     // Vitesse du joueur
-    double fakeVitesseX = team ? -selected.vitesse.x : selected.vitesse.x;
-    mat->set(2, i, fakeVitesseX);
-    mat->set(3, i, selected.vitesse.y);
+    vector fakeVitesse = team ? -selected.vitesse : selected.vitesse;
+    mat->set(2, i, fakeVitesse.x);
+    mat->set(3, i, fakeVitesse.y);
 
     // Distance et orientation relative de la balle
-    vector relatBalle = b->pos - selected.pos;
-    mat->set(4, i, norme(relatBalle));
-    mat->set(5, i, angleRounded(vangle(relatBalle) - selected.orientation));
+    mat->set(4, i, norme(b->pos - selected.pos));
+    mat->set(5, i,
+             angleRounded(angle_two_vectors(b->pos, selected.pos) -
+                          selected.orientation));
 
     double fakeOrientation =
         team ? selected.orientation + M_PI : selected.orientation;
     // Distance et orientation relative de la cage adverse
     vector cage = {.x = MAP_LENGTH, .y = (double)MAP_HEIGHT / 2};
     mat->set(6, i, norme(cage - fakePos));
-    mat->set(7, i, angleRounded(vangle(cage - fakePos) - fakeOrientation));
+    mat->set(7, i,
+             angleRounded(angle_two_vectors(cage, fakePos) - fakeOrientation));
 
     // Joueur le plus proche
     player *nearest;
@@ -170,7 +176,7 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
     }
     mat->set(8, i, d);
     mat->set(9, i,
-             angleRounded(vangle(nearest->pos - selected.pos) -
+             angleRounded(angle_two_vectors(nearest->pos, selected.pos) -
                           selected.orientation));
 }
 
@@ -179,8 +185,8 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
    sur chaque colonnes les COM_SIZE dernières sorties de communication à
    Didier qui doivent être réinjectés dans compute_didier
 
-   0 -> left
-   1 -> right
+   team == false -> left
+   team == true -> right
 */
 
 Matrix *Chromosome::collect_and_apply(player *equipeAlliee,

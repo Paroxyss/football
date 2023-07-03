@@ -78,7 +78,11 @@ inline double vangle(vector v) {
     return angleRounded(atan2(v.y, v.x));
 }
 
-inline std::ostream &operator<<(std::ostream &out, vector vec){
-	out << "Vector{ .x=" << vec.x << ", .y = " << vec.y << "}";
-	return out;
+inline double angle_two_vectors(vector a, vector b) {
+    return acos(dotProduct(a, b) / (norme(a) * norme(b)));
+}
+
+inline std::ostream &operator<<(std::ostream &out, vector vec) {
+    out << "Vector{ .x=" << vec.x << ", .y = " << vec.y << "}";
+    return out;
 }

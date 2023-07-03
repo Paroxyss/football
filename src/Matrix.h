@@ -59,10 +59,10 @@ class Matrix {
     void print();
 
     Matrix *crossover(Matrix *a);
-    void He_initialize();
+    void initialize();
 
     void write(std::ofstream &file);
-	static Matrix* read(std::ifstream &file);
+    static Matrix *read(std::ifstream &file);
 };
 
 Matrix *mutation(Matrix &m);

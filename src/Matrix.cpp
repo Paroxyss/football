@@ -40,7 +40,7 @@ void Matrix::print() {
     }
 }
 
-void Matrix::He_initialize() {
+void Matrix::initialize() {
     for (int i = 0; i < this->ligne; i++) {
         for (int j = 0; j < this->col; j++) {
             double x = randomDouble(-10, 10);
@@ -50,6 +50,11 @@ void Matrix::He_initialize() {
     }
 }
 
+/*
+    Il existe énormément de différentes manières de
+    muter une matrices, il faudrait faire des tests pour voir laquelle est la
+   plus efficace
+*/
 Matrix *mutation(Matrix &m) {
     Matrix *muted = new Matrix(m.ligne, m.col);
     int np = m.ligne * m.col;
@@ -61,12 +66,6 @@ Matrix *mutation(Matrix &m) {
                 continue;
             }
 
-            /*
-                TODO: il explique énormément un peu comme le crossover
-                de différentes façons de muter une valeur réelle. Il faudrait
-               toutes les tester...
-
-            */
             muted->set(i, j, replacement());
         }
     }

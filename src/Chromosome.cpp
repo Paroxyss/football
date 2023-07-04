@@ -147,22 +147,22 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
 
     // Vitesse du joueur
     vector fakeVitesse = team ? -selected.vitesse : selected.vitesse;
+
     mat->set(2, i, fakeVitesse.x);
-    mat->set(3, i, fakeVitesse.y);
+    mat->set(3, i, fakeVitesse.x);
 
     // Distance et orientation relative de la balle
     mat->set(4, i, norme(b->pos - selected.pos));
-    mat->set(5, i,
-             angleRounded(angle_two_vectors(b->pos, selected.pos) -
-                          selected.orientation));
+    mat->set(
+        5, i,
+        angleRounded(vangle(b->pos - selected.pos) - selected.orientation));
 
     double fakeOrientation =
         team ? selected.orientation + M_PI : selected.orientation;
     // Distance et orientation relative de la cage adverse
     vector cage = {.x = MAP_LENGTH, .y = (double)MAP_HEIGHT / 2};
     mat->set(6, i, norme(cage - fakePos));
-    mat->set(7, i,
-             angleRounded(angle_two_vectors(cage, fakePos) - fakeOrientation));
+    mat->set(7, i, angleRounded(vangle(cage - fakePos) - fakeOrientation));
 
     // Joueur le plus proche
     player *nearest;
@@ -176,7 +176,7 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
     }
     mat->set(8, i, d);
     mat->set(9, i,
-             angleRounded(angle_two_vectors(nearest->pos, selected.pos) -
+             angleRounded(vangle(nearest->pos - selected.pos) -
                           selected.orientation));
 }
 

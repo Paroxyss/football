@@ -66,7 +66,7 @@ void train(unsigned int generationObjective, unsigned int populationSize,
         gen += nbThread;
 
         std::cout << "Stats gen " << gen << " " << totalInfos << " in "
-            << elapsed_seconds.count() << std::endl;
+                  << elapsed_seconds.count() << std::endl;
 
         lastSave += nbThread;
 

@@ -89,7 +89,7 @@ Population::tournament(int tourn_size, bool save) {
     for (int i = 0; i < tourn_size; i++) {
         int k = rand() % tourn_size;
 
-        while (selected[k]) {
+        while (selected[k % tourn_size]) {
             k++;
         }
 
@@ -97,6 +97,7 @@ Population::tournament(int tourn_size, bool save) {
         selected[k] = true;
     }
 
+    free(selected);
     gameStatistics gameStats = {.totalCollisions = 0,
                                 .totalGoals = 0,
                                 .scoreMean = 0,
@@ -137,7 +138,6 @@ Population::tournament(int tourn_size, bool save) {
         contestants = pool;
     }
 
-    free(selected);
     return std::make_tuple(contestants[0], contestants[1], gameStats);
 }
 

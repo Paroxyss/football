@@ -12,27 +12,17 @@
 Matrix::Matrix(int ligne, int col) {
     this->ligne = ligne;
     this->col = col;
-    this->t = new double *[ligne];
-
-    for (int i = 0; i < ligne; i++) {
-        this->t[i] = (double *)calloc(col, sizeof(double));
-    }
+    this->t = new double[ligne * col];
 }
 
 Matrix::~Matrix() {
-
-    for (int i = 0; i < this->ligne; i++) {
-        delete[] t[i];
-    }
-
-    delete[] t;
+    delete[] this->t;
 }
 
 void Matrix::print() {
-    std::cout << "Matrice : " << this->ligne << "x" << this->col << std::endl;
     for (int i = 0; i < this->ligne; i++) {
         for (int j = 0; j < this->col; j++) {
-            std::cout << this->t[i][j] << " ";
+            std::cout << this->get(i, j) << " ";
         }
         std::cout << std::endl;
     }
@@ -77,7 +67,8 @@ void Matrix::write(std::ofstream &file) {
 
     for (int i = 0; i < this->ligne; i++) {
         for (int j = 0; j < this->col; j++) {
-            file.write((char *)&t[i][j], sizeof(double));
+            double v = this->get(i, j);
+            file.write((char *)&v, sizeof(double));
         }
     }
 }
@@ -92,7 +83,8 @@ Matrix *Matrix::read(std::ifstream &file) {
     auto m = new Matrix(lignes, colonnes);
     for (int i = 0; i < m->ligne; i++) {
         for (int j = 0; j < m->col; j++) {
-            file.read((char *)&m->t[i][j], sizeof(double));
+            double v = m->get(i, j);
+            file.read((char *)&v, sizeof(double));
         }
     }
     return m;

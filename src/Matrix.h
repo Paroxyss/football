@@ -6,7 +6,7 @@ class Matrix {
     int col = 0, ligne = 0;
 
   private:
-    double **t;
+    double *t;
 
   public:
     Matrix(){};
@@ -19,7 +19,7 @@ class Matrix {
             throw std::invalid_argument("Bad matrice get");
         }
 
-        return this->t[i][j];
+        return this->t[i * this->col + j];
     }
 
     inline void set(int i, int j, double x) {
@@ -27,7 +27,7 @@ class Matrix {
             throw std::invalid_argument("Bad matrice set");
         }
 
-        this->t[i][j] = x;
+        this->t[i * this->col + j] = x;
     }
 
     // Multiple deux matrices en place dans this (a * this)
@@ -36,24 +36,19 @@ class Matrix {
             throw std::invalid_argument("lol multinv");
         }
 
-        double **newT = new double *[a.ligne];
+        double *nt = new double[a.ligne * this->col];
 
         for (int i = 0; i < a.ligne; i++) {
-            double *v = (double *)calloc(this->col, sizeof(double));
             for (int j = 0; j < this->col; j++) {
+                nt[i * this->col + j] = 0;
                 for (int k = 0; k < this->ligne; k++) {
-                    v[j] += a.get(i, k) * this->get(k, j);
+                    nt[i * this->col + j] += a.get(i, k) * this->get(k, j);
                 }
             }
-            newT[i] = v;
         }
 
-        for (int i = 0; i < this->ligne; i++) {
-            delete this->t[i];
-        }
-
-        delete[] t;
-        this->t = newT;
+        delete[] this->t;
+        this->t = nt;
         this->ligne = a.ligne;
     }
 

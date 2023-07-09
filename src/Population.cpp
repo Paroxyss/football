@@ -84,13 +84,17 @@ std::tuple<Chromosome *, Chromosome *, gameStatistics>
 Population::tournament(int tourn_size, bool save) {
     std::vector<Chromosome *> contestants(tourn_size);
 
-    bool *selected = (bool *)calloc(tourn_size, 1);
+    bool *selected = (bool *)calloc(tourn_size, sizeof(bool));
 
     for (int i = 0; i < tourn_size; i++) {
         int k = rand() % tourn_size;
 
-        while (selected[k % tourn_size]) {
+        while (selected[k]) {
             k++;
+
+            if (k == tourn_size) {
+                k = 0;
+            }
         }
 
         contestants[i] = this->pop[k];

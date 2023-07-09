@@ -27,11 +27,11 @@ class Chromosome {
     void write(std::ofstream &file);
     static Chromosome *read(std::ifstream &file);
 
-	double getPlayersNorm();
-	double getDidierNorm();
-	double getMatrixesNorm();
-	double getAngleNorm();
-	std::pair<double, double> get2dProjection();
+    double getPlayersNorm();
+    double getDidierNorm();
+    double getMatrixesNorm();
+    double getAngleNorm();
+    std::pair<double, double> get2dProjection();
 };
 
 Chromosome *mutate(Chromosome *c);

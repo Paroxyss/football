@@ -9,8 +9,6 @@
 #include <random>
 #include <stdexcept>
 
-using std::cout;
-
 Matrix::Matrix(int ligne, int col) {
     this->ligne = ligne;
     this->col = col;

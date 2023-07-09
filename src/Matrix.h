@@ -37,6 +37,7 @@ class Matrix {
         }
 
         double **newT = new double *[a.ligne];
+
         for (int i = 0; i < a.ligne; i++) {
             double *v = (double *)calloc(this->col, sizeof(double));
             for (int j = 0; j < this->col; j++) {

@@ -438,9 +438,5 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
         csvOutputFile.close();
     }
 
-    if (g.infos.score == 0) {
-        g.infos.score = g.ball.pos.x >= (double)MAP_LENGTH / 2 ? -1 : 1;
-    };
-
     return g.infos;
 };

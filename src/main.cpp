@@ -1,3 +1,4 @@
+#include "Matrix.h"
 #include "config.h"
 #include "train.hpp"
 

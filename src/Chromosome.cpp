@@ -249,6 +249,7 @@ Chromosome *mutate(Chromosome *c) {
 }
 
 Chromosome *crossover(Chromosome &a, Chromosome &b) {
+
     Chromosome *child = new Chromosome();
 
     for (int k = 0; k < EQUIPE_SIZE; k++) {

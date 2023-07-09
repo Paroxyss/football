@@ -32,6 +32,7 @@ Population::~Population() {
 gameStatistics Population::next(bool save) {
     Chromosome **nxt = new Chromosome *[this->size];
     int count = 0;
+
     int tourn_size = previous_power_2(this->size);
 
     gameStatistics tourn_stats = {.totalCollisions = 0,
@@ -80,10 +81,20 @@ gameStatistics Population::next(bool save) {
 }
 
 std::tuple<Chromosome *, Chromosome *, gameStatistics>
-Population::tournament(int tournament_size, bool save) {
-    std::vector<Chromosome *> contestants(tournament_size);
-    for (int i = 0; i < tournament_size; i++) {
-        contestants[i] = this->pop[rand() % this->size];
+Population::tournament(int tourn_size, bool save) {
+    std::vector<Chromosome *> contestants(tourn_size);
+
+    bool *selected = (bool *)calloc(tourn_size, 1);
+
+    for (int i = 0; i < tourn_size; i++) {
+        int k = rand() % tourn_size;
+
+        while (selected[k]) {
+            k++;
+        }
+
+        contestants[i] = this->pop[k];
+        selected[k] = true;
     }
 
     gameStatistics gameStats = {.totalCollisions = 0,
@@ -93,38 +104,40 @@ Population::tournament(int tournament_size, bool save) {
                                 .collisionsMean = 0};
     unsigned int gameN = 1;
 
-    while (tournament_size > 2) {
-        int pool_size = tournament_size / 2;
+    while (tourn_size > 2) {
+        int pool_size = tourn_size / 2;
         std::vector<Chromosome *> pool(pool_size);
 
         for (int i = 0; i < pool_size; i++) {
-            auto matchResult =
+            auto match_results =
                 play_match(contestants[i * 2], contestants[i * 2 + 1], save);
-            if (matchResult.score > 0) {
+
+            if (match_results.score > 0) {
                 pool[i] = contestants[i * 2];
             } else {
                 pool[i] = contestants[i * 2 + 1];
             }
 
             // statistiques
-            gameStats.totalCollisions += matchResult.collisions;
-            gameStats.totalGoals += matchResult.goals;
+            gameStats.totalCollisions += match_results.collisions;
+            gameStats.totalGoals += match_results.goals;
             gameStats.collisionsMean =
                 (double)(gameN - 1) / gameN * gameStats.collisionsMean +
-                (double)matchResult.collisions / gameN;
+                (double)match_results.collisions / gameN;
             gameStats.goalsMean =
                 (double)(gameN - 1) / gameN * gameStats.goalsMean +
-                (double)matchResult.goals / gameN;
+                (double)match_results.goals / gameN;
             gameStats.scoreMean =
                 (double)(gameN - 1) / gameN * gameStats.scoreMean +
-                matchResult.score / gameN;
+                match_results.score / gameN;
             gameN += 1;
         }
 
-        tournament_size = pool_size;
+        tourn_size = pool_size;
         contestants = pool;
     }
 
+    free(selected);
     return std::make_tuple(contestants[0], contestants[1], gameStats);
 }
 

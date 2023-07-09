@@ -14,7 +14,7 @@ class Population {
     ~Population();
 
     gameStatistics next(bool save = false);
-	
+
     std::tuple<Chromosome *, Chromosome *, gameStatistics>
     tournament(int k, bool save);
 

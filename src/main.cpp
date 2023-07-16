@@ -2,6 +2,7 @@
 #include "config.h"
 #include "train.hpp"
 
+#include <chrono>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
@@ -58,6 +59,16 @@ int main(int argc, char *argv[]) {
         } else {
             saveMap(argv[2]);
         }
+    } else if (strcmp(argv[1], "speedtest") == 0) {
+        auto start = std::chrono::system_clock::now();
+        train(25, 50, 1);
+        auto end = std::chrono::system_clock::now();
+        auto duration =
+            std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+        std::cout << "Time: " << duration.count() / 25. / 50.
+                  << " ms par générations par individus par thread"
+                  << std::endl;
     }
 
     _exit(EXIT_SUCCESS);

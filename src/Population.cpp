@@ -33,18 +33,24 @@ gameStatistics Population::next(bool save) {
     Chromosome **nxt = new Chromosome *[this->size];
     int count = 0;
 
-    int tourn_size = previous_power_2(this->size);
+    /*
+        Choisir une taille de tournois aléatoire divise
+        par 3 le nombres de SGI (secondes par générations par individus)
+        Il faut être sur que ça ne ralenti pas trop l'apprentissage ce que
+        je n'ai pas encore vérifié.
+    */
+
+    int p = rand() % (int)log2(this->size / 2) + 2;
+    int tourn_size = pow(2, p);
+    // int tourn_size = previous_power_2(this->size);
 
     gameStatistics tourn_stats = {.totalCollisions = 0,
                                   .totalGoals = 0,
                                   .scoreMean = 0,
                                   .goalsMean = 0,
                                   .collisionsMean = 0};
-    while (count < this->size) {
-        if (likelyness(1 - CROSSOVER_PROBABILITY)) {
-            nxt[count] = cloneChromosome(this->pop[rand() % this->size]);
-
-        } else {
+    while (count < this->size * SAVE_POP_RATE) {
+        if (likelyness(CROSSOVER_PROBABILITY)) {
             auto outcome = this->tournament(tourn_size, save);
             nxt[count] =
                 crossover(*std::get<0>(outcome), *std::get<1>(outcome));
@@ -62,16 +68,25 @@ gameStatistics Population::next(bool save) {
             tourn_stats.scoreMean =
                 (double)(count) / count * tourn_stats.scoreMean +
                 tournResult.scoreMean / (count + 1);
-        }
-
-        if (likelyness(MUTATION_PROBABILITY)) {
-            nxt[count] = mutate(nxt[count]);
+        } else {
+            nxt[count] = cloneChromosome(this->pop[rand() % this->size]);
         }
 
         count++;
     }
 
+    while (count < this->size) {
+        nxt[count] = new Chromosome();
+        nxt[count]->initialize();
+
+        count++;
+    }
+
     for (int i = 0; i < this->size; i++) {
+        if (likelyness(MUTATION_PROBABILITY)) {
+            nxt[i] = mutate(nxt[i]);
+        }
+
         delete this->pop[i];
         this->pop[i] = nxt[i];
     }

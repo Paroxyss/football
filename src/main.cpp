@@ -13,6 +13,13 @@
 #include <thread>
 #include <unistd.h>
 
+/*
+
+    TODO: on prend à chaque génération un joueur aléatoire et on voit si sa
+   valeur décroit. Si c'est le cas alors les neurones finissent par mourir il y
+   a donc un problème.
+*/
+
 int main(int argc, char *argv[]) {
     srand(time(NULL));
 

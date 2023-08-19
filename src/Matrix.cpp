@@ -48,13 +48,13 @@ void Matrix::print() {
 
 /**
  * @brief Permet d'initialiser les valeurs d'une matrice déjà instanciée.
- * Pour le moment les valeurs sont définies aléatoirement entre -10 et 10 sans
- * raison particulière.
+ * Les moyennes sont initialisées à des valeurs comprises entre -1 et 1 et
+ * de valeur moyenne 0.
  */
 void Matrix::initialize() {
     for (int i = 0; i < this->ligne; i++) {
         for (int j = 0; j < this->col; j++) {
-            double x = randomDouble(-10, 10);
+            double x = randomDouble();
 
             this->set(i, j, x);
         }

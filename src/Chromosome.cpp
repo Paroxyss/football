@@ -98,13 +98,16 @@ void Chromosome::apply(Matrix &inputs) {
             o.set(j, 0, inputs.get(j, i));
         }
 
-        for (int j = 0; j < NETWORK_SIZE - 2; j++) {
+        o.mult_inv(*this->matrix[i][0]);
+        input_layer_activation(o);
+
+        for (int j = 1; j < NETWORK_SIZE - 2; j++) {
             o.mult_inv(*this->matrix[i][j]);
-            apply_activation(o);
+            hidden_layer_activation(o);
         }
 
         o.mult_inv(*this->matrix[i][NETWORK_SIZE - 2]);
-        output_activation(o);
+        output_layer_activation(o);
 
         for (int j = 0; j < NETWORK_OUTPUT_SIZE; j++) {
             inputs.set(j, i, o.get(j, 0));
@@ -122,13 +125,16 @@ void Chromosome::apply(Matrix &inputs) {
 */
 
 void Chromosome::apply_didier(Matrix &inputs) {
-    for (int i = 0; i < DIDIER_NETWORK_SIZE - 2; i++) {
+    inputs.mult_inv(*this->didier[0]);
+    input_layer_activation(inputs);
+
+    for (int i = 1; i < DIDIER_NETWORK_SIZE - 2; i++) {
         inputs.mult_inv(*this->didier[i]);
-        apply_activation(inputs);
+        hidden_layer_activation(inputs);
     }
 
     inputs.mult_inv(*this->didier[DIDIER_NETWORK_SIZE - 2]);
-    output_activation(inputs);
+    output_layer_activation(inputs);
 }
 
 /*

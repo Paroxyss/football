@@ -1,7 +1,7 @@
 #include "util.hpp"
 
 inline double replacement() {
-    return randomDouble(-10, 10);
+    return randomDouble();
 }
 
 inline double tanhmut(double x) {

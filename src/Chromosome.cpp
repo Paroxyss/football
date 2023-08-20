@@ -101,7 +101,7 @@ void Chromosome::apply(Matrix &inputs) {
         o.mult_inv(*this->matrix[i][0]);
         input_layer_activation(o);
 
-        for (int j = 1; j < NETWORK_SIZE - 2; j++) {
+        for (int j = 1; j < NETWORK_SIZE - 3; j++) {
             o.mult_inv(*this->matrix[i][j]);
             hidden_layer_activation(o);
         }
@@ -128,7 +128,7 @@ void Chromosome::apply_didier(Matrix &inputs) {
     inputs.mult_inv(*this->didier[0]);
     input_layer_activation(inputs);
 
-    for (int i = 1; i < DIDIER_NETWORK_SIZE - 2; i++) {
+    for (int i = 1; i < DIDIER_NETWORK_SIZE - 3; i++) {
         inputs.mult_inv(*this->didier[i]);
         hidden_layer_activation(inputs);
     }

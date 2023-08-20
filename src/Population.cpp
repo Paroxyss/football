@@ -34,11 +34,11 @@ gameStatistics Population::next(bool save) {
     int count = 0;
 
     /*
-        Choisir une taille de tournois aléatoire divise
-        par 3 le nombres de SGI (secondes par générations par individus)
-        Il faut être sur que ça ne ralenti pas trop l'apprentissage ce que
-        je n'ai pas encore vérifié.
-    */
+     * Choisir une taille de tournois aléatoire divise
+     * par 3 le nombres de SGI (secondes par générations par individus)
+     * Il faut être sur que ça ne ralenti pas trop l'apprentissage ce que
+     * je n'ai pas encore vérifié.
+     */
 
     int p = rand() % (int)log2(this->size / 2) + 2;
     int tourn_size = pow(2, p);

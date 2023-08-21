@@ -39,7 +39,7 @@ inline double mish(double x) {
 inline void input_layer_activation(Matrix &c) {
     for (int i = 0; i < c.ligne; i++) {
         for (int j = 0; j < c.col; j++) {
-            c.set(i, j, ReLu(c.get(i, j)));
+            c.set(i, j, tanh(c.get(i, j) / 1000.));
         }
     }
 }
@@ -51,7 +51,7 @@ inline void input_layer_activation(Matrix &c) {
 inline void hidden_layer_activation(Matrix &c) {
     for (int i = 0; i < c.ligne; i++) {
         for (int j = 0; j < c.col; j++) {
-            c.set(i, j, ReLu(c.get(i, j)));
+            c.set(i, j, tanh(c.get(i, j)));
         }
     }
 }

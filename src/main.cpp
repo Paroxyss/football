@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 
         // Il doit au moins y avoir 2 individus par thread car la taille
         // minimale d'une population pour organiser un tournois est de 2.
-        if (popSize < 2 * nThread) {
+        if (popSize < 4 * nThread) {
             throw std::invalid_argument("Population trop petite.");
         }
 

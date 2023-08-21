@@ -35,10 +35,11 @@ inline int previous_power_2(int n) {
 }
 
 inline int random_power(int n) {
-    int r = rand() % (n - 1) + 2;
-    int p = 1;
+    // 4 est le nombre minimal de participants à un tournois.
+    int r = rand() % n + 4;
+    int p = 4;
 
-    while (p * 2 <= r) {
+    while (p * 2 < r) {
         p *= 2;
     }
 

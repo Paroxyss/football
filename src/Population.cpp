@@ -33,16 +33,10 @@ gameStatistics Population::next(bool save) {
     Chromosome **nxt = new Chromosome *[this->size];
     int count = 0;
 
-    /*
-     * Choisir une taille de tournois aléatoire divise
-     * par 3 le nombres de SGI (secondes par générations par individus)
-     * Il faut être sur que ça ne ralenti pas trop l'apprentissage ce que
-     * je n'ai pas encore vérifié.
-     */
-
-    int p = rand() % (int)log2(this->size / 2) + 2;
-    int tourn_size = pow(2, p);
-    // int tourn_size = previous_power_2(this->size);
+    // on choisit une puissance de 2 aléatoire car ça permet
+    // d'organiser des petites compétitions et donc limiter la pression
+    // selective.
+    int tourn_size = random_power(this->size);
 
     gameStatistics tourn_stats = {.totalCollisions = 0,
                                   .totalGoals = 0,

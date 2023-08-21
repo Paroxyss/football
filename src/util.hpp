@@ -34,6 +34,17 @@ inline int previous_power_2(int n) {
     return n;
 }
 
+inline int random_power(int n) {
+    int r = rand() % (n - 1) + 2;
+    int p = 1;
+
+    while (p * 2 <= r) {
+        p *= 2;
+    }
+
+    return p;
+}
+
 inline double angleRounded(double input) {
     // on ajoute 2pi pour être dans les positifs et ajour un comportement plus
     // logique

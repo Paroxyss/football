@@ -397,7 +397,7 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
 
         auto r1 = c1->collect_and_apply(g.players, g.players + EQUIPE_SIZE,
                                         &g.ball, didierInputs[0], false);
-        auto r2 = c1->collect_and_apply(g.players + EQUIPE_SIZE, g.players,
+        auto r2 = c2->collect_and_apply(g.players + EQUIPE_SIZE, g.players,
                                         &g.ball, didierInputs[1], true);
 
         for (int a = 0; a < 2; a++) {

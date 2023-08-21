@@ -438,5 +438,9 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
         csvOutputFile.close();
     }
 
+    if (g.infos.score == 0) {
+        g.infos.score = likelyness(0.5) ? 1 : -1;
+    }
+
     return g.infos;
 };

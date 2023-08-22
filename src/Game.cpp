@@ -392,6 +392,12 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
         Matrix(COM_SIZE * EQUIPE_SIZE, 1),
         Matrix(COM_SIZE * EQUIPE_SIZE, 1),
     };
+	
+	for(int i = 0; i < 2; i++){
+		for(int j = 0; j < didierInputs[i].ligne; j++){
+			didierInputs[i].set(j, 0, 0);
+		}
+	}
 
     for (int k = 0; k < GAME_DURATION; k++) {
 

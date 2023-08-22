@@ -175,11 +175,12 @@ Matrix *Matrix::read(std::ifstream &file) {
     file.read((char *)&lignes, sizeof(lignes));
 
     auto m = new Matrix(lignes, colonnes);
+
     for (int i = 0; i < m->ligne; i++) {
         for (int j = 0; j < m->col; j++) {
-            double v = m->get(i, j);
-            file.read((char *)&v, sizeof(double));
+            file.read((char *)&m->t[i * colonnes + j], sizeof(double));
         }
     }
+
     return m;
 }

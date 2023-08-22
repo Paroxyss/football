@@ -90,7 +90,9 @@ void Chromosome::initialize() {
    dimensions dans le bute d'éviter les "inégalités"
 */
 
-void Chromosome::apply(Matrix &inputs) {
+Matrix *Chromosome::apply(Matrix &inputs) {
+    Matrix *outputs = new Matrix(NETWORK_OUTPUT_SIZE, EQUIPE_SIZE);
+
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         Matrix o = Matrix(NETWORK_INPUT_SIZE, 1);
 
@@ -110,9 +112,11 @@ void Chromosome::apply(Matrix &inputs) {
         output_layer_activation(o);
 
         for (int j = 0; j < NETWORK_OUTPUT_SIZE; j++) {
-            inputs.set(j, i, o.get(j, 0));
+            outputs->set(j, i, o.get(j, 0));
         }
     }
+
+    return outputs;
 }
 
 /*
@@ -198,34 +202,36 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
 Matrix *Chromosome::collect_and_apply(player *equipeAlliee,
                                       player *equipeAdverse, ball *b,
                                       Matrix &didier_output, bool team) {
-    Matrix *m = new Matrix(NETWORK_INPUT_SIZE, EQUIPE_SIZE);
+    Matrix *inputs = new Matrix(NETWORK_INPUT_SIZE, EQUIPE_SIZE);
     apply_didier(didier_output);
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
-        writeInputs(m, equipeAlliee, equipeAdverse, i, b, team);
+        writeInputs(inputs, equipeAlliee, equipeAdverse, i, b, team);
 
         // les coms
         for (int j = 0; j < COM_SIZE; j++) {
-            m->set(NETWORK_INPUT_SIZE - COM_SIZE + j, i,
-                   didier_output.get(j + i * COM_SIZE, 0));
+            inputs->set(NETWORK_INPUT_SIZE - COM_SIZE + j, i,
+                        didier_output.get(j + i * COM_SIZE, 0));
         }
     }
 
-    // on prépare les lastcom suivant pour cette équipe
-    this->apply(*m);
+    // Evaluation du réseau de neurones de chaque joueurs.
+    Matrix *outputs = this->apply(*inputs);
 
     int c = 0;
 
     while (c < EQUIPE_SIZE) {
         for (int i = 0; i < COM_SIZE; i++) {
-            didier_output.set(c * COM_SIZE + i, 0,
-                              m->get(NETWORK_OUTPUT_SIZE - COM_SIZE + i, c));
+            didier_output.set(
+                c * COM_SIZE + i, 0,
+                outputs->get(NETWORK_OUTPUT_SIZE - COM_SIZE + i, c));
         }
 
         c++;
     }
 
-    return m;
+    delete inputs;
+    return outputs;
 }
 
 /*

@@ -22,7 +22,7 @@ class Chromosome {
     Matrix *collect_and_apply(player *equipeAlliee, player *equipeAdverse,
                               ball *b, Matrix &didier_output, bool team);
 
-    void apply(Matrix &inputs);
+    Matrix *apply(Matrix &inputs);
 
     void write(std::ofstream &file);
     static Chromosome *read(std::ifstream &file);

@@ -90,14 +90,20 @@ void Chromosome::initialize() {
    dimensions dans le bute d'éviter les "inégalités"
 */
 
-Matrix *Chromosome::apply(Matrix &inputs) {
+Matrix *Chromosome::apply(Matrix &inputs, player *equipeAlliee) {
     Matrix *outputs = new Matrix(NETWORK_OUTPUT_SIZE, EQUIPE_SIZE);
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
+
+        // on peut retirer o puisque equipeAlliee[i] fait la même chose mais
+        // j'ai pas envie de tout casser donc je te laisse le faire
         Matrix o = Matrix(NETWORK_INPUT_SIZE, 1);
+        equipeAlliee[i].inputs = new Matrix(NETWORK_INPUT_SIZE, 1);
 
         for (int j = 0; j < NETWORK_INPUT_SIZE; j++) {
             o.set(j, 0, inputs.get(j, i));
+
+            equipeAlliee[i].inputs->set(j, 0, inputs.get(j, i));
         }
 
         o.mult_inv(*this->matrix[i][0]);
@@ -163,16 +169,12 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
 
     // Distance et orientation relative de la balle
     mat->set(4, i, norme(b->pos - selected.pos));
-    mat->set(
-        5, i,
-        angleRounded(vangle(b->pos - selected.pos) - selected.orientation));
+    mat->set(5, i, angleRounded(vangle(b->pos - fakePos)));
 
-    double fakeOrientation =
-        team ? selected.orientation + M_PI : selected.orientation;
     // Distance et orientation relative de la cage adverse
     vector cage = {.x = MAP_LENGTH, .y = (double)MAP_HEIGHT / 2};
     mat->set(6, i, norme(cage - fakePos));
-    mat->set(7, i, angleRounded(vangle(cage - fakePos) - fakeOrientation));
+    mat->set(7, i, angleRounded(vangle(cage - fakePos)));
 
     // Joueur le plus proche
     player *nearest;
@@ -184,10 +186,9 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
             d = nd;
         };
     }
+
     mat->set(8, i, d);
-    mat->set(9, i,
-             angleRounded(vangle(nearest->pos - selected.pos) -
-                          selected.orientation));
+    mat->set(9, i, angleRounded(vangle(nearest->pos - selected.pos)));
 }
 
 /*
@@ -216,7 +217,7 @@ Matrix *Chromosome::collect_and_apply(player *equipeAlliee,
     }
 
     // Evaluation du réseau de neurones de chaque joueurs.
-    Matrix *outputs = this->apply(*inputs);
+    Matrix *outputs = this->apply(*inputs, equipeAlliee);
 
     int c = 0;
 

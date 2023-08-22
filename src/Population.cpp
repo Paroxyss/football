@@ -39,12 +39,6 @@ gameStatistics Population::next(bool save) {
     Chromosome **nxt = new Chromosome *[this->size];
     int count = 0;
 
-    // on choisit une puissance de 2 aléatoire car ça permet
-    // d'organiser des petites compétitions et donc limiter la pression
-    // selective.
-    // int tourn_size = random_power(this->size);
-    int tourn_size = previous_power(this->size);
-
     gameStatistics tourn_stats = {.totalCollisions = 0,
                                   .totalGoals = 0,
                                   .scoreMean = 0,
@@ -62,6 +56,12 @@ gameStatistics Population::next(bool save) {
         }
 
         if (likelyness(CROSSOVER_PROBABILITY)) {
+
+            // on choisit une puissance de 2 aléatoire car ça permet
+            // d'organiser des petites compétitions et donc limiter la pression
+            // selective.
+            int tourn_size = random_power(this->size);
+
             auto outcome = this->tournament(tourn_size, save);
             nxt[count] =
                 crossover(*std::get<0>(outcome), *std::get<1>(outcome));

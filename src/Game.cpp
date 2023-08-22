@@ -325,13 +325,13 @@ void Game::tick(double timeToAdvance, bool root) {
 };
 
 void Game::writePlayers() {
-    csvOutputFile << "2";
-    csvOutputFile << "," << (int)ball.pos.x << "," << (int)ball.pos.y;
+    csvOutputFile << "2," << (int)ball.pos.x << "," << (int)ball.pos.y << ",";
     for (int i = 0; i < playerNumber; i++) {
-        csvOutputFile << "," << (double)players[i].pos.x << ","
-                      << (double)players[i].pos.y << ","
-                      << (float)((int)(players[i].orientation * 10) /
-                                 (float)10);
+        csvOutputFile << (double)this->players[i].orientation << ",";
+        for (int j = 0; j < this->players[i].inputs->ligne; j++) {
+            csvOutputFile << (double)(this->players[i].inputs->get(j, 0))
+                          << ",";
+        }
     }
     csvOutputFile << std::endl;
 }

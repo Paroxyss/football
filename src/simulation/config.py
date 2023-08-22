@@ -20,9 +20,10 @@ BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 YELLOW = (255, 255, 0)
 GREEN = (0, 255, 0)
+PINK = (255, 192, 203)
+
 FIELD_GREEN = (50, 168, 82)
 FIELD_DARK_GREEN = (46, 153, 75)
 N_BANDE = 10
-
 
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))

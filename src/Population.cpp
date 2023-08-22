@@ -18,7 +18,6 @@ Population::Population(int size) {
 
     for (int i = 0; i < size; i++) {
         this->pop[i] = new Chromosome();
-        this->pop[i]->initialize();
     }
 }
 
@@ -28,6 +27,12 @@ Population::~Population() {
     }
 
     delete[] this->pop;
+}
+
+void Population::initialize() {
+    for (int i = 0; i < this->size; i++) {
+        this->pop[i]->initialize();
+    }
 }
 
 gameStatistics Population::next(bool save) {
@@ -46,7 +51,8 @@ gameStatistics Population::next(bool save) {
                                   .goalsMean = 0,
                                   .collisionsMean = 0};
 
-    // Pour la barre de progression, ne marche pas très bien pour les petites populations mais bon
+    // Pour la barre de progression, ne marche pas très bien pour les petites
+    // populations mais bon
     int outRate = std::floor((this->size * SAVE_POP_RATE) / 10);
 
     while (count < this->size * SAVE_POP_RATE) {

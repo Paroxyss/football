@@ -13,6 +13,7 @@ class Population {
     Population(int size);
     ~Population();
 
+    void initialize();
     gameStatistics next(bool save = false);
 
     std::tuple<Chromosome *, Chromosome *, gameStatistics>

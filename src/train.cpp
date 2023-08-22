@@ -32,6 +32,7 @@ void train(unsigned int generationObjective, unsigned int populationSize,
 
     for (int i = 0; i < nbThread; i++) {
         pops[i] = new Population(n);
+        pops[i]->initialize();
     }
 
     while (gen < generationObjective) {
@@ -65,7 +66,7 @@ void train(unsigned int generationObjective, unsigned int populationSize,
         shufflePopulations(pops, nbThread);
         gen += nbThread;
 
-        std::cout << "Stats gen " << gen << " " << totalInfos << " in "
+        std::cout << "\nStats gen " << gen << " " << totalInfos << " in "
                   << elapsed_seconds.count() << std::endl;
 
         lastSave += nbThread;

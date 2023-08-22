@@ -130,8 +130,6 @@ void Matrix::mult_inv(Matrix &a) {
  */
 Matrix *mutation(Matrix &m) {
     Matrix *muted = new Matrix(m.ligne, m.col);
-    int np = m.ligne * m.col;
-    int c = 0;
 
     for (int i = 0; i < m.ligne; i++) {
         for (int j = 0; j < m.col; j++) {

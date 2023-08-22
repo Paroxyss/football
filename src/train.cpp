@@ -118,6 +118,14 @@ void play_with_nexts(Population *p, int i, int *scores) {
     }
 }
 
+/**
+ * @brief On recherche les deux meilleures équipes pour afficher leur match.
+ *
+ * @param filename Fichier dans lequel récupérer la population.
+ *
+ * TODO: Cette méthode est en n^2, il faut en implémenter une plus rapide
+ * soit avec un Tournament Tree, un QuickSelect ou un Heap-max
+ */
 void simulateAndSave(const char *filename) {
     std::ifstream input;
     input.open(filename);
@@ -145,6 +153,12 @@ void simulateAndSave(const char *filename) {
         for (int j = 0; j < r; j++) {
             threads[j]->join();
         }
+
+        if (c > 0)
+            std::cout << "\x1b[A"
+                      << "\33[2K\r" << std::flush;
+
+        std::cout << c << " / " << p->size << std::endl;
 
         c += r;
     }

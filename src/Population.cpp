@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -43,7 +44,16 @@ gameStatistics Population::next(bool save) {
                                   .scoreMean = 0,
                                   .goalsMean = 0,
                                   .collisionsMean = 0};
+
+    // Pour la barre de progression, ne marche pas très bien pour les petites populations mais bon
+    int outRate = std::floor((this->size * SAVE_POP_RATE) / 10);
+
     while (count < this->size * SAVE_POP_RATE) {
+        if ((count % outRate) == 0) {
+            std::cout << "*";
+            fflush(stdout);
+        }
+
         if (likelyness(CROSSOVER_PROBABILITY)) {
             auto outcome = this->tournament(tourn_size, save);
             nxt[count] =

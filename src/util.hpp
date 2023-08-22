@@ -26,7 +26,7 @@ inline double randomDouble() {
     return randomDouble(-1, 1);
 }
 
-inline int previous_power_2(int n) {
+inline int previous_power(int n) {
     while (n & n - 1) {
         n = n & n - 1;
     }

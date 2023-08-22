@@ -159,7 +159,7 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
     vector fakeVitesse = team ? -selected.vitesse : selected.vitesse;
 
     mat->set(2, i, fakeVitesse.x);
-    mat->set(3, i, fakeVitesse.x);
+    mat->set(3, i, fakeVitesse.y);
 
     // Distance et orientation relative de la balle
     mat->set(4, i, norme(b->pos - selected.pos));

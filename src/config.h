@@ -33,15 +33,17 @@ const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, COM_SIZE *EQUIPE_SIZE};
 #define BALL_MASS 40
 #define BALL_SIZE 10
 
-#define GENE_MUTATION_PROBABILITY 0.05
-
 #define POPULATION_SIZE 1000
 
+// entre 0.6 et 0.9
 #define CROSSOVER_PROBABILITY 0.9
-#define NEWBLOOD_PROBABILITY 0.05
-#define MUTATION_PROBABILITY 0.05
 
-#define SAVE_POP_RATE 0.95
+// entre 0.001 et 0.1
+#define MUTATION_PROBABILITY 0.01
+#define GENE_MUTATION_PROBABILITY 0.05
+
+// entre 0.95 et 0.999
+#define SAVE_POP_RATE 0.99
 
 // nombre de générations
 #define N 10

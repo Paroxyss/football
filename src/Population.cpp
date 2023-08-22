@@ -37,7 +37,8 @@ gameStatistics Population::next(bool save) {
     // on choisit une puissance de 2 aléatoire car ça permet
     // d'organiser des petites compétitions et donc limiter la pression
     // selective.
-    int tourn_size = random_power(this->size);
+    // int tourn_size = random_power(this->size);
+    int tourn_size = previous_power(this->size);
 
     gameStatistics tourn_stats = {.totalCollisions = 0,
                                   .totalGoals = 0,

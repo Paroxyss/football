@@ -90,7 +90,7 @@ void Chromosome::initialize() {
    dimensions dans le bute d'éviter les "inégalités"
 */
 
-Matrix *Chromosome::apply(Matrix &inputs, player *equipeAlliee) {
+Matrix *Chromosome::apply(player *equipeAlliee) {
     Matrix *outputs = new Matrix(NETWORK_OUTPUT_SIZE, EQUIPE_SIZE);
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
@@ -104,24 +104,22 @@ Matrix *Chromosome::apply(Matrix &inputs, player *equipeAlliee) {
         equipeAlliee[i].inputs = new Matrix(NETWORK_INPUT_SIZE, 1);
 
         for (int j = 0; j < NETWORK_INPUT_SIZE; j++) {
-            o.set(j, 0, inputs.get(j, i));
-
-            equipeAlliee[i].inputs->set(j, 0, inputs.get(j, i));
+            output.set(j, 0, equipeAlliee[i].inputs->get(j, 0));
         }
 
-        o.mult_inv(*this->matrix[i][0]);
-        input_layer_activation(o);
+        output.mult_inv(*this->matrix[i][0]);
+        input_layer_activation(output);
 
         for (int j = 1; j < NETWORK_SIZE - 2; j++) {
-            o.mult_inv(*this->matrix[i][j]);
-            hidden_layer_activation(o);
+            output.mult_inv(*this->matrix[i][j]);
+            hidden_layer_activation(output);
         }
 
-        o.mult_inv(*this->matrix[i][NETWORK_SIZE - 2]);
-        output_layer_activation(o);
+        output.mult_inv(*this->matrix[i][NETWORK_SIZE - 2]);
+        output_layer_activation(output);
 
         for (int j = 0; j < NETWORK_OUTPUT_SIZE; j++) {
-            outputs->set(j, i, o.get(j, 0));
+            outputs->set(j, i, output.get(j, 0));
         }
     }
 
@@ -154,33 +152,34 @@ void Chromosome::apply_didier(Matrix &inputs) {
     team == false -> gauche
     team == true -> droite
 */
-void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
-                 int i, ball *b, bool team) {
+void writeInputs(player *equipeAlliee, player *equipeAdverse, int i, ball *b,
+                 bool team) {
     player &selected = equipeAlliee[i];
+    Matrix *&inputs = selected.inputs;
 
     // Position du joueur
     vector mapSize = {.x = MAP_LENGTH, .y = MAP_HEIGHT};
     vector fakePos = team ? mapSize - selected.pos : selected.pos;
 
-    mat->set(0, i, fakePos.x);
-    mat->set(1, i, fakePos.y);
+    inputs->set(0, 0, fakePos.x);
+    inputs->set(1, 0, fakePos.y);
 
     // Vitesse du joueur
     vector fakeVitesse = team ? -selected.vitesse : selected.vitesse;
 
-    mat->set(2, i, fakeVitesse.x);
-    mat->set(3, i, fakeVitesse.y);
+    inputs->set(2, 0, fakeVitesse.x);
+    inputs->set(3, 0, fakeVitesse.y);
 
     // Distance et orientation relative de la balle
     vector ball_fakePos = team ? mapSize - b->pos : b->pos;
 
-    mat->set(4, i, norme(ball_fakePos - fakePos));
-    mat->set(5, i, angleRounded(vangle(ball_fakePos - fakePos)));
+    inputs->set(4, 0, norme(ball_fakePos - fakePos));
+    inputs->set(5, 0, angleRounded(vangle(ball_fakePos - fakePos)));
 
     // Distance et orientation relative de la cage adverse
     vector cage = {.x = MAP_LENGTH, .y = (double)MAP_HEIGHT / 2};
-    mat->set(6, i, norme(cage - fakePos));
-    mat->set(7, i, angleRounded(vangle(cage - fakePos)));
+    inputs->set(6, 0, norme(cage - fakePos));
+    inputs->set(7, 0, angleRounded(vangle(cage - fakePos)));
 
     // Joueur le plus proche
     vector nearest;
@@ -197,8 +196,8 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
         };
     }
 
-    mat->set(8, i, d);
-    mat->set(9, i, angleRounded(vangle(nearest - fakePos)));
+    inputs->set(8, 0, d);
+    inputs->set(9, 0, angleRounded(vangle(nearest - fakePos)));
 }
 
 /*
@@ -213,21 +212,20 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
 Matrix *Chromosome::collect_and_apply(player *equipeAlliee,
                                       player *equipeAdverse, ball *b,
                                       Matrix &didier_output, bool team) {
-    Matrix *inputs = new Matrix(NETWORK_INPUT_SIZE, EQUIPE_SIZE);
     apply_didier(didier_output);
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
-        writeInputs(inputs, equipeAlliee, equipeAdverse, i, b, team);
+        writeInputs(equipeAlliee, equipeAdverse, i, b, team);
 
         // les coms
         for (int j = 0; j < COM_SIZE; j++) {
-            inputs->set(NETWORK_INPUT_SIZE - COM_SIZE + j, i,
-                        didier_output.get(j + i * COM_SIZE, 0));
+            equipeAlliee[i].inputs->set(NETWORK_INPUT_SIZE - COM_SIZE + j, 0,
+                                        didier_output.get(j + i * COM_SIZE, 0));
         }
     }
 
     // Evaluation du réseau de neurones de chaque joueurs.
-    Matrix *outputs = this->apply(*inputs, equipeAlliee);
+    Matrix *outputs = this->apply(equipeAlliee);
 
     int c = 0;
 
@@ -241,7 +239,6 @@ Matrix *Chromosome::collect_and_apply(player *equipeAlliee,
         c++;
     }
 
-    delete inputs;
     return outputs;
 }
 

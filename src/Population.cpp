@@ -95,7 +95,10 @@ gameStatistics Population::next(bool save) {
 
     for (int i = 0; i < this->size; i++) {
         if (likelyness(MUTATION_PROBABILITY)) {
+            Chromosome *tmp = nxt[i];
             nxt[i] = mutate(nxt[i]);
+			// mutate clone le chromosome, on doit alors supprimer l'ancien
+			delete tmp;
         }
 
         delete this->pop[i];

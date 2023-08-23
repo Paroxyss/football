@@ -1,32 +1,31 @@
 import pygame as pg
-from math import cos, sin
+from math import cos, sin, pi
 from config import *
 
 
 def draw_player(t, x, y, d):
     if t == "droite":
         x = SCREEN_WIDTH - x
+        y = SCREEN_HEIGHT - y
+        color = RED
+        d = d + pi
+    else:
+        color = BLUE
 
     pg.draw.circle(
         screen,
-        RED if t == "droite" else BLUE,
-        (
-            x if t == "droite" else x,
-            SCREEN_HEIGHT - y,
-        ),
+        color,
+        (x, y),
         PLAYER_SIZE,
     )
 
     pg.draw.line(
         screen,
         WHITE,
-        (
-            x if t == "droite" else x,
-            SCREEN_HEIGHT - y,
-        ),
+        (x, y),
         (
             x + cos(d) * PLAYER_SIZE,
-            SCREEN_HEIGHT - y - sin(d) * PLAYER_SIZE,
+            y - sin(d) * PLAYER_SIZE,
         ),
         2,
     )

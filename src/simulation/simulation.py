@@ -33,15 +33,11 @@ while running:
 
                 for k in range(1, nb_joueurs + 1):
                     if show[k - 1]:
-                        show_data(
-                            parsed[i][k - 1], k, nb_joueurs
-                        )
+                        show_data(parsed[i][k - 1], k, nb_joueurs)
 
                 for k in range(1, nb_joueurs + 1):
                     draw_player(
-                        "droite"
-                        if k > nb_joueurs / 2
-                        else "gauche",
+                        "droite" if k > nb_joueurs / 2 else "gauche",
                         parsed[i][k - 1]["x"],
                         parsed[i][k - 1]["y"],
                         parsed[i][k - 1]["orientation"],

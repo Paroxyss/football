@@ -158,6 +158,7 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
     // Position du joueur
     vector mapSize = {.x = MAP_LENGTH, .y = MAP_HEIGHT};
     vector fakePos = team ? mapSize - selected.pos : selected.pos;
+
     mat->set(0, i, fakePos.x);
     mat->set(1, i, fakePos.y);
 
@@ -168,8 +169,10 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
     mat->set(3, i, fakeVitesse.y);
 
     // Distance et orientation relative de la balle
-    mat->set(4, i, norme(b->pos - selected.pos));
-    mat->set(5, i, angleRounded(vangle(b->pos - fakePos)));
+    vector ball_fakePos = team ? mapSize - b->pos : b->pos;
+
+    mat->set(4, i, norme(ball_fakePos - fakePos));
+    mat->set(5, i, angleRounded(vangle(ball_fakePos - fakePos)));
 
     // Distance et orientation relative de la cage adverse
     vector cage = {.x = MAP_LENGTH, .y = (double)MAP_HEIGHT / 2};
@@ -177,18 +180,22 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
     mat->set(7, i, angleRounded(vangle(cage - fakePos)));
 
     // Joueur le plus proche
-    player *nearest;
+    vector nearest;
     double d = INFINITY;
+
     for (int i = 0; i < EQUIPE_SIZE; i++) {
-        double nd = norme(equipeAdverse[i].pos - selected.pos);
+        vector opponent_fakePos =
+            team ? mapSize - equipeAdverse[i].pos : equipeAdverse[i].pos;
+
+        double nd = norme(opponent_fakePos - fakePos);
         if (nd < d) {
-            nearest = &equipeAdverse[i];
+            nearest = opponent_fakePos;
             d = nd;
         };
     }
 
     mat->set(8, i, d);
-    mat->set(9, i, angleRounded(vangle(nearest->pos - selected.pos)));
+    mat->set(9, i, angleRounded(vangle(nearest - fakePos)));
 }
 
 /*

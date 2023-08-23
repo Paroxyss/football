@@ -92,25 +92,29 @@ void Game::set_players(const int conf[], int n) {
 
     for (int i = 0; i < n; i++) {
         double spy = MAP_HEIGHT / (double)(conf[i] + 1);
+
         for (int k = 1; k <= conf[i]; k++) {
             this->players[c].pos = {.x = (i + 1) * spx, .y = k * spy};
             this->players[c].vitesse = {.x = 0, .y = 0};
             this->players[c].orientation = randomDouble() * M_PI;
+
             c++;
         }
     }
 
-    for (int i = n - 1, j = 0; i >= 0; i--) {
+    for (int i = 0; i < n; i++) {
         double spy = MAP_HEIGHT / (double)(conf[i] + 1);
-        for (int k = 1; k <= conf[i]; k++, j++) {
-            // inverse la position des joueurs symétriquement.
-            int p = this->playerNumber - 1 - j;
 
-            this->players[p].pos = {.x = MAP_LENGTH - (i + 1) * spx,
+        for (int k = 1; k <= conf[i]; k++) {
+            this->players[c].pos = {.x = MAP_HEIGHT / 2. + spx * (n - i + 1),
                                     .y = k * spy};
-            this->players[p].vitesse = {.x = 0, .y = 0};
-            this->players[p].orientation = angleRounded(
-                this->players[this->playerNumber - (c + 1)].orientation - M_PI);
+            this->players[c].vitesse = {.x = 0, .y = 0};
+
+            // on donne aux joueurs de droite le même angle que ceux de gauche,
+            // c'est après en python que l'on ajoute M_PI pour donner la
+            // symétrie.
+            this->players[c].orientation = this->players[c - s].orientation;
+
             c++;
         }
     }

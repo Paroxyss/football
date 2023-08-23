@@ -22,7 +22,7 @@ class Chromosome {
     Matrix *collect_and_apply(player *equipeAlliee, player *equipeAdverse,
                               ball *b, Matrix &didier_output, bool team);
 
-    Matrix *apply(player *equipeAlliee);
+    Matrix *apply(Matrix &inputs, player *equipeAlliee);
 
     void write(std::ofstream &file);
     static Chromosome *read(std::ifstream &file);
@@ -37,5 +37,5 @@ class Chromosome {
 void mutate(Chromosome &c);
 Matrix *compute_didier(Chromosome *c, Matrix *inputs);
 Chromosome *crossover(Chromosome &a, Chromosome &b);
-void writeInputs(player *equipeAlliee, player *equipeAdverse, int i,
+void writeInputs(Matrix *m, player *equipeAlliee, player *equipeAdverse, int i,
                  ball *b, bool team);

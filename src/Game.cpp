@@ -98,6 +98,7 @@ void Game::set_players(const int conf[], int n) {
             this->players[c].vitesse = {.x = 0, .y = 0};
             this->players[c].orientation = randomDouble() * M_PI;
 
+
             c++;
         }
     }
@@ -105,7 +106,7 @@ void Game::set_players(const int conf[], int n) {
     for (int i = 0; i < n; i++) {
         double spy = MAP_HEIGHT / (double)(conf[i] + 1);
 
-        for (int k = 1; k <= conf[i]; k++) {
+        for (int k = conf[i]; k >= 1; k--) {
             this->players[c].pos = {.x = MAP_HEIGHT / 2. + spx * (n - i + 1),
                                     .y = k * spy};
             this->players[c].vitesse = {.x = 0, .y = 0};
@@ -115,9 +116,12 @@ void Game::set_players(const int conf[], int n) {
             // symétrie.
             this->players[c].orientation = this->players[c - s].orientation;
 
+
             c++;
         }
     }
+
+
 }
 
 inline double distancecarre(ball &p, const ball &b) {

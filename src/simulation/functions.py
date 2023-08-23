@@ -37,18 +37,25 @@ def calcx(infos, k, nb_joueurs):
     return SCREEN_WIDTH - infos["x"]
 
 
+def calcy(infos, k, nb_joueurs):
+    if k <= nb_joueurs / 2:
+        return infos["y"]
+    return SCREEN_HEIGHT - infos["y"]
+
+
 def show_data(infos, k, nb_joueurs):
-    y = infos["y"]
+    y = calcy(infos, k, nb_joueurs)
     x = calcx(infos, k, nb_joueurs)
     side = "droite" if k > nb_joueurs / 2 else "gauche"
 
     # balle
 
-    epy = y + sin(infos["ball_angle"]) * infos["ball_dist"]
     if side == "gauche":
         epx = x + cos(infos["ball_angle"]) * infos["ball_dist"]
+        epy = y + sin(infos["ball_angle"]) * infos["ball_dist"]
     else:
         epx = x - cos(infos["ball_angle"]) * infos["ball_dist"]
+        epy = y - sin(infos["ball_angle"]) * infos["ball_dist"]
 
     ep = (int(epx), int(epy))
 
@@ -62,11 +69,14 @@ def show_data(infos, k, nb_joueurs):
 
     # cage adverse
 
-    epy = y + sin(infos["cage_angle"]) * infos["cage_dist"]
+    # pour epy je ne suis pas sur, peut être que je corrige un problème
+    # qui provient en fait du cpp mais je ne sais pas...
     if side == "gauche":
         epx = x + cos(infos["cage_angle"]) * infos["cage_dist"]
+        epy = y + sin(infos["cage_angle"]) * infos["cage_dist"]
     else:
         epx = x - cos(infos["cage_angle"]) * infos["cage_dist"]
+        epy = y - sin(infos["cage_angle"]) * infos["cage_dist"]
 
     ep = (int(epx), int(epy))
 
@@ -80,11 +90,12 @@ def show_data(infos, k, nb_joueurs):
 
     # joueur le plus proche
 
-    epy = y + sin(infos["nearest_angle"]) * infos["nearest_dist"]
     if side == "gauche":
         epx = x + cos(infos["nearest_angle"]) * infos["nearest_dist"]
+        epy = y + sin(infos["nearest_angle"]) * infos["nearest_dist"]
     else:
         epx = x - cos(infos["nearest_angle"]) * infos["nearest_dist"]
+        epy = y - sin(infos["nearest_angle"]) * infos["nearest_dist"]
 
     ep = (int(epx), int(epy))
 

@@ -6,7 +6,6 @@
 #include <ostream>
 #include <stdio.h>
 #include <sys/ioctl.h>
-#include <thread>
 #include <unistd.h>
 
 #include "Game.hpp"
@@ -98,7 +97,6 @@ void Game::set_players(const int conf[], int n) {
             this->players[c].vitesse = {.x = 0, .y = 0};
             this->players[c].orientation = randomDouble() * M_PI;
 
-
             c++;
         }
     }
@@ -116,12 +114,9 @@ void Game::set_players(const int conf[], int n) {
             // symétrie.
             this->players[c].orientation = this->players[c - s].orientation;
 
-
             c++;
         }
     }
-
-
 }
 
 inline double distancecarre(ball &p, const ball &b) {

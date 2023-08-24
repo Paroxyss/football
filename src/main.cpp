@@ -10,7 +10,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <thread>
 #include <unistd.h>
 
 /*
@@ -26,7 +25,7 @@ int main(int argc, char *argv[]) {
     if (argc < 2) {
         std::cerr
             << "Aucun argument fourni ! " << std::endl
-            << "\t train <genN> <popSize> [nThread] : entraine le "
+            << "\t train <genN> <popSize> : entraine le "
                "réseaux en sauvegardant les populations"
             << std::endl
             << "\t play <popFile> : fait un tournoi au sein d'une "
@@ -39,26 +38,22 @@ int main(int argc, char *argv[]) {
     }
 
     if (strcmp(argv[1], "train") == 0) {
-        unsigned int genN = N;
-        unsigned int popSize = POPULATION_SIZE;
-        unsigned int nThread = std::thread::hardware_concurrency();
+        unsigned int n_gen = N;
+        unsigned int pop_size = POPULATION_SIZE;
+
         if (argc >= 3) {
-            genN = std::stoi(argv[2]);
+            n_gen = std::stoi(argv[2]);
         }
         if (argc >= 4) {
-            popSize = std::stoi(argv[3]);
-        }
-        if (argc >= 5) {
-            nThread = std::stoi(argv[4]);
+            pop_size = std::stoi(argv[3]);
         }
 
-        // Il doit au moins y avoir 2 individus par thread car la taille
-        // minimale d'une population pour organiser un tournois est de 2.
-        if (popSize < 4 * nThread) {
+        // Il doit au moins être possible d'organiser un tournois
+        if (pop_size < 4) {
             throw std::invalid_argument("Population trop petite.");
         }
 
-        train(genN, popSize, nThread);
+        train(n_gen, pop_size);
     } else if (strcmp(argv[1], "play") == 0) {
         if (argc < 3) {
             throw std::invalid_argument("Missing argument popFile");
@@ -73,16 +68,6 @@ int main(int argc, char *argv[]) {
         } else {
             saveMap(argv[2]);
         }
-    } else if (strcmp(argv[1], "speedtest") == 0) {
-        auto start = std::chrono::system_clock::now();
-        train(25, 50, 1);
-        auto end = std::chrono::system_clock::now();
-        auto duration =
-            std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-        std::cout << "Time: " << duration.count() / 25. / 50.
-                  << " ms par générations par individus par thread"
-                  << std::endl;
     }
 
     _exit(EXIT_SUCCESS);

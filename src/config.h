@@ -49,5 +49,3 @@ const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 10, COM_SIZE *EQUIPE_SIZE};
 #define N 10
 // intervalle (en génération) des sauvegardes
 #define SAVE_RATE 100
-
-#define NB_THREAD 4

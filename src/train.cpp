@@ -1,105 +1,56 @@
 #include <stdexcept>
-#include <thread>
 
 #include "Chromosome.hpp"
 #include "Population.hpp"
 #include "config.h"
 #include "util.hpp"
 
-void generation(Population *pop, gameStatistics *res) {
-    auto infos = pop->next();
-    res->totalCollisions = infos.totalCollisions;
-    res->totalGoals = infos.totalGoals;
-    res->collisionsMean = infos.collisionsMean;
-    res->goalsMean = infos.goalsMean;
-    res->scoreMean = infos.scoreMean;
-}
+void train(unsigned int n_gen, unsigned int population_size) {
 
-void train(unsigned int generationObjective, unsigned int populationSize,
-           unsigned int nbThread) {
+    std::cout << "Starting a train of " << n_gen << " generations with "
+              << population_size << " chromosomes" << std::endl;
 
-    std::cout << "Starting a train of " << generationObjective
-              << " generations with " << populationSize << " chromosomes on "
-              << nbThread << " threads" << std::endl;
-
-    const int n = populationSize / nbThread;
     int gen = 0;
-    int lastSave = 0;
+    int last_save = 0;
 
-    Population **pops = new Population *[nbThread];
-    std::thread *threads[nbThread];
-    gameStatistics infos[nbThread];
+    Population *pop = new Population(population_size);
+    pop->initialize();
 
-    for (int i = 0; i < nbThread; i++) {
-        pops[i] = new Population(n);
-        pops[i]->initialize();
-    }
-
-    while (gen < generationObjective) {
-        gameStatistics totalInfos = {.totalCollisions = 0,
-                                     .totalGoals = 0,
-                                     .scoreMean = 0,
-                                     .goalsMean = 0,
-                                     .collisionsMean = 0};
+    while (gen < n_gen) {
 
         auto start = std::chrono::steady_clock::now();
 
-        for (int i = 0; i < nbThread; i++) {
-            threads[i] = new std::thread(generation, pops[i], &infos[i]);
-        }
-
-        for (auto &thread : threads) {
-            thread->join();
-        }
+        gameStatistics stats = pop->next();
 
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start;
 
-        for (int i = 0; i < nbThread; i++) {
-            totalInfos.totalCollisions += infos[i].totalCollisions;
-            totalInfos.totalGoals += infos[i].totalGoals;
-            totalInfos.collisionsMean += infos[i].collisionsMean / nbThread;
-            totalInfos.goalsMean += infos[i].goalsMean / nbThread;
-            totalInfos.scoreMean += infos[i].scoreMean / nbThread;
-        }
+        gen += 1;
+        last_save += 1;
 
-        shufflePopulations(pops, nbThread);
-        gen += nbThread;
-
-        std::cout << "\nStats gen " << gen << " " << totalInfos << " in "
+        std::cout << "\nStats gen " << gen << " " << stats << " in "
                   << elapsed_seconds.count() << std::endl;
 
-        lastSave += nbThread;
-
-        if (lastSave > SAVE_RATE) {
-            Population *p = joinPopulation(pops, nbThread);
+        if (last_save > SAVE_RATE) {
             std::ofstream out;
             out.open("pops/pop-gen" + std::to_string(gen) + "-at-" +
                      std::to_string(time(NULL)));
 
-            p->write(out);
+            pop->write(out);
 
             out.close();
-            delete p;
-            lastSave -= SAVE_RATE;
+            last_save -= SAVE_RATE;
         }
     }
 
-    Population *p = joinPopulation(pops, nbThread);
     std::ofstream out;
     out.open("pops/pop-gen" + std::to_string(gen) + "-at-" +
              std::to_string(time(NULL)));
 
-    p->write(out);
-
+    pop->write(out);
     out.close();
 
-    for (int i = 0; i < nbThread; i++) {
-        delete pops[i];
-        delete threads[i];
-    }
-    delete[] pops;
-    delete p;
+    delete pop;
 }
 
 /*

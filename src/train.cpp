@@ -124,66 +124,24 @@ void play_with_nexts(Population *p, int i, int *scores) {
  *
  * @param filename Fichier dans lequel récupérer la population.
  *
- * TODO: Cette méthode est en n^2, il faut en implémenter une plus rapide
- * soit avec un Tournament Tree, un QuickSelect ou un Heap-max
  */
-void simulateAndSave(const char *filename) {
+void simulate_and_save(const char *filename) {
     std::ifstream input;
     input.open(filename);
 
     if (!input.is_open())
         throw std::invalid_argument("File not found");
 
-    int n = std::thread::hardware_concurrency();
-    std::thread *threads[n];
+    Population *pop = Population::read(input);
 
-    Population *p = Population::read(input);
+    auto tourn_size = previous_power(pop->size);
 
-    int *scores = (int *)calloc(p->size, sizeof(int));
-    int b1 = INT_MIN, b2 = INT_MIN;
-    Chromosome *c1, *c2;
+    auto tourn = pop->tournament(tourn_size, 0);
 
-    int c = 0;
-    while (c < p->size) {
-        int r = p->size - c - n < 0 ? p->size - c : n;
+    play_match(std::get<0>(tourn), std::get<1>(tourn), 1);
 
-        for (int i = 0; i < r; i++) {
-            threads[i] = new std::thread(play_with_nexts, p, c + i, scores);
-        }
-
-        for (int j = 0; j < r; j++) {
-            threads[j]->join();
-        }
-
-        if (c > 0)
-            std::cout << "\x1b[A"
-                      << "\33[2K\r" << std::flush;
-
-        std::cout << c << " / " << p->size << std::endl;
-
-        c += r;
-    }
-
-    for (int i = 0; i < p->size; i++) {
-        int v = scores[i];
-        Chromosome *c = p->pop[i];
-
-        if (v > b1) {
-            b2 = b1, c2 = c1;
-            b1 = v, c1 = c;
-        } else if (v > b2 && v != b1) {
-            b2 = v, c2 = c;
-        }
-    }
-
-    play_match(c1, c2, 1);
     input.close();
-
-    for (int i = 0; i < n; i++)
-        delete threads[i];
-
-    free(scores);
-    delete p;
+    delete pop;
 }
 
 void play_match(const char *fileC1, const char *fileC2) {

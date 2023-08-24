@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
         if (argc < 3) {
             throw std::invalid_argument("Missing argument popFile");
         }
-        simulateAndSave(argv[2]);
+        simulate_and_save(argv[2]);
     } else if (strcmp(argv[1], "map") == 0) {
         if (argc < 3) {
             throw std::invalid_argument("Missing argument popFile");

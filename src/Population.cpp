@@ -120,11 +120,11 @@ gameStatistics Population::next(int n_thread, bool save) {
     }
 
     for (int i = 0; i < this->size; i++) {
+        // TODO: Il faut que William relise la fonction mutate
+        // pour vérifier qu'elle fait tout correctement telle que je l'ai
+        // modifiée.
         if (likelyness(MUTATION_PROBABILITY)) {
-            Chromosome *tmp = nxt[i];
-            nxt[i] = mutate(nxt[i]);
-            // mutate clone le chromosome, on doit alors supprimer l'ancien
-            delete tmp;
+            mutate(*nxt[i]);
         }
 
         delete this->pop[i];

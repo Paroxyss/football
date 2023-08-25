@@ -98,12 +98,15 @@ Matrix *Chromosome::apply(Matrix &inputs, player *equipeAlliee) {
         // on peut retirer o puisque equipeAlliee[i] fait la même chose mais
         // j'ai pas envie de tout casser donc je te laisse le faire
         Matrix o = Matrix(NETWORK_INPUT_SIZE, 1);
-        equipeAlliee[i].inputs = Matrix(NETWORK_INPUT_SIZE, 1);
+
+        // on supprime les inputs du tick précédent.
+        delete equipeAlliee[i].inputs;
+        equipeAlliee[i].inputs = new Matrix(NETWORK_INPUT_SIZE, 1);
 
         for (int j = 0; j < NETWORK_INPUT_SIZE; j++) {
             o.set(j, 0, inputs.get(j, i));
 
-            equipeAlliee[i].inputs.set(j, 0, inputs.get(j, i));
+            equipeAlliee[i].inputs->set(j, 0, inputs.get(j, i));
         }
 
         o.mult_inv(*this->matrix[i][0]);
@@ -250,26 +253,19 @@ Matrix *Chromosome::collect_and_apply(player *equipeAlliee,
    matrices (se qui échangerais la position initiale de 2 joueurs)
 */
 
-Chromosome *mutate(Chromosome *c) {
-    Chromosome *nw = new Chromosome();
-
+void mutate(Chromosome &c) {
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
-            delete nw->matrix[i][j];
-            nw->matrix[i][j] = mutation(*c->matrix[i][j]);
+            mutation(*c.matrix[i][j]);
         }
     }
 
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        delete nw->didier[i];
-        nw->didier[i] = mutation(*c->didier[i]);
+        mutation(*c.didier[i]);
     }
-
-    return nw;
 }
 
 Chromosome *crossover(Chromosome &a, Chromosome &b) {
-
     Chromosome *child = new Chromosome();
 
     for (int k = 0; k < EQUIPE_SIZE; k++) {

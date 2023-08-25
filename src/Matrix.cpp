@@ -128,20 +128,16 @@ void Matrix::mult_inv(Matrix &a) {
  * @param m Matrice à muter.
  * @return Matrice passée en argument une fois mutée.
  */
-Matrix *mutation(Matrix &m) {
-    Matrix *muted = new Matrix(m.ligne, m.col);
-
+void mutation(Matrix &m) {
     for (int i = 0; i < m.ligne; i++) {
         for (int j = 0; j < m.col; j++) {
             if (likelyness(1 - GENE_MUTATION_PROBABILITY)) {
                 continue;
             }
 
-            muted->set(i, j, replacement());
+            m.set(i, j, replacement());
         }
     }
-
-    return muted;
 }
 
 /**

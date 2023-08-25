@@ -67,6 +67,11 @@ Game::Game(int playerNumber, bool logToFile) {
 }
 
 Game::~Game() {
+
+    for (int i = 0; i < this->playerNumber; i++) {
+        delete this->players[i].inputs;
+    }
+
     delete[] players;
     delete[] walls;
     delete[] goals;
@@ -331,8 +336,9 @@ void Game::writePlayers() {
     csvOutputFile << "2," << (int)ball.pos.x << "," << (int)ball.pos.y << ",";
     for (int i = 0; i < playerNumber; i++) {
         csvOutputFile << (double)this->players[i].orientation << ",";
-        for (int j = 0; j < this->players[i].inputs.ligne; j++) {
-            csvOutputFile << (double)(this->players[i].inputs.get(j, 0)) << ",";
+        for (int j = 0; j < this->players[i].inputs->ligne; j++) {
+            csvOutputFile << (double)(this->players[i].inputs->get(j, 0))
+                          << ",";
         }
     }
     csvOutputFile << std::endl;

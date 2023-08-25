@@ -34,7 +34,7 @@ class Chromosome {
     std::pair<double, double> get2dProjection();
 };
 
-Chromosome *mutate(Chromosome *c);
+void mutate(Chromosome &c);
 Matrix *compute_didier(Chromosome *c, Matrix *inputs);
 Chromosome *crossover(Chromosome &a, Chromosome &b);
 void writeInputs(Matrix *m, player *equipeAlliee, player *equipeAdverse, int i,

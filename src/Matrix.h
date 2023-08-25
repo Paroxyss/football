@@ -20,4 +20,4 @@ class Matrix {
     static Matrix *read(std::ifstream &file);
 };
 
-Matrix *mutation(Matrix &m);
+void mutation(Matrix &m);

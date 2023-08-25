@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <thread>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -35,9 +36,14 @@ void Population::initialize() {
     }
 }
 
-gameStatistics Population::next(bool save) {
+gameStatistics Population::next(int n_thread, bool save) {
     Chromosome **nxt = new Chromosome *[this->size];
+
     int count = 0;
+    int expected = this->size * SAVE_POP_RATE;
+
+    std::thread *threads[n_thread];
+    std::tuple<Chromosome *, Chromosome *, gameStatistics> winners[n_thread];
 
     gameStatistics tourn_stats = {.totalCollisions = 0,
                                   .totalGoals = 0,
@@ -47,9 +53,9 @@ gameStatistics Population::next(bool save) {
 
     // Pour la barre de progression, ne marche pas très bien pour les petites
     // populations mais bon
-    int outRate = std::floor((this->size * SAVE_POP_RATE) / 10);
+    int outRate = std::floor(expected / 10);
 
-    while (count < this->size * SAVE_POP_RATE) {
+    while (count < expected) {
         if ((count % outRate) == 0) {
             std::cout << "*";
             fflush(stdout);
@@ -57,33 +63,53 @@ gameStatistics Population::next(bool save) {
 
         if (likelyness(CROSSOVER_PROBABILITY)) {
 
-            // on choisit une puissance de 2 aléatoire car ça permet
-            // d'organiser des petites compétitions et donc limiter la pression
-            // selective.
-            int tourn_size = random_power(this->size);
+            if (expected - count < n_thread) {
+                n_thread = 1;
+            }
 
-            auto outcome = this->tournament(tourn_size, save);
-            nxt[count] =
-                crossover(*std::get<0>(outcome), *std::get<1>(outcome));
-            auto tournResult = std::get<2>(outcome);
+            for (int i = 0; i < n_thread; i++) {
+                // on choisit une puissance de 2 aléatoire car ça permet
+                // d'organiser des petites compétitions et donc limiter la
+                // pression selective.
+                // On divise par 4 sinon c'est beaucoup trop lent.
+                int tourn_size = random_power(this->size / 4);
 
-            tourn_stats.totalCollisions += tournResult.totalCollisions;
-            tourn_stats.totalGoals += tournResult.totalGoals;
+                threads[i] =
+                    new std::thread([this, tourn_size, save, &winners, i]() {
+                        auto outcome = this->tournament(tourn_size, save);
+                        winners[i] = outcome;
+                    });
+            }
 
-            tourn_stats.collisionsMean =
-                (double)(count) / count * tourn_stats.collisionsMean +
-                tournResult.collisionsMean / (count + 1);
-            tourn_stats.goalsMean =
-                (double)(count) / count * tourn_stats.goalsMean +
-                tournResult.goalsMean / (count + 1);
-            tourn_stats.scoreMean =
-                (double)(count) / count * tourn_stats.scoreMean +
-                tournResult.scoreMean / (count + 1);
+            for (int i = 0; i < n_thread; ++i) {
+                threads[i]->join();
+            }
+
+            for (int i = 0; i < n_thread; i++) {
+                nxt[count] = crossover(*std::get<0>(winners[i]),
+                                       *std::get<1>(winners[i]));
+
+                auto tournResult = std::get<2>(winners[i]);
+
+                tourn_stats.totalCollisions += tournResult.totalCollisions;
+                tourn_stats.totalGoals += tournResult.totalGoals;
+
+                tourn_stats.collisionsMean =
+                    (double)(count) / count * tourn_stats.collisionsMean +
+                    tournResult.collisionsMean / (count + 1);
+                tourn_stats.goalsMean =
+                    (double)(count) / count * tourn_stats.goalsMean +
+                    tournResult.goalsMean / (count + 1);
+                tourn_stats.scoreMean =
+                    (double)(count) / count * tourn_stats.scoreMean +
+                    tournResult.scoreMean / (count + 1);
+
+                count++;
+            }
+
         } else {
-            nxt[count] = cloneChromosome(this->pop[rand() % this->size]);
+            nxt[count++] = cloneChromosome(this->pop[rand() % this->size]);
         }
-
-        count++;
     }
 
     while (count < this->size) {
@@ -97,12 +123,16 @@ gameStatistics Population::next(bool save) {
         if (likelyness(MUTATION_PROBABILITY)) {
             Chromosome *tmp = nxt[i];
             nxt[i] = mutate(nxt[i]);
-			// mutate clone le chromosome, on doit alors supprimer l'ancien
-			delete tmp;
+            // mutate clone le chromosome, on doit alors supprimer l'ancien
+            delete tmp;
         }
 
         delete this->pop[i];
         this->pop[i] = nxt[i];
+    }
+
+    for (int i = 0; i < n_thread; i++) {
+        delete threads[i];
     }
 
     delete[] nxt;
@@ -174,30 +204,6 @@ Population::tournament(int tourn_size, bool save) {
     return std::make_tuple(contestants[0], contestants[1], gameStats);
 }
 
-Chromosome **getChromosomeFromPopulations(Population **pop, unsigned int i) {
-    int ich = 0;
-    while (i >= pop[ich]->size) {
-        i -= pop[ich]->size;
-        ich += 1;
-    }
-    return &pop[ich]->pop[i];
-};
-
-void shufflePopulations(Population **pop, unsigned int numberOfPop) {
-    int popTotale = 0;
-    for (int i = 0; i < numberOfPop; i++) {
-        popTotale += pop[i]->size;
-    }
-    for (int i = popTotale - 1; i >= 0; i--) {
-        int swapIndice = rand() % (i + 1);
-        auto pc1 = getChromosomeFromPopulations(pop, i);
-        auto pc2 = getChromosomeFromPopulations(pop, swapIndice);
-        auto tmp = *pc1;
-        *pc1 = *pc2;
-        *pc2 = tmp;
-    }
-}
-
 Chromosome *cloneChromosome(Chromosome *original) {
     auto clone = new Chromosome();
 
@@ -221,25 +227,6 @@ Chromosome *cloneChromosome(Chromosome *original) {
     }
 
     return clone;
-}
-
-Population *joinPopulation(Population **p, int n) {
-    int c = 0;
-    for (int i = 0; i < n; i++) {
-        c += p[i]->size;
-    }
-
-    auto np = new Population(c);
-    int k = 0;
-
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < p[i]->size; j++) {
-            delete np->pop[k];
-            np->pop[k++] = cloneChromosome(p[i]->pop[j]);
-        }
-    }
-
-    return np;
 }
 
 void Population::write(std::ofstream &file) {

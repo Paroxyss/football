@@ -5,10 +5,11 @@
 #include "config.h"
 #include "util.hpp"
 
-void train(unsigned int n_gen, unsigned int population_size) {
+void train(int n_gen, int population_size, int n_thread) {
 
     std::cout << "Starting a train of " << n_gen << " generations with "
-              << population_size << " chromosomes" << std::endl;
+              << population_size << " chromosomes on " << n_thread
+              << " threads." << std::endl;
 
     int gen = 0;
     int last_save = 0;
@@ -20,7 +21,7 @@ void train(unsigned int n_gen, unsigned int population_size) {
 
         auto start = std::chrono::steady_clock::now();
 
-        gameStatistics stats = pop->next();
+        gameStatistics stats = pop->next(n_thread);
 
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start;

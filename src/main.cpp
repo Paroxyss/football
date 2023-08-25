@@ -10,6 +10,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <unistd.h>
 
 /*
@@ -38,8 +39,9 @@ int main(int argc, char *argv[]) {
     }
 
     if (strcmp(argv[1], "train") == 0) {
-        unsigned int n_gen = N;
-        unsigned int pop_size = POPULATION_SIZE;
+        int n_gen = N;
+        int pop_size = POPULATION_SIZE;
+        int n_thread = std::thread::hardware_concurrency();
 
         if (argc >= 3) {
             n_gen = std::stoi(argv[2]);
@@ -47,13 +49,15 @@ int main(int argc, char *argv[]) {
         if (argc >= 4) {
             pop_size = std::stoi(argv[3]);
         }
-
-        // Il doit au moins être possible d'organiser un tournois
-        if (pop_size < 4) {
-            throw std::invalid_argument("Population trop petite.");
+        if (argc >= 5) {
+            n_thread = std::stoi(argv[4]);
         }
 
-        train(n_gen, pop_size);
+        // Il doit au moins être possible d'organiser un tournois
+        if (pop_size < 4)
+            throw std::invalid_argument("Population trop petite.");
+
+        train(n_gen, pop_size, n_thread);
     } else if (strcmp(argv[1], "play") == 0) {
         if (argc < 3) {
             throw std::invalid_argument("Missing argument popFile");

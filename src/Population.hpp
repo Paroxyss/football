@@ -14,7 +14,7 @@ class Population {
     ~Population();
 
     void initialize();
-    gameStatistics next(bool save = false);
+    gameStatistics next(int n_thread, bool save = false);
 
     std::tuple<Chromosome *, Chromosome *, gameStatistics>
     tournament(int k, bool save);
@@ -23,7 +23,9 @@ class Population {
     static Population *read(std::ifstream &file);
 };
 
-Chromosome **getChromosomeFromPopulations(Population **pop, unsigned int i);
-Population *joinPopulation(Population **p, int n);
-void shufflePopulations(Population **pop, unsigned int numberOfPop);
+void thread_tournament(
+    int tourn_size, bool save,
+    std::tuple<Chromosome *, Chromosome *, gameStatistics> *wheretowrite,
+    Population *pop);
+
 Chromosome *cloneChromosome(Chromosome *original);

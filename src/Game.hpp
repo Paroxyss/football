@@ -11,7 +11,7 @@ struct ball {
 
 struct player : ball {
     double orientation, acceleration;
-    Matrix *inputs;
+    Matrix inputs;
 };
 
 // faut la mettre ici sinon ça compile pas (mdr)

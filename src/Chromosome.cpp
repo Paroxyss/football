@@ -98,12 +98,12 @@ Matrix *Chromosome::apply(Matrix &inputs, player *equipeAlliee) {
         // on peut retirer o puisque equipeAlliee[i] fait la même chose mais
         // j'ai pas envie de tout casser donc je te laisse le faire
         Matrix o = Matrix(NETWORK_INPUT_SIZE, 1);
-        equipeAlliee[i].inputs = new Matrix(NETWORK_INPUT_SIZE, 1);
+        equipeAlliee[i].inputs = Matrix(NETWORK_INPUT_SIZE, 1);
 
         for (int j = 0; j < NETWORK_INPUT_SIZE; j++) {
             o.set(j, 0, inputs.get(j, i));
 
-            equipeAlliee[i].inputs->set(j, 0, inputs.get(j, i));
+            equipeAlliee[i].inputs.set(j, 0, inputs.get(j, i));
         }
 
         o.mult_inv(*this->matrix[i][0]);

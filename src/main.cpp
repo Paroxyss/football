@@ -34,6 +34,9 @@ int main(int argc, char *argv[]) {
             << std::endl
             << "\t map <popFile> [output] crée un fichier csv mappant une "
                "population"
+            << std::endl
+            << "\t random <popFile> : sauvegarde un match entre deux individus "
+               "choisis aléatoirement"
             << std::endl;
         _exit(EXIT_FAILURE);
     }
@@ -72,6 +75,8 @@ int main(int argc, char *argv[]) {
         } else {
             saveMap(argv[2]);
         }
+    } else if (strcmp(argv[1], "random") == 0) {
+        play_random_match(argv[2]);
     }
 
     _exit(EXIT_SUCCESS);

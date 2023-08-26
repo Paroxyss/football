@@ -36,6 +36,23 @@ void Population::initialize() {
     }
 }
 
+void update_statistics(gameStatistics &tourn_stats, gameStatistics *tournResult,
+                       int count) {
+
+    tourn_stats.totalCollisions += tournResult->totalCollisions;
+    tourn_stats.totalGoals += tournResult->totalGoals;
+
+    tourn_stats.collisionsMean =
+        (double)(count) / count * tourn_stats.collisionsMean +
+        tournResult->collisionsMean / (count + 1);
+    tourn_stats.goalsMean = (double)(count) / count * tourn_stats.goalsMean +
+                            tournResult->goalsMean / (count + 1);
+    tourn_stats.scoreMean = (double)(count) / count * tourn_stats.scoreMean +
+                            tournResult->scoreMean / (count + 1);
+
+    tourn_stats.n++;
+}
+
 gameStatistics Population::next(int n_thread, bool save) {
     Chromosome **nxt = new Chromosome *[this->size];
 
@@ -45,7 +62,8 @@ gameStatistics Population::next(int n_thread, bool save) {
     std::thread *threads[n_thread];
     std::tuple<Chromosome *, Chromosome *, gameStatistics> winners[n_thread];
 
-    gameStatistics tourn_stats = {.totalCollisions = 0,
+    gameStatistics tourn_stats = {.n = 0,
+                                  .totalCollisions = 0,
                                   .totalGoals = 0,
                                   .scoreMean = 0,
                                   .goalsMean = 0,
@@ -56,11 +74,6 @@ gameStatistics Population::next(int n_thread, bool save) {
     int outRate = std::floor(expected / 10);
 
     while (count < expected) {
-        if ((count % outRate) == 0) {
-            std::cout << "*";
-            fflush(stdout);
-        }
-
         if (likelyness(CROSSOVER_PROBABILITY)) {
 
             if (expected - count < n_thread) {
@@ -72,7 +85,7 @@ gameStatistics Population::next(int n_thread, bool save) {
                 // d'organiser des petites compétitions et donc limiter la
                 // pression selective.
                 // On divise par 4 sinon c'est beaucoup trop lent.
-                int tourn_size = random_power(this->size / 4);
+                int tourn_size = random_power(this->size / 8);
 
                 threads[i] =
                     new std::thread([this, tourn_size, save, &winners, i]() {
@@ -90,19 +103,12 @@ gameStatistics Population::next(int n_thread, bool save) {
                                        *std::get<1>(winners[i]));
 
                 auto tournResult = std::get<2>(winners[i]);
+                update_statistics(tourn_stats, &tournResult, count);
 
-                tourn_stats.totalCollisions += tournResult.totalCollisions;
-                tourn_stats.totalGoals += tournResult.totalGoals;
-
-                tourn_stats.collisionsMean =
-                    (double)(count) / count * tourn_stats.collisionsMean +
-                    tournResult.collisionsMean / (count + 1);
-                tourn_stats.goalsMean =
-                    (double)(count) / count * tourn_stats.goalsMean +
-                    tournResult.goalsMean / (count + 1);
-                tourn_stats.scoreMean =
-                    (double)(count) / count * tourn_stats.scoreMean +
-                    tournResult.scoreMean / (count + 1);
+                if ((count % outRate) == 0) {
+                    std::cout << "*";
+                    fflush(stdout);
+                }
 
                 count++;
             }
@@ -146,6 +152,7 @@ Population::tournament(int tourn_size, bool save) {
     bool *selected = (bool *)calloc(tourn_size, sizeof(bool));
 
     for (int i = 0; i < tourn_size; i++) {
+        // TODO: Apparemment rand() n'est pas thread-safe.
         int k = rand() % tourn_size;
 
         while (selected[k]) {

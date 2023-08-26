@@ -2,9 +2,10 @@
 #include <ostream>
 
 std::ostream &operator<<(std::ostream &out, gameStatistics stats) {
-    out << "Stats{ collisions : " << stats.totalCollisions << " | "
-        << stats.collisionsMean << ", goals : " << stats.totalGoals << " | "
-        << stats.goalsMean << ", score : " << stats.scoreMean << " }";
+    out << "Stats{ collisions : "
+        << "matches : " << stats.n << ", collisions : " << stats.totalCollisions
+        << " | " << stats.collisionsMean << ", goals : " << stats.totalGoals
+        << " | " << stats.goalsMean << ", score : " << stats.scoreMean << " }";
     return out;
 }
 

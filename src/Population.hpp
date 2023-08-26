@@ -22,10 +22,6 @@ class Population {
     void write(std::ofstream &file);
     static Population *read(std::ifstream &file);
 };
-
-void thread_tournament(
-    int tourn_size, bool save,
-    std::tuple<Chromosome *, Chromosome *, gameStatistics> *wheretowrite,
-    Population *pop);
-
 Chromosome *cloneChromosome(Chromosome *original);
+void update_statistics(gameStatistics &tourn_stats, gameStatistics *tournResult,
+                       int count);

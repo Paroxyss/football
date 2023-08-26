@@ -11,6 +11,7 @@ struct gameInformations {
 };
 
 struct gameStatistics {
+    unsigned int n;
     unsigned long totalCollisions;
     unsigned int totalGoals;
     double scoreMean;

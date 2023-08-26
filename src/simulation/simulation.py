@@ -27,15 +27,8 @@ while running:
                 clock.tick(60)
             case 2.0:
                 draw_field()
-
-                pg.draw.circle(
-                    screen,
-                    WHITE,
-                    (10, 30),
-                    5,
-                )
-
                 draw_goal()
+                progression_bar(i, len(parsed))
                 draw_ball(data[i][1], data[i][2])
 
                 for k in range(1, nb_joueurs + 1):

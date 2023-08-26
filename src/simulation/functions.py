@@ -37,6 +37,16 @@ def calcx(infos, k, nb_joueurs):
     return SCREEN_WIDTH - infos["x"]
 
 
+def progression_bar(p, max):
+    x = 10
+    y = 10
+
+    for i in range(4):
+        pg.draw.rect(screen, (255, 255, 255), (x, y, 200, 15), 1)
+
+    pg.draw.rect(screen, (255, 255, 255), (x, y, 2 * (p / max * 100), 15), 15)
+
+
 def calcy(infos, k, nb_joueurs):
     if k <= nb_joueurs / 2:
         return infos["y"]

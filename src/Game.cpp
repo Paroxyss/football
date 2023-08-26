@@ -333,7 +333,8 @@ void Game::tick(double timeToAdvance, bool root) {
 };
 
 void Game::writePlayers() {
-    csvOutputFile << "2," << (int)ball.pos.x << "," << (int)ball.pos.y << ",";
+    csvOutputFile << "2," << (double)ball.pos.x << "," << (double)ball.pos.y
+                  << ",";
     for (int i = 0; i < playerNumber; i++) {
         csvOutputFile << (double)this->players[i].orientation << ",";
         for (int j = 0; j < this->players[i].inputs->ligne; j++) {

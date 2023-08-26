@@ -1,9 +1,3 @@
-/**
- * Fichier de gestion pour les matrices.
- *
- * @author William, Cyprien.
- */
-
 #include "Matrix.h"
 #include "Mutation.hpp"
 #include "config.h"
@@ -131,11 +125,11 @@ void Matrix::mult_inv(Matrix &a) {
 void mutation(Matrix &m) {
     for (int i = 0; i < m.ligne; i++) {
         for (int j = 0; j < m.col; j++) {
-            if (likelyness(1 - GENE_MUTATION_PROBABILITY)) {
+            if (likelyness(1 - MUTATION_PROBABILITY)) {
                 continue;
             }
 
-            m.set(i, j, replacement());
+            m.set(i, j, balance(m.get(i, j)));
         }
     }
 }

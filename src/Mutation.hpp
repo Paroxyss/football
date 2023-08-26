@@ -1,10 +1,3 @@
-#include "util.hpp"
-
-inline double replacement() {
-    return randomDouble();
-}
-
-inline double tanhmut(double x) {
-    double t = randomDouble(1, 5);
-    return x * (0.5 * (tanh(1.75 * (t - 1)) + tanh(2 * (t - 4))) + 1);
-}
+double replacement();
+double perturbation(double x);
+double balance(double x);

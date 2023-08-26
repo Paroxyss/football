@@ -114,10 +114,13 @@ gameStatistics Population::next(int n_thread, bool save) {
             }
 
         } else {
-            nxt[count++] = cloneChromosome(this->pop[rand() % this->size]);
+            nxt[count] = cloneChromosome(this->pop[rand() % this->size]);
+            count++;
         }
     }
 
+    // On introduit des individus complètement nouveau pour explorer le plus de
+    // solutions possible.
     while (count < this->size) {
         nxt[count] = new Chromosome();
         nxt[count]->initialize();
@@ -126,12 +129,7 @@ gameStatistics Population::next(int n_thread, bool save) {
     }
 
     for (int i = 0; i < this->size; i++) {
-        // TODO: Il faut que William relise la fonction mutate
-        // pour vérifier qu'elle fait tout correctement telle que je l'ai
-        // modifiée.
-        if (likelyness(MUTATION_PROBABILITY)) {
-            mutate(*nxt[i]);
-        }
+        mutate(*nxt[i]);
 
         delete this->pop[i];
         this->pop[i] = nxt[i];

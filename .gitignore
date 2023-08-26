@@ -17,3 +17,5 @@ pops/*
 
 test.hpp
 test.cpp
+
+bugs.md

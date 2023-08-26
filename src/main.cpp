@@ -1,4 +1,5 @@
 #include "Matrix.h"
+#include "Simulation.hpp"
 #include "config.h"
 #include "train.hpp"
 
@@ -77,6 +78,8 @@ int main(int argc, char *argv[]) {
         }
     } else if (strcmp(argv[1], "random") == 0) {
         play_random_match(argv[2]);
+    } else if (strcmp(argv[1], "seegoal") == 0) {
+        see_goal(argv[2]);
     }
 
     _exit(EXIT_SUCCESS);

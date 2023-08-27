@@ -1,4 +1,5 @@
 #include "util.hpp"
+#include <random>
 
 /**
  * @brief Permet d'explorer un large espace solution mais peut perdre une bonne
@@ -29,4 +30,12 @@ double balance(double x) {
     }
 
     return replacement();
+}
+
+double gaussian(double x) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<double> distribution(0.0, 0.1);
+
+    return x + distribution(gen);
 }

@@ -129,7 +129,7 @@ void mutation(Matrix &m) {
                 continue;
             }
 
-            m.set(i, j, balance(m.get(i, j)));
+            m.set(i, j, replacement());
         }
     }
 }

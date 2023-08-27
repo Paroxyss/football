@@ -14,9 +14,6 @@ struct gameStatistics {
     unsigned int n;
     unsigned long totalCollisions;
     unsigned int totalGoals;
-    double scoreMean;
-    double goalsMean;
-    double collisionsMean;
 };
 
 inline double randomDouble(double min, double max) {
@@ -24,7 +21,7 @@ inline double randomDouble(double min, double max) {
 }
 
 inline double randomDouble() {
-    return randomDouble(-1, 1);
+    return randomDouble(-10, 10);
 }
 
 inline int previous_power(int n) {

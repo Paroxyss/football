@@ -37,41 +37,32 @@ void Population::initialize() {
 }
 
 void update_statistics(gameStatistics &tourn_stats, gameStatistics *tournResult,
-                       int count) {
+                       int matchs_count) {
 
     tourn_stats.totalCollisions += tournResult->totalCollisions;
     tourn_stats.totalGoals += tournResult->totalGoals;
-
-    tourn_stats.collisionsMean =
-        (double)(count) / count * tourn_stats.collisionsMean +
-        tournResult->collisionsMean / (count + 1);
-    tourn_stats.goalsMean = (double)(count) / count * tourn_stats.goalsMean +
-                            tournResult->goalsMean / (count + 1);
-    tourn_stats.scoreMean = (double)(count) / count * tourn_stats.scoreMean +
-                            tournResult->scoreMean / (count + 1);
-
-    tourn_stats.n++;
+    tourn_stats.n += matchs_count;
 }
 
 gameStatistics Population::next(int n_thread, bool save) {
     Chromosome **nxt = new Chromosome *[this->size];
 
     int count = 0;
-    int expected = this->size * SAVE_POP_RATE;
+    int expected = this->size * (1 - NEW_BLOOD);
 
     std::thread *threads[n_thread];
     std::tuple<Chromosome *, Chromosome *, gameStatistics> winners[n_thread];
 
-    gameStatistics tourn_stats = {.n = 0,
-                                  .totalCollisions = 0,
-                                  .totalGoals = 0,
-                                  .scoreMean = 0,
-                                  .goalsMean = 0,
-                                  .collisionsMean = 0};
+    gameStatistics tourn_stats = {
+        .n = 0,
+        .totalCollisions = 0,
+        .totalGoals = 0,
+    };
 
     // Pour la barre de progression, ne marche pas très bien pour les petites
     // populations mais bon
     int outRate = std::floor(expected / 10);
+    int *matchs_count = new int[n_thread];
 
     while (count < expected) {
         if (likelyness(CROSSOVER_PROBABILITY)) {
@@ -86,6 +77,8 @@ gameStatistics Population::next(int n_thread, bool save) {
                 // pression selective.
                 // On divise par 4 sinon c'est beaucoup trop lent.
                 int tourn_size = random_power(this->size / 8);
+
+                matchs_count[i] = tourn_size - 1;
 
                 threads[i] =
                     new std::thread([this, tourn_size, save, &winners, i]() {
@@ -103,7 +96,7 @@ gameStatistics Population::next(int n_thread, bool save) {
                                        *std::get<1>(winners[i]));
 
                 auto tournResult = std::get<2>(winners[i]);
-                update_statistics(tourn_stats, &tournResult, count);
+                update_statistics(tourn_stats, &tournResult, matchs_count[i]);
 
                 if ((count % outRate) == 0) {
                     std::cout << "*";
@@ -140,6 +133,7 @@ gameStatistics Population::next(int n_thread, bool save) {
     }
 
     delete[] nxt;
+    delete[] matchs_count;
     return tourn_stats;
 }
 
@@ -166,12 +160,11 @@ Population::tournament(int tourn_size, bool save) {
     }
 
     free(selected);
-    gameStatistics gameStats = {.totalCollisions = 0,
-                                .totalGoals = 0,
-                                .scoreMean = 0,
-                                .goalsMean = 0,
-                                .collisionsMean = 0};
-    unsigned int gameN = 1;
+
+    gameStatistics gameStats = {
+        .totalCollisions = 0,
+        .totalGoals = 0,
+    };
 
     while (tourn_size > 2) {
         int pool_size = tourn_size / 2;
@@ -190,16 +183,6 @@ Population::tournament(int tourn_size, bool save) {
             // statistiques
             gameStats.totalCollisions += match_results.collisions;
             gameStats.totalGoals += match_results.goals;
-            gameStats.collisionsMean =
-                (double)(gameN - 1) / gameN * gameStats.collisionsMean +
-                (double)match_results.collisions / gameN;
-            gameStats.goalsMean =
-                (double)(gameN - 1) / gameN * gameStats.goalsMean +
-                (double)match_results.goals / gameN;
-            gameStats.scoreMean =
-                (double)(gameN - 1) / gameN * gameStats.scoreMean +
-                match_results.score / gameN;
-            gameN += 1;
         }
 
         tourn_size = pool_size;
@@ -214,6 +197,7 @@ Chromosome *cloneChromosome(Chromosome *original) {
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
+
             for (int k = 0; k < original->matrix[i][j]->ligne; k++) {
                 for (int l = 0; l < original->matrix[i][j]->col; l++) {
                     clone->matrix[i][j]->set(k, l,

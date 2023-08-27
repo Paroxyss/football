@@ -4,8 +4,9 @@
 std::ostream &operator<<(std::ostream &out, gameStatistics stats) {
     out << "Stats{ collisions : "
         << "matches : " << stats.n << ", collisions : " << stats.totalCollisions
-        << " | " << stats.collisionsMean << ", goals : " << stats.totalGoals
-        << " | " << stats.goalsMean << ", score : " << stats.scoreMean << " }";
+        << " | " << stats.totalCollisions / (double)(stats.n)
+        << ", goals : " << stats.totalGoals << " | "
+        << stats.totalGoals / (double)(stats.n) << " }";
     return out;
 }
 

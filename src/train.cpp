@@ -40,7 +40,7 @@ void train(int n_gen, int population_size, int n_thread) {
             pop->write(out);
 
             out.close();
-            last_save -= SAVE_RATE;
+            last_save = 0;
         }
     }
 

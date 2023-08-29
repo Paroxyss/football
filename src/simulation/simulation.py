@@ -22,28 +22,27 @@ for i in range(1, len(data)):
 
 while running:
     for i in range(1, len(parsed)):
-        match data[i][0]:
-            case 1.0:
-                clock.tick(60)
-            case 2.0:
-                draw_field()
-                draw_goal()
-                progression_bar(i, len(parsed))
-                draw_ball(data[i][1], data[i][2])
+        lineType = data[i][0]
+        if(lineType == 1.0):
+            clock.tick(60)
+        elif(lineType == 2.0):
+            draw_field()
+            draw_goal()
+            progression_bar(i, len(parsed))
+            draw_ball(data[i][1], data[i][2])
 
-                for k in range(1, nb_joueurs + 1):
-                    if show[k - 1]:
-                        show_data(parsed[i][k - 1], k, nb_joueurs)
+            for k in range(1, nb_joueurs + 1):
+                if show[k - 1]:
+                    show_data(parsed[i][k - 1], k, nb_joueurs)
 
-                    draw_player(
-                        "droite" if k > nb_joueurs / 2 else "gauche",
-                        parsed[i][k - 1]["x"],
-                        parsed[i][k - 1]["y"],
-                        parsed[i][k - 1]["orientation"],
-                    )
-
-            case default:
-                print("error", data[i][0])
+                draw_player(
+                    "droite" if k > nb_joueurs / 2 else "gauche",
+                    parsed[i][k - 1]["x"],
+                    parsed[i][k - 1]["y"],
+                    parsed[i][k - 1]["orientation"],
+                )
+        else:
+            print("error", data[i][0])
 
         for event in pg.event.get():
             if event.type == pg.MOUSEBUTTONDOWN:

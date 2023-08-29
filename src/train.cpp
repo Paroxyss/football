@@ -1,9 +1,14 @@
+#include <filesystem>
 #include <stdexcept>
+namespace fs = std::__fs::filesystem;
 
 #include "Chromosome.hpp"
 #include "Population.hpp"
 #include "config.h"
 #include "util.hpp"
+
+#define POPNAME(gen)                                                           \
+    "pops/pop-gen" + std::to_string(gen) + "-at-" + std::to_string(time(NULL))
 
 void train(int n_gen, int population_size, int n_thread) {
 
@@ -34,22 +39,26 @@ void train(int n_gen, int population_size, int n_thread) {
 
         if (last_save > SAVE_RATE) {
             std::ofstream out;
-            out.open("pops/pop-gen" + std::to_string(gen) + "-at-" +
-                     std::to_string(time(NULL)));
+            auto backup_fname = POPNAME(gen);
+            out.open(backup_fname);
 
             pop->write(out);
-
             out.close();
+
+            fs::remove("pops/latest-backup");
+            fs::create_hard_link(backup_fname, "pops/latest-backup");
             last_save = 0;
         }
     }
 
     std::ofstream out;
-    out.open("pops/pop-gen" + std::to_string(gen) + "-at-" +
-             std::to_string(time(NULL)));
+    auto outFName = POPNAME(gen);
+    out.open(outFName);
 
     pop->write(out);
     out.close();
+    fs::remove("pops/latest");
+    fs::create_hard_link(outFName, "pops/latest");
 
     delete pop;
 }

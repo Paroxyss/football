@@ -50,7 +50,7 @@ gameStatistics Population::next(int n_thread, bool save) {
     int count = 0;
     int expected = this->size * (1 - NEW_BLOOD);
 
-    std::thread *threads[n_thread];
+    std::thread threads[n_thread];
     std::tuple<Chromosome *, Chromosome *, gameStatistics> winners[n_thread];
 
     gameStatistics tourn_stats = {
@@ -81,14 +81,14 @@ gameStatistics Population::next(int n_thread, bool save) {
                 matchs_count[i] = tourn_size - 1;
 
                 threads[i] =
-                    new std::thread([this, tourn_size, save, &winners, i]() {
+                    std::thread([this, tourn_size, save, &winners, i]() {
                         auto outcome = this->tournament(tourn_size, save);
                         winners[i] = outcome;
                     });
             }
 
             for (int i = 0; i < n_thread; ++i) {
-                threads[i]->join();
+                threads[i].join();
             }
 
             for (int i = 0; i < n_thread; i++) {
@@ -105,11 +105,6 @@ gameStatistics Population::next(int n_thread, bool save) {
 
                 count++;
             }
-
-            for (int i = 0; i < n_thread; i++) {
-                delete threads[i];
-            }
-
         } else {
             nxt[count] = cloneChromosome(this->pop[rand() % this->size]);
             count++;

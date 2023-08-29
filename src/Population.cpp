@@ -106,6 +106,10 @@ gameStatistics Population::next(int n_thread, bool save) {
                 count++;
             }
 
+            for (int i = 0; i < n_thread; i++) {
+                delete threads[i];
+            }
+
         } else {
             nxt[count] = cloneChromosome(this->pop[rand() % this->size]);
             count++;
@@ -126,10 +130,6 @@ gameStatistics Population::next(int n_thread, bool save) {
 
         delete this->pop[i];
         this->pop[i] = nxt[i];
-    }
-
-    for (int i = 0; i < n_thread; i++) {
-        delete threads[i];
     }
 
     delete[] nxt;

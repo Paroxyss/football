@@ -63,6 +63,7 @@ Game::Game(int playerNumber, bool logToFile) {
     setBall({.x = 0, .y = 0}, {.x = 0, .y = 0}, BALL_SIZE);
     for (int i = 0; i < playerNumber; i++) {
         setPlayer(i, {.x = 0, .y = 0}, {.x = 0, .y = 0}, 0, PLAYER_SIZE);
+        players[i].inputs = NULL;
     }
 }
 

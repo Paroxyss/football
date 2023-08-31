@@ -45,13 +45,13 @@ inline int random_power(int n) {
 }
 
 inline double angleRounded(double input) {
-    // on ajoute 2pi pour être dans les positifs et ajour un comportement plus
-    // logique
-    int offset = round(abs(input) / (2 * M_PI));
-    // correction du signe
-    offset *= abs(input) / input;
-    // retour de l'angle corrigé
-    return input - offset * 2 * M_PI;
+    input = fmod(input, 2 * M_PI);
+
+    if (input < 0) {
+        input += 2 * M_PI;
+    }
+
+    return input;
 }
 
 inline bool likelyness(double v) {

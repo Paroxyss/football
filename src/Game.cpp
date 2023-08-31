@@ -68,6 +68,9 @@ Game::Game(int playerNumber, bool logToFile) {
 }
 
 Game::~Game() {
+    if (logToFile) {
+        csvOutputFile.close();
+    }
 
     for (int i = 0; i < this->playerNumber; i++) {
         delete this->players[i].inputs;
@@ -439,9 +442,6 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
         }
     }
 
-    if (save) {
-        csvOutputFile.close();
-    }
 
     if (g.infos.score == 0) {
         g.infos.score = likelyness(0.5) ? 1 : -1;

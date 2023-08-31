@@ -137,12 +137,14 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
     vector ball_fakePos = team ? mapSize - b->pos : b->pos;
 
     mat->set(4, i, norme(ball_fakePos - fakePos));
-    mat->set(5, i, angleRounded(vangle(ball_fakePos - fakePos)));
+	// on l'inverse pour que ce soit la valeur à corriger pour aller vers la balle, plus logique pour le joueur
+    mat->set(5, i, -angleRounded(selected.orientation - vangle(ball_fakePos - fakePos)));
 
     // Distance et orientation relative de la cage adverse
     vector cage = {.x = MAP_LENGTH, .y = (double)MAP_HEIGHT / 2};
     mat->set(6, i, norme(cage - fakePos));
-    mat->set(7, i, angleRounded(vangle(cage - fakePos)));
+	// idem que pour l'orientation relative de la balle, on passe la valeur angulaire à corriger
+    mat->set(7, i, -angleRounded(selected.orientation - vangle(cage - fakePos)));
 
     // Joueur le plus proche
     vector nearest;
@@ -160,7 +162,7 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
     }
 
     mat->set(8, i, d);
-    mat->set(9, i, angleRounded(vangle(nearest - fakePos)));
+    mat->set(9, i, -angleRounded(selected.orientation - vangle(nearest - fakePos)));
 }
 
 Matrix *Chromosome::collect_and_apply(player *equipeAlliee,

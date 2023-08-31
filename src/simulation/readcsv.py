@@ -48,8 +48,6 @@ def parse(line, nb_joueurs):
                 "cage_angle": line[i * n + 8],
                 "nearest_dist": line[i * n + 9],
                 "nearest_angle": line[i * n + 10],
-                "com1": line[i * n + 11],
-                "com2": line[i * n + 12],
             }
         )
 

@@ -395,26 +395,15 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
     g.ball.vitesse = {.x = 0, .y = 0};
 
-    int c[] = {2, 1};
-    g.set_players(c, 2);
-
-    Matrix didierInputs[2] = {
-        Matrix(COM_SIZE * EQUIPE_SIZE, 1),
-        Matrix(COM_SIZE * EQUIPE_SIZE, 1),
-    };
-
-    for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < didierInputs[i].ligne; j++) {
-            didierInputs[i].set(j, 0, 0);
-        }
-    }
+    int c[] = {1};
+    g.set_players(c, 1);
 
     for (int k = 0; k < GAME_DURATION; k++) {
 
         auto r1 = c1->collect_and_apply(g.players, g.players + EQUIPE_SIZE,
-                                        &g.ball, didierInputs[0], false);
+                                        &g.ball,  false);
         auto r2 = c2->collect_and_apply(g.players + EQUIPE_SIZE, g.players,
-                                        &g.ball, didierInputs[1], true);
+                                        &g.ball,  true);
 
         for (int a = 0; a < 2; a++) {
             for (int i = 0; i < EQUIPE_SIZE; i++) {
@@ -446,7 +435,7 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
             g.ball.vitesse.x = 0;
             g.ball.vitesse.y = 0;
 
-            g.set_players(c, 2);
+            g.set_players(c, 1);
         }
     }
 

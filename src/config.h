@@ -1,22 +1,18 @@
 #pragma once
 
-#define COM_SIZE 2
-
 #define NETWORK_SIZE 4
-#define DIDIER_NETWORK_SIZE 3
 
 // pour l'instant le réseau ne prend pas l'accélération en entrée
 // pour pouvoir évoluer plus facilement.
 // x, y, vx, vy, theta, distance_balle, rthetab, distance cage, angle relatif
 // cage, distance abverse + proche, angle adverse + proche, com1, .. ,
 // com{COM_SIZE}
-#define NETWORK_OUTPUT_SIZE (2 + COM_SIZE)
-#define NETWORK_INPUT_SIZE (10 + COM_SIZE)
+#define NETWORK_OUTPUT_SIZE 2
+#define NETWORK_INPUT_SIZE 10
 
-#define EQUIPE_SIZE 3
+#define EQUIPE_SIZE 1
 
 const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 8, 6, NETWORK_OUTPUT_SIZE};
-const int DIDIER_LAYERS[] = {COM_SIZE * EQUIPE_SIZE, 5, COM_SIZE *EQUIPE_SIZE};
 
 #define GAME_RESOLUTION 1
 

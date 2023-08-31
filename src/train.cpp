@@ -112,11 +112,6 @@ void saveMap(const char *filename, const char *outputFn) {
     std::ofstream output;
     output.open(outputFn);
 
-    for (int i = 0; i < p->size; i++) {
-        auto data = p->pop[i]->get2dProjection();
-        output << data.first << ", " << data.second << std::endl;
-    }
-
     input.close();
     output.close();
 
@@ -142,10 +137,6 @@ void linearMap(const char **files, const char *outputFn, int fileNumber) {
         std::cout << "Ok ! (" << p->size << " chromosomes)" << std::endl
                   << "Mapping..." << std::endl;
 
-        for (int i = 0; i < p->size; i++) {
-            auto data = p->pop[i]->get2dProjection();
-            output << data.first << ", " << data.second << std::endl;
-        }
 
         input.close();
 

@@ -20,10 +20,6 @@ Chromosome::Chromosome() {
                 new Matrix(PLAYER_LAYERS[j + 1], PLAYER_LAYERS[j]);
         }
     }
-
-    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        this->didier[i] = new Matrix(DIDIER_LAYERS[i + 1], DIDIER_LAYERS[i]);
-    }
 }
 
 Chromosome::~Chromosome() {
@@ -31,10 +27,6 @@ Chromosome::~Chromosome() {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             delete this->matrix[i][j];
         }
-    }
-
-    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        delete this->didier[i];
     }
 }
 
@@ -47,10 +39,6 @@ void Chromosome::print() {
         }
     }
 
-    std::cout << "didier:" << std::endl;
-    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        this->didier[i]->print();
-    }
 }
 
 /*
@@ -67,10 +55,6 @@ void Chromosome::initialize() {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             this->matrix[i][j]->initialize();
         }
-    }
-
-    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        this->didier[i]->initialize();
     }
 }
 
@@ -129,28 +113,6 @@ Matrix *Chromosome::apply(Matrix &inputs, player *equipeAlliee) {
 }
 
 /*
-    Didier est toujours évalué avant les joueurs. Lors de ce premier
-    appel, inputs == NULL et il est alors évalués sur des 0.
-    Sinon, inputs est une matrice colonne de taille COM_SIZE * EQUIPE_SIZE où
-    les coefficients (inputs_i, ..., inputs_{i + COM_SIZE}) correspond aux
-   sorties du canal de communication du joueur i lors de l'évaluation
-   précédente.
-*/
-
-void Chromosome::apply_didier(Matrix &inputs) {
-    inputs.mult_inv(*this->didier[0]);
-    input_layer_activation(inputs);
-
-    for (int i = 1; i < DIDIER_NETWORK_SIZE - 2; i++) {
-        inputs.mult_inv(*this->didier[i]);
-        hidden_layer_activation(inputs);
-    }
-
-    inputs.mult_inv(*this->didier[DIDIER_NETWORK_SIZE - 2]);
-    output_layer_activation(inputs);
-}
-
-/*
     team == false -> gauche
     team == true -> droite
 */
@@ -201,45 +163,19 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
     mat->set(9, i, angleRounded(vangle(nearest - fakePos)));
 }
 
-/*
-   lastcom est la matrice (COM_SIZE * EQUIPE_SIZE) contenant
-   sur chaque colonnes les COM_SIZE dernières sorties de communication à
-   Didier qui doivent être réinjectés dans compute_didier
-
-   team == false -> left
-   team == true -> right
-*/
-
 Matrix *Chromosome::collect_and_apply(player *equipeAlliee,
                                       player *equipeAdverse, ball *b,
-                                      Matrix &didier_output, bool team) {
+                                      bool team) {
     Matrix *inputs = new Matrix(NETWORK_INPUT_SIZE, EQUIPE_SIZE);
-    apply_didier(didier_output);
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         writeInputs(inputs, equipeAlliee, equipeAdverse, i, b, team);
-
-        // les coms
-        for (int j = 0; j < COM_SIZE; j++) {
-            inputs->set(NETWORK_INPUT_SIZE - COM_SIZE + j, i,
-                        didier_output.get(j + i * COM_SIZE, 0));
-        }
     }
 
     // Evaluation du réseau de neurones de chaque joueurs.
     Matrix *outputs = this->apply(*inputs, equipeAlliee);
 
     int c = 0;
-
-    while (c < EQUIPE_SIZE) {
-        for (int i = 0; i < COM_SIZE; i++) {
-            didier_output.set(
-                c * COM_SIZE + i, 0,
-                outputs->get(NETWORK_OUTPUT_SIZE - COM_SIZE + i, c));
-        }
-
-        c++;
-    }
 
     delete inputs;
     return outputs;
@@ -258,10 +194,6 @@ void mutate(Chromosome &c) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             mutation(*c.matrix[i][j]);
         }
-    }
-
-    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        mutation(*c.didier[i]);
     }
 }
 
@@ -283,35 +215,20 @@ Chromosome *crossover(Chromosome &a, Chromosome &b) {
         }
     }
 
-    for (int j = 0; j < DIDIER_NETWORK_SIZE - 1; j++) {
-        Matrix *m = uniform_crossover(*a.didier[j], *b.didier[j]);
-        for (int k = 0; k < m->ligne; k++) {
-            for (int l = 0; l < m->col; l++) {
-                child->didier[j]->set(k, l, m->get(k, l));
-            }
-        }
-        delete m;
-    }
-
     return child;
 }
 
 void Chromosome::write(std::ofstream &file) {
     int equipeSize = EQUIPE_SIZE;
     int nSize = NETWORK_SIZE;
-    int dSize = DIDIER_NETWORK_SIZE;
 
     // Par sécurité
     file.write((char *)&equipeSize, sizeof(int));
     file.write((char *)&nSize, sizeof(int));
-    file.write((char *)&dSize, sizeof(int));
 
     // Configs
     for (int i = 0; i < NETWORK_SIZE; i++) {
         file.write((char *)&PLAYER_LAYERS[i], sizeof(int));
-    }
-    for (int i = 0; i < DIDIER_NETWORK_SIZE; i++) {
-        file.write((char *)&DIDIER_LAYERS[i], sizeof(int));
     }
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
@@ -319,31 +236,23 @@ void Chromosome::write(std::ofstream &file) {
             this->matrix[i][j]->write(file);
         }
     }
-
-    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        this->didier[i]->write(file);
-    }
 }
 
 Chromosome *Chromosome::read(std::ifstream &file) {
     int equipeSize;
     int nSize;
-    int dSize;
 
     // Par sécurité
     file.read((char *)&equipeSize, sizeof(int));
     file.read((char *)&nSize, sizeof(int));
-    file.read((char *)&dSize, sizeof(int));
 
-    if (equipeSize != EQUIPE_SIZE || nSize != NETWORK_SIZE ||
-        dSize != DIDIER_NETWORK_SIZE) {
+    if (equipeSize != EQUIPE_SIZE || nSize != NETWORK_SIZE) {
         throw std::invalid_argument(
             "Misconfigured Chromosome file (bad constants)");
     }
 
     const int pLayers[NETWORK_SIZE] = {};
-    const int dLayers[DIDIER_NETWORK_SIZE] = {};
-
+	
     // Configs
     for (int i = 0; i < NETWORK_SIZE; i++) {
         file.read((char *)&pLayers[i], sizeof(int));
@@ -352,14 +261,7 @@ Chromosome *Chromosome::read(std::ifstream &file) {
                 "Misconfigured Chromosome file (bad player layers)");
         }
     }
-    for (int i = 0; i < DIDIER_NETWORK_SIZE; i++) {
-        file.read((char *)&dLayers[i], sizeof(int));
-        if (dLayers[i] != DIDIER_LAYERS[i]) {
-            throw std::invalid_argument(
-                "Misconfigured Chromosome file (bad didier layers)");
-        }
-    }
-
+	
     Chromosome *c = new Chromosome();
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
@@ -367,11 +269,6 @@ Chromosome *Chromosome::read(std::ifstream &file) {
             delete c->matrix[i][j];
             c->matrix[i][j] = Matrix::read(file);
         }
-    }
-
-    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        delete c->didier[i];
-        c->didier[i] = Matrix::read(file);
     }
 
     return c;
@@ -392,20 +289,6 @@ double Chromosome::getPlayersNorm() {
     return sum;
 }
 
-double Chromosome::getDidierNorm() {
-    double sum = 0;
-
-    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        for (int k = 0; k < didier[i]->ligne; k++) {
-            for (int l = 0; l < didier[i]->col; l++) {
-                sum += pow(didier[i]->get(k, l), 2);
-            }
-        }
-    }
-
-    return sqrt(sum);
-}
-
 double Chromosome::getMatrixesNorm() {
     double sum = 0;
 
@@ -415,14 +298,6 @@ double Chromosome::getMatrixesNorm() {
                 for (int l = 0; l < matrix[i][j]->col; l++) {
                     sum += pow(matrix[i][j]->get(k, l), 2);
                 }
-            }
-        }
-    }
-
-    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        for (int k = 0; k < didier[i]->ligne; k++) {
-            for (int l = 0; l < didier[i]->col; l++) {
-                sum += pow(didier[i]->get(k, l), 2);
             }
         }
     }
@@ -445,19 +320,6 @@ double Chromosome::getAngleNorm() {
             }
         }
     }
-
-    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-        for (int k = 0; k < didier[i]->ligne; k++) {
-            for (int l = 0; l < didier[i]->col; l++) {
-                v.x = didier[i]->get(k, l);
-                sum += vangle(v);
-            }
-        }
-    }
-
     return sum;
 }
 
-std::pair<double, double> Chromosome::get2dProjection() {
-    return std::make_pair(this->getPlayersNorm(), this->getDidierNorm());
-}

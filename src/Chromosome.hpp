@@ -37,5 +37,7 @@ class Chromosome {
 void mutate(Chromosome &c);
 Matrix *compute_didier(Chromosome *c, Matrix *inputs);
 Chromosome *crossover(Chromosome &a, Chromosome &b);
+double mmn(double x, double min, double max);
+void normalize_inputs(Matrix &inputs, int i);
 void writeInputs(Matrix *m, player *equipeAlliee, player *equipeAdverse, int i,
                  ball *b, bool team);

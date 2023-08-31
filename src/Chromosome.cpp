@@ -13,6 +13,11 @@
 #include <iostream>
 #include <ostream>
 
+// Opérations couteuses donc mises en statiques, elles sont utilisées
+// pour la normalisation min-max.
+static double d_map = sqrt(pow(MAP_LENGTH, 2) + pow(MAP_HEIGHT, 2));
+static double d_cage = sqrt(pow(MAP_HEIGHT / 2, 2) + pow(MAP_LENGTH, 2));
+
 Chromosome::Chromosome() {
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
@@ -148,6 +153,51 @@ void Chromosome::apply_didier(Matrix &inputs) {
 
     inputs.mult_inv(*this->didier[DIDIER_NETWORK_SIZE - 2]);
     output_layer_activation(inputs);
+}
+
+/**
+ * @brief min-max normalization: Retranche la valeur donnée entre 0 et 1.
+ */
+double mmn(double x, double min, double max) {
+    return (x - min) / (max - min);
+}
+
+/**
+ * @brief Si les valeurs d'entrées ne sont pas normalisées, certaines valeurs
+ * qui sont naturellement plus élevée, comme par exemple la distance à la cage
+ * par rapport à la distance à la balle seront plus importantes que d'autres qui
+ * peuvent être naturellement plus petite comme l'orientation.
+ */
+void normalize_inputs(Matrix &inputs, int i) {
+    // Position du joueur
+    inputs.set(0, i,
+               mmn(inputs.get(0, i), PLAYER_SIZE, MAP_LENGTH - PLAYER_SIZE));
+    inputs.set(1, i,
+               mmn(inputs.get(1, i), PLAYER_SIZE, MAP_HEIGHT - PLAYER_SIZE));
+
+    // Vitesse du joueur
+    // TODO: Vitesse max???
+    inputs.set(2, i, mmn(inputs.get(2, i), 0, 100));
+    inputs.set(3, i, mmn(inputs.get(3, i), 0, 100));
+
+    // Distance et orientation relative de la balle
+    inputs.set(4, i,
+               mmn(inputs.get(4, i), BALL_SIZE + PLAYER_SIZE,
+                   d_map - BALL_SIZE - PLAYER_SIZE));
+    inputs.set(5, i, mmn(inputs.get(5, i), 0, 2 * M_PI));
+
+    // Distance et orientation relative de la cage adverse
+    inputs.set(6, i, mmn(inputs.get(6, i), PLAYER_SIZE, d_cage - PLAYER_SIZE));
+    inputs.set(7, i, mmn(inputs.get(7, i), 0, 2 * M_PI));
+
+    // Joueur le plus proche
+    inputs.set(8, i,
+               mmn(inputs.get(8, i), 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE));
+    inputs.set(9, i, mmn(inputs.get(9, i), 0, 2 * M_PI));
+
+    // TODO: Il faut trouver un moyen de normaliser didier...
+    // TODO: Il faut trouver un moyen de passer sur le fichier game.csv les
+    // valeurs non normalisées.
 }
 
 /*

@@ -76,7 +76,7 @@ gameStatistics Population::next(int n_thread, bool save) {
                 // d'organiser des petites compétitions et donc limiter la
                 // pression selective.
                 // On divise par 4 sinon c'est beaucoup trop lent.
-                int tourn_size = random_power(this->size / 8);
+                int tourn_size = random_power(this->size / 2);
 
                 matchs_count[i] = tourn_size - 1;
 

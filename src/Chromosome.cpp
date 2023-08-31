@@ -13,6 +13,11 @@
 #include <iostream>
 #include <ostream>
 
+// Opérations couteuses donc mises en statiques, elles sont utilisées
+// pour la normalisation min-max.
+static double d_map = sqrt(pow(MAP_LENGTH, 2) + pow(MAP_HEIGHT, 2));
+static double d_cage = sqrt(pow(MAP_HEIGHT / 2, 2) + pow(MAP_LENGTH, 2));
+
 Chromosome::Chromosome() {
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {

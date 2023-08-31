@@ -145,7 +145,7 @@ def draw_goal():
 def draw_ball(x, y):
     pg.draw.circle(
         screen,
-        YELLOW,
+        BLACK,
         (x, SCREEN_HEIGHT - y),
         BALL_SIZE,
     )

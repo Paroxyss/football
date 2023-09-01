@@ -45,13 +45,12 @@ inline int random_power(int n) {
 }
 
 inline double angleRounded(double input) {
-    input = fmod(input, 2 * M_PI);
-
+    input = fmod(input + M_PI, 2 * M_PI);
     if (input < 0) {
         input += 2 * M_PI;
     }
 
-    return input;
+    return input - M_PI;
 }
 
 inline bool likelyness(double v) {

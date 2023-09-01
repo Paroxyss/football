@@ -307,14 +307,10 @@ void Game::tick(double timeToAdvance, bool root) {
     if (root) {
         if (logToFile) {
             csvOutputFile << "1" << std::endl;
+            writePlayers();
         }
-
-        // On applique les frottements
-        ball.vitesse -= norme(ball.vitesse) * ball.vitesse / 200;
-        for (int i = 0; i < playerNumber; i++) {
-            players[i].vitesse -=
-                norme(players[i].vitesse) * players[i].vitesse / 40;
-        }
+		executePlayerActions(timeToAdvance);
+		applyFriction(timeToAdvance);
     }
     // On fait tout avancer de la durée voulue
     moveAllObj(timeToAdvance);
@@ -352,10 +348,6 @@ void Game::tick(double timeToAdvance, bool root) {
         tick(timeToAdvance - firstCollision->time, false);
     }
 
-    if (root && logToFile) {
-        writePlayers();
-    }
-
     // On libère la liste dont on n'aura plus besoin
     freeCollisionList(c);
 };
@@ -376,12 +368,35 @@ void Game::writePlayers() {
 
 // Effectue une action pour un joueur donné (ce qui lui permet de tourner et/ou
 // d'accélérer)
-void Game::doAction(unsigned int id, double rotation, double acceleration) {
-    players[id].orientation += rotation;
-    players[id].vitesse.x += acceleration * cos(players[id].orientation);
-    players[id].vitesse.y += acceleration * sin(players[id].orientation);
-    players[id].acceleration = 0;
+void Game::setAccelerations(unsigned int id, double rotation,
+                            double acceleration) {
+    players[id].raccel = rotation;
+    players[id].acceleration = acceleration;
 };
+
+void Game::executePlayerActions(double time) {
+    for (int id = 0; id < playerNumber; id++) {
+        player &selected = players[id];
+        selected.orientation += selected.raccel * time;
+        selected.vitesse.x +=
+            selected.acceleration * cos(players[id].orientation) * time;
+        selected.vitesse.y +=
+            selected.acceleration * sin(players[id].orientation) * time;
+        selected.raccel = 0;
+        selected.acceleration = 0;
+    }
+}
+
+void Game::applyFriction(double time) {
+    // On applique les frottements
+	// Ces frottements sont des frottements fluides (F = K*v)
+    ball.vitesse -= (norme(ball.vitesse) * ball.vitesse / 200) * time;
+	
+    for (int i = 0; i < playerNumber; i++) {
+        players[i].vitesse -=
+            (norme(players[i].vitesse) * players[i].vitesse / 40) * time;
+    }
+}
 
 void Game::setBall(vector pos, vector vitesse, double size, double mass) {
     this->ball = {.pos = pos, .vitesse = vitesse, .size = size, .mass = mass};
@@ -394,6 +409,7 @@ void Game::setPlayer(int id, vector pos, vector speed, double orientation,
     this->players[id].orientation = orientation;
     this->players[id].size = size;
     this->players[id].acceleration = 0;
+    this->players[id].raccel = 0;
     this->players[id].mass = mass;
 }
 
@@ -447,14 +463,14 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
                 if (acceleration < 0) {
                     acceleration /= 5;
                 }
-                g.doAction(i + a * EQUIPE_SIZE, rotation, acceleration);
+                g.setAccelerations(i + a * EQUIPE_SIZE, rotation, acceleration);
             }
         }
 
         delete r1;
         delete r2;
 
-        g.tick();
+        g.tick(1);
 
         bool bc1 = g.checkGoal(0);
         bool bc2 = g.checkGoal(1);

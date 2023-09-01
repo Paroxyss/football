@@ -8,6 +8,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include "Chromosome.hpp"
 #include "Game.hpp"
 #include "Matrix.h"
 #include "Vector.hpp"
@@ -82,7 +83,8 @@ Game::~Game() {
 }
 
 /*
-    pour 3 joueurs, on peut par exemple avoir {2, 1}
+    Répartis les joueurs sur le terrain selon la configuration voulue.
+    Pour 3 joueurs, on peut par exemple avoir {2, 1}, placés comme au vrai foot
 
     Si on place l'équipe de droite les joueurs sont placés dans l'ordre inverse
     d'apparition dans la configuration.
@@ -142,6 +144,8 @@ inline collisionList *insert(collisionList *list, ball *actor, ball *secondary,
     l->next = list;
     return l;
 }
+// Retourne le temps avant lequel un objet va rencontrer un mur, si le temps est
+// négatif ou NaN, la collision n'arrivera jamais
 double getWallCollisionTime(ball *obj, ball *wall) {
     vector MO = obj->pos - wall->pos;
 
@@ -157,6 +161,8 @@ double getWallCollisionTime(ball *obj, ball *wall) {
     return T / ev;
 }
 
+// Retourne le temps avant lequel un objet va rencontrer un autre objet, si le
+// temps est négatif ou NaN, la collision n'arrivera jamais
 double getTwoBallCollisionTime(ball *b1, ball *b2) {
     vector v_relative = b1->vitesse - b2->vitesse;
     vector LM = b1->pos - b2->pos;
@@ -174,6 +180,7 @@ double getTwoBallCollisionTime(ball *b1, ball *b2) {
     return (ev - pprime) / norme(v_relative);
 }
 
+// Remplit une liste chainée avec les conflit au moment où elle est appellée
 collisionList *Game::getObjectCollisionList(int objId,
                                             collisionList *listToAppend) {
     struct ball *selected;
@@ -195,7 +202,7 @@ collisionList *Game::getObjectCollisionList(int objId,
         }
     }
 
-    // test de collisions triangulaire
+    // test de collisions triangulaire balle-joueur ou joueur-joueur
     for (int i = objId + 1; i < playerNumber; i++) {
         if (distancecarre(*selected, this->players[i]) <
             pow(selected->size + PLAYER_SIZE, 2)) {
@@ -204,15 +211,10 @@ collisionList *Game::getObjectCollisionList(int objId,
         }
     }
 
-    // la balle va tester ses propres collisions avec tout le monde.
-    /*if (objId != -1 &&
-        distancecarre(*selected, ball) < pow(PLAYER_SIZE + BALL_SIZE, 2)) {
-        c = insert(c, selected, &ball, CIRCLE);
-    }*/
-
     return listToAppend;
 }
 
+// Calcule l'instant (exact) de choc pour chaque collision de la liste
 void timeCollisionList(collisionList *collision) {
     if (!collision) {
         return;
@@ -227,6 +229,9 @@ void timeCollisionList(collisionList *collision) {
     timeCollisionList(collision->next);
 }
 
+// Effectue une collision entre obj1 et obj2, modifiant ainsi leurs vitesses
+// /!\ Il ne faut appeler cette fonction qu'avec des objets se touchant, et ne
+// le faire qu'une fois sinon le comportement est indéfini
 void computeCollisionCircle(ball *obj1, ball *obj2) {
     vector x1 = obj1->pos;
     double &m1 = obj1->mass;
@@ -247,6 +252,7 @@ void computeCollisionCircle(ball *obj1, ball *obj2) {
     v2 = v2 - dv2;
 }
 
+// Comme au dessus, mais avec un mur
 void computeCollisionWall(ball &b, ball *w) {
     vector um = w->vitesse / norme(w->vitesse);
     vector normal_um = {.x = um.y, .y = -um.x};
@@ -255,6 +261,8 @@ void computeCollisionWall(ball &b, ball *w) {
                 dotProduct(b.vitesse, um) * um;
 }
 
+// Retourne un pointeur vers la premiere collision arrivant dans la liste, d'un
+// point de vue temporel
 collisionList *findFirstCollision(collisionList *list) {
     if (!list)
         return NULL;
@@ -275,6 +283,7 @@ collisionList *findFirstCollision(collisionList *list) {
     return list;
 }
 
+// Libere la liste chainée
 void freeCollisionList(collisionList *list) {
     if (list == NULL) {
         return;
@@ -283,42 +292,53 @@ void freeCollisionList(collisionList *list) {
     delete[] list;
 }
 
-void Game::moveAllObj(double percent) {
-    ball.pos += ball.vitesse * percent;
+// fait bouger tous les objets pour une certaine durée
+void Game::moveAllObj(double time) {
+    ball.pos += ball.vitesse * time;
     for (int i = 0; i < playerNumber; i++) {
-        players[i].pos += players[i].vitesse * percent;
+        players[i].pos += players[i].vitesse * time;
     }
 }
 
+// effectue un pas de simulation, d'une durée souhaitée
 void Game::tick(double timeToAdvance, bool root) {
+    // ici, root est un bouléen défini à vrai ssi c'est le premier appel
+    // récursif
     if (root) {
-
         if (logToFile) {
             csvOutputFile << "1" << std::endl;
         }
 
+        // On applique les frottements
         ball.vitesse -= norme(ball.vitesse) * ball.vitesse / 200;
         for (int i = 0; i < playerNumber; i++) {
             players[i].vitesse -=
                 norme(players[i].vitesse) * players[i].vitesse / 40;
         }
     }
-    // on fait tout avancer
+    // On fait tout avancer de la durée voulue
     moveAllObj(timeToAdvance);
 
+    // On obtient la liste des collisions APRÈS avoir bougé
     collisionList *c = NULL;
 
     for (int i = 0; i < playerNumber + 1; i++) {
         c = getObjectCollisionList(i - 1, c);
     }
+    // On regarde s'il y a des collisions
     if (c != NULL) {
+        // S'il y a des collisions, c'est qu'il faut faire du backtracking pour
+        // retrouver la réalité, donc on commence par retourner en arrière
         moveAllObj(-timeToAdvance);
         this->infos.collisions += 1;
 
+        // On regarde à quel instant est survenu la première collision
         collisionList *firstCollision = findFirstCollision(c);
 
+        // On avance à cet instant précis
         moveAllObj(firstCollision->time);
 
+        // On effectue la collision
         switch (firstCollision->type) {
         case CIRCLE:
             computeCollisionCircle(firstCollision->actor,
@@ -328,16 +348,20 @@ void Game::tick(double timeToAdvance, bool root) {
             computeCollisionWall(*firstCollision->actor,
                                  firstCollision->secondary);
         }
+        // On fait de nouveau un tick, pour compléter le temps restant
         tick(timeToAdvance - firstCollision->time, false);
     }
+
     if (root && logToFile) {
         writePlayers();
     }
+
+    // On libère la liste dont on n'aura plus besoin
     freeCollisionList(c);
 };
 
+// Écrit l'état des joueurs dans un fichier
 void Game::writePlayers() {
-
     csvOutputFile << "2," << (double)ball.pos.x << "," << (double)ball.pos.y
                   << ",";
     for (int i = 0; i < playerNumber; i++) {
@@ -350,6 +374,8 @@ void Game::writePlayers() {
     csvOutputFile << std::endl;
 }
 
+// Effectue une action pour un joueur donné (ce qui lui permet de tourner et/ou
+// d'accélérer)
 void Game::doAction(unsigned int id, double rotation, double acceleration) {
     players[id].orientation += rotation;
     players[id].vitesse.x += acceleration * cos(players[id].orientation);
@@ -371,6 +397,8 @@ void Game::setPlayer(int id, vector pos, vector speed, double orientation,
     this->players[id].mass = mass;
 }
 
+// Regarde si la balle est dans la cage n°id, ou alors qu'elle va la traverser
+// dans la seconde suivante
 bool Game::checkGoal(int id) {
     double cage = getWallCollisionTime(&this->ball, &this->goals[id]);
 
@@ -405,9 +433,9 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     for (int k = 0; k < GAME_DURATION; k++) {
 
         auto r1 = c1->collect_and_apply(g.players, g.players + EQUIPE_SIZE,
-                                        &g.ball,  false);
+                                        &g.ball, false);
         auto r2 = c2->collect_and_apply(g.players + EQUIPE_SIZE, g.players,
-                                        &g.ball,  true);
+                                        &g.ball, true);
 
         for (int a = 0; a < 2; a++) {
             for (int i = 0; i < EQUIPE_SIZE; i++) {
@@ -442,7 +470,6 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
             g.set_players(c, 1);
         }
     }
-
 
     if (g.infos.score == 0) {
         g.infos.score = likelyness(0.5) ? 1 : -1;

@@ -5,11 +5,14 @@
 #include <fstream>
 
 struct ball {
+    // pos en m, vitesse en m.s-1
     vector pos, vitesse;
+    // size le rayon en m, mass en kg
     double size, mass;
 };
 
 struct player : ball {
+    // orientation en radian, acceleration en m.s-2
     double orientation, acceleration;
     Matrix *inputs;
 };
@@ -28,16 +31,14 @@ struct wall : ball {};
 enum CollisionType { WALL, CIRCLE };
 
 struct collisionList {
+    // temps auquel la collision arrive (en s)
     double time;
+    // Acteur de la collision
     ball *actor;
+    // Objet la subissant
     ball *secondary;
     CollisionType type;
     collisionList *next;
-};
-
-struct backtrackCollisionReport {
-    double distanceBefore;
-    collisionList *obj;
 };
 
 extern std::ofstream csvOutputFile;
@@ -61,6 +62,7 @@ class Game {
     Game(int playerNumber, bool logToFile = false);
     ~Game();
 
+    // fait avancer la simulation du temps souhaité
     void tick(double timeToAdvance = 1, bool root = true);
 
     void doAction(unsigned int id, double rotation, double acceleration);
@@ -74,8 +76,8 @@ class Game {
 
     bool checkGoal(int id);
 
-    // bouge tous les objets du pourcentage/portion de tick donnée.
-    void moveAllObj(double percent);
+    // bouge tous les objets pour la durée donnée (en s)
+    void moveAllObj(double time);
 
     void writePlayers();
 

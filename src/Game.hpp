@@ -61,7 +61,7 @@ class Game {
     Game(int playerNumber, bool logToFile = false);
     ~Game();
 
-    virtual void tick(double timeToAdvance = 1, bool root = true);
+    void tick(double timeToAdvance = 1, bool root = true);
 
     void doAction(unsigned int id, double rotation, double acceleration);
 

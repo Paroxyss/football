@@ -74,38 +74,33 @@ void Chromosome::initialize() {
    dimensions dans le bute d'éviter les "inégalités"
 */
 
-Matrix *Chromosome::apply(Matrix &inputs, player *equipeAlliee) {
+Matrix *Chromosome::apply(player *equipeAlliee) {
     Matrix *outputs = new Matrix(NETWORK_OUTPUT_SIZE, EQUIPE_SIZE);
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
+		player &selected = equipeAlliee[i];
 
-        // on peut retirer o puisque equipeAlliee[i] fait la même chose mais
-        // j'ai pas envie de tout casser donc je te laisse le faire
-        Matrix o = Matrix(NETWORK_INPUT_SIZE, 1);
+		// Cette matrice va servir à faire le calcul en place
+        Matrix mcalcul = Matrix(NETWORK_INPUT_SIZE, 1);
 
-        // on supprime les inputs du tick précédent.
-        delete equipeAlliee[i].inputs;
-        equipeAlliee[i].inputs = new Matrix(NETWORK_INPUT_SIZE, 1);
-
+		// On copie la matrice d'input dans celle de calcul
         for (int j = 0; j < NETWORK_INPUT_SIZE; j++) {
-            o.set(j, 0, inputs.get(j, i));
-
-            equipeAlliee[i].inputs->set(j, 0, inputs.get(j, i));
+            mcalcul.set(j, 0, selected.inputs->get(j, i));
         }
 
-        o.mult_inv(*this->matrix[i][0]);
-        input_layer_activation(o);
+        mcalcul.mult_inv(*this->matrix[i][0]);
+        input_layer_activation(mcalcul);
 
         for (int j = 1; j < NETWORK_SIZE - 2; j++) {
-            o.mult_inv(*this->matrix[i][j]);
-            hidden_layer_activation(o);
+            mcalcul.mult_inv(*this->matrix[i][j]);
+            hidden_layer_activation(mcalcul);
         }
 
-        o.mult_inv(*this->matrix[i][NETWORK_SIZE - 2]);
-        output_layer_activation(o);
+        mcalcul.mult_inv(*this->matrix[i][NETWORK_SIZE - 2]);
+        output_layer_activation(mcalcul);
 
         for (int j = 0; j < NETWORK_OUTPUT_SIZE; j++) {
-            outputs->set(j, i, o.get(j, 0));
+            outputs->set(j, i, mcalcul.get(j, 0));
         }
     }
 
@@ -116,35 +111,34 @@ Matrix *Chromosome::apply(Matrix &inputs, player *equipeAlliee) {
     team == false -> gauche
     team == true -> droite
 */
-void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
-                 int i, ball *b, bool team) {
-    player &selected = equipeAlliee[i];
+void writeInputs(player &target, player *equipeAdverse, ball *b, bool team){
+	Matrix *&mat = target.inputs;
 
     // Position du joueur
     vector mapSize = {.x = MAP_LENGTH, .y = MAP_HEIGHT};
-    vector fakePos = team ? mapSize - selected.pos : selected.pos;
+    vector fakePos = team ? mapSize - target.pos : target.pos;
 
-    mat->set(0, i, fakePos.x);
-    mat->set(1, i, fakePos.y);
+    mat->set(0, 0, fakePos.x);
+    mat->set(1, 0, fakePos.y);
 
     // Vitesse du joueur
-    vector fakeVitesse = team ? -selected.vitesse : selected.vitesse;
+    vector fakeVitesse = team ? -target.vitesse : target.vitesse;
 
-    mat->set(2, i, fakeVitesse.x);
-    mat->set(3, i, fakeVitesse.y);
+    mat->set(2, 0, fakeVitesse.x);
+    mat->set(3, 0, fakeVitesse.y);
 
     // Distance et orientation relative de la balle
     vector ball_fakePos = team ? mapSize - b->pos : b->pos;
 
-    mat->set(4, i, norme(ball_fakePos - fakePos));
+    mat->set(4, 0, norme(ball_fakePos - fakePos));
 	// on l'inverse pour que ce soit la valeur à corriger pour aller vers la balle, plus logique pour le joueur
-    mat->set(5, i, -angleRounded(selected.orientation - vangle(ball_fakePos - fakePos)));
+    mat->set(5, 0, -angleRounded(target.orientation - vangle(ball_fakePos - fakePos)));
 
     // Distance et orientation relative de la cage adverse
     vector cage = {.x = MAP_LENGTH, .y = (double)MAP_HEIGHT / 2};
-    mat->set(6, i, norme(cage - fakePos));
+    mat->set(6, 0, norme(cage - fakePos));
 	// idem que pour l'orientation relative de la balle, on passe la valeur angulaire à corriger
-    mat->set(7, i, -angleRounded(selected.orientation - vangle(cage - fakePos)));
+    mat->set(7, 0, -angleRounded(target.orientation - vangle(cage - fakePos)));
 
     // Joueur le plus proche
     vector nearest;
@@ -161,25 +155,23 @@ void writeInputs(Matrix *mat, player *equipeAlliee, player *equipeAdverse,
         };
     }
 
-    mat->set(8, i, d);
-    mat->set(9, i, -angleRounded(selected.orientation - vangle(nearest - fakePos)));
+    mat->set(8, 0, d);
+    mat->set(9, 0, -angleRounded(target.orientation - vangle(nearest - fakePos)));
 }
 
 Matrix *Chromosome::collect_and_apply(player *equipeAlliee,
                                       player *equipeAdverse, ball *b,
                                       bool team) {
-    Matrix *inputs = new Matrix(NETWORK_INPUT_SIZE, EQUIPE_SIZE);
-
+	// On sauvegarde les inputs dans les joueurs
     for (int i = 0; i < EQUIPE_SIZE; i++) {
-        writeInputs(inputs, equipeAlliee, equipeAdverse, i, b, team);
+        writeInputs(equipeAlliee[i], equipeAdverse, b, team);
     }
 
     // Evaluation du réseau de neurones de chaque joueurs.
-    Matrix *outputs = this->apply(*inputs, equipeAlliee);
+    Matrix *outputs = this->apply(equipeAlliee);
 
     int c = 0;
 
-    delete inputs;
     return outputs;
 }
 

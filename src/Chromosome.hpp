@@ -19,7 +19,7 @@ class Chromosome {
     Matrix *collect_and_apply(player *equipeAlliee, player *equipeAdverse,
                               ball *b, bool team);
 
-    Matrix *apply(Matrix &inputs, player *equipeAlliee);
+    Matrix *apply(player *equipeAlliee);
 
     void write(std::ofstream &file);
     static Chromosome *read(std::ifstream &file);
@@ -31,5 +31,4 @@ class Chromosome {
 
 void mutate(Chromosome &c);
 Chromosome *crossover(Chromosome &a, Chromosome &b);
-void writeInputs(Matrix *m, player *equipeAlliee, player *equipeAdverse, int i,
-                 ball *b, bool team);
+void writeInputs(player &target, player *equipeAdverse, ball *b, bool team);

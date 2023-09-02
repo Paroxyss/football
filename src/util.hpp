@@ -21,7 +21,7 @@ inline double randomDouble(double min, double max) {
 }
 
 inline double randomDouble() {
-    return randomDouble(-10, 10);
+    return randomDouble();
 }
 
 inline int previous_power(int n) {

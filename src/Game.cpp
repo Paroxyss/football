@@ -309,8 +309,8 @@ void Game::tick(double timeToAdvance, bool root) {
             csvOutputFile << "1" << std::endl;
             writePlayers();
         }
-		executePlayerActions(timeToAdvance);
-		applyFriction(timeToAdvance);
+        executePlayerActions(timeToAdvance);
+        applyFriction(timeToAdvance);
     }
     // On fait tout avancer de la durée voulue
     moveAllObj(timeToAdvance);
@@ -389,9 +389,9 @@ void Game::executePlayerActions(double time) {
 
 void Game::applyFriction(double time) {
     // On applique les frottements
-	// Ces frottements sont des frottements fluides (F = K*v)
+    // Ces frottements sont des frottements fluides (F = K*v)
     ball.vitesse -= (norme(ball.vitesse) * ball.vitesse / 200) * time;
-	
+
     for (int i = 0; i < playerNumber; i++) {
         players[i].vitesse -=
             (norme(players[i].vitesse) * players[i].vitesse / 40) * time;

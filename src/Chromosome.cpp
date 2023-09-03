@@ -38,7 +38,6 @@ void Chromosome::print() {
             this->matrix[i][j]->print();
         }
     }
-
 }
 
 /*
@@ -78,12 +77,12 @@ Matrix *Chromosome::apply(player *equipeAlliee) {
     Matrix *outputs = new Matrix(NETWORK_OUTPUT_SIZE, EQUIPE_SIZE);
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
-		player &selected = equipeAlliee[i];
+        player &selected = equipeAlliee[i];
 
-		// Cette matrice va servir à faire le calcul en place
+        // Cette matrice va servir à faire le calcul en place
         Matrix mcalcul = Matrix(NETWORK_INPUT_SIZE, 1);
 
-		// On copie la matrice d'input dans celle de calcul
+        // On copie la matrice d'input dans celle de calcul
         for (int j = 0; j < NETWORK_INPUT_SIZE; j++) {
             mcalcul.set(j, 0, selected.inputs->get(j, i));
         }
@@ -111,8 +110,8 @@ Matrix *Chromosome::apply(player *equipeAlliee) {
     team == false -> gauche
     team == true -> droite
 */
-void writeInputs(player &target, player *equipeAdverse, ball *b, bool team){
-	Matrix *&mat = target.inputs;
+void writeInputs(player &target, player *equipeAdverse, ball *b, bool team) {
+    Matrix *&mat = target.inputs;
 
     // Position du joueur
     vector mapSize = {.x = MAP_LENGTH, .y = MAP_HEIGHT};
@@ -131,13 +130,17 @@ void writeInputs(player &target, player *equipeAdverse, ball *b, bool team){
     vector ball_fakePos = team ? mapSize - b->pos : b->pos;
 
     mat->set(4, 0, norme(ball_fakePos - fakePos));
-	// on l'inverse pour que ce soit la valeur à corriger pour aller vers la balle, plus logique pour le joueur
-    mat->set(5, 0, -angleRounded(target.orientation - vangle(ball_fakePos - fakePos)));
+    // on l'inverse pour que ce soit la valeur à corriger pour aller vers la
+    // balle, plus logique pour le joueur
+    mat->set(
+        5, 0,
+        -angleRounded(target.orientation - vangle(ball_fakePos - fakePos)));
 
     // Distance et orientation relative de la cage adverse
     vector cage = {.x = MAP_LENGTH, .y = (double)MAP_HEIGHT / 2};
     mat->set(6, 0, norme(cage - fakePos));
-	// idem que pour l'orientation relative de la balle, on passe la valeur angulaire à corriger
+    // idem que pour l'orientation relative de la balle, on passe la valeur
+    // angulaire à corriger
     mat->set(7, 0, -angleRounded(target.orientation - vangle(cage - fakePos)));
 
     // Joueur le plus proche
@@ -156,21 +159,20 @@ void writeInputs(player &target, player *equipeAdverse, ball *b, bool team){
     }
 
     mat->set(8, 0, d);
-    mat->set(9, 0, -angleRounded(target.orientation - vangle(nearest - fakePos)));
+    mat->set(9, 0,
+             -angleRounded(target.orientation - vangle(nearest - fakePos)));
 }
 
 Matrix *Chromosome::collect_and_apply(player *equipeAlliee,
                                       player *equipeAdverse, ball *b,
                                       bool team) {
-	// On sauvegarde les inputs dans les joueurs
+    // On sauvegarde les inputs dans les joueurs
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         writeInputs(equipeAlliee[i], equipeAdverse, b, team);
     }
 
     // Evaluation du réseau de neurones de chaque joueurs.
     Matrix *outputs = this->apply(equipeAlliee);
-
-    int c = 0;
 
     return outputs;
 }
@@ -246,7 +248,7 @@ Chromosome *Chromosome::read(std::ifstream &file) {
     }
 
     const int pLayers[NETWORK_SIZE] = {};
-	
+
     // Configs
     for (int i = 0; i < NETWORK_SIZE; i++) {
         file.read((char *)&pLayers[i], sizeof(int));
@@ -255,7 +257,7 @@ Chromosome *Chromosome::read(std::ifstream &file) {
                 "Misconfigured Chromosome file (bad player layers)");
         }
     }
-	
+
     Chromosome *c = new Chromosome();
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
@@ -316,4 +318,3 @@ double Chromosome::getAngleNorm() {
     }
     return sum;
 }
-

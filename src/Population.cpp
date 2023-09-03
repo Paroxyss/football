@@ -65,48 +65,51 @@ gameStatistics Population::next(int n_thread, bool save) {
     int *matchs_count = new int[n_thread];
 
     while (count < expected) {
-        if (likelyness(CROSSOVER_PROBABILITY)) {
 
-            if (expected - count < n_thread) {
-                n_thread = 1;
-            }
+        if (expected - count < n_thread) {
+            n_thread = 1;
+        }
 
-            for (int i = 0; i < n_thread; i++) {
-                // on choisit une puissance de 2 aléatoire car ça permet
-                // d'organiser des petites compétitions et donc limiter la
-                // pression selective.
-                // On divise par 4 sinon c'est beaucoup trop lent.
-                int tourn_size = random_power(this->size / 8);
+        for (int i = 0; i < n_thread; i++) {
+            // on choisit une puissance de 2 aléatoire car ça permet
+            // d'organiser des petites compétitions et donc limiter la
+            // pression selective.
+            // On divise par 4 sinon c'est beaucoup trop lent.
+            int tourn_size = random_power(this->size / 8);
 
-                matchs_count[i] = tourn_size - 1;
+            matchs_count[i] = tourn_size - 1;
 
-                threads[i] =
-                    std::thread([this, tourn_size, save, &winners, i]() {
-                        auto outcome = this->tournament(tourn_size, save);
-                        winners[i] = outcome;
-                    });
-            }
+            threads[i] = std::thread([this, tourn_size, save, &winners, i]() {
+                auto outcome = this->tournament(tourn_size, save);
+                winners[i] = outcome;
+            });
+        }
 
-            for (int i = 0; i < n_thread; ++i) {
-                threads[i].join();
-            }
+        for (int i = 0; i < n_thread; ++i) {
+            threads[i].join();
+        }
 
-            for (int i = 0; i < n_thread; i++) {
+        for (int i = 0; i < n_thread; i++) {
+            if (likelyness(CROSSOVER_PROBABILITY)) {
                 nxt[count] = crossover(*std::get<0>(winners[i]),
                                        *std::get<1>(winners[i]));
 
                 auto tournResult = std::get<2>(winners[i]);
                 update_statistics(tourn_stats, &tournResult, matchs_count[i]);
 
-                if ((count % outRate) == 0) {
-                    std::cout << "*";
-                    fflush(stdout);
-                }
-
                 count++;
+            } else {
+                Chromosome *c = (likelyness(0.5) ? std::get<0>(winners[i])
+                                                 : std::get<1>(winners[i]));
+
+                nxt[count] = cloneChromosome(c);
             }
-        } else {
-            nxt[count] = cloneChromosome(this->pop[rand() % this->size]);
+
+            if ((count % outRate) == 0) {
+                std::cout << "*";
+                fflush(stdout);
+            }
+
             count++;
         }
     }

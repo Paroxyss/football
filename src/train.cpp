@@ -63,23 +63,6 @@ void train(int n_gen, int population_size, int n_thread) {
     delete pop;
 }
 
-/*
-    Pour choisir les deux équipes dont le match sera visualisé,
-    on organise un tournois en n^2 ce qui maximise l'élitisme.
-
-    Le désavantage étant que ça rallonge considérable le temps d'exécution
-    surtout pour des larges population. Il faudrait donc repenser cette étape
-    hors tests.
-*/
-void play_with_nexts(Population *p, int i, int *scores) {
-    for (int j = i + 1; j < p->size; j++) {
-        auto res = play_match(p->pop[i], p->pop[j], 0);
-        int w = res.score > 0 ? i : j;
-
-        scores[w] += abs(res.score);
-    }
-}
-
 void play_match(const char *fileC1, const char *fileC2) {
     std::cout << "Opening ... ";
     std::ifstream fc1;
@@ -136,7 +119,6 @@ void linearMap(const char **files, const char *outputFn, int fileNumber) {
         Population *p = Population::read(input);
         std::cout << "Ok ! (" << p->size << " chromosomes)" << std::endl
                   << "Mapping..." << std::endl;
-
 
         input.close();
 

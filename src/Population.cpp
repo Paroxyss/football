@@ -42,6 +42,7 @@ void update_statistics(gameStatistics &tourn_stats, gameStatistics *tournResult,
     tourn_stats.totalCollisions += tournResult->totalCollisions;
     tourn_stats.totalGoals += tournResult->totalGoals;
     tourn_stats.n += matchs_count;
+    tourn_stats.total_ball_collisions += tournResult->total_ball_collisions;
 }
 
 gameStatistics Population::next(int n_thread, bool save) {
@@ -53,11 +54,10 @@ gameStatistics Population::next(int n_thread, bool save) {
     std::thread threads[n_thread];
     std::tuple<Chromosome *, Chromosome *, gameStatistics> winners[n_thread];
 
-    gameStatistics tourn_stats = {
-        .n = 0,
-        .totalCollisions = 0,
-        .totalGoals = 0,
-    };
+    gameStatistics tourn_stats = {.n = 0,
+                                  .totalCollisions = 0,
+                                  .totalGoals = 0,
+                                  .total_ball_collisions = 0};
 
     // Pour la barre de progression, ne marche pas très bien pour les petites
     // populations mais bon
@@ -159,6 +159,7 @@ Population::tournament(int tourn_size, bool save) {
     gameStatistics gameStats = {
         .totalCollisions = 0,
         .totalGoals = 0,
+        .total_ball_collisions = 0,
     };
 
     while (tourn_size > 2) {
@@ -178,6 +179,7 @@ Population::tournament(int tourn_size, bool save) {
             // statistiques
             gameStats.totalCollisions += match_results.collisions;
             gameStats.totalGoals += match_results.goals;
+            gameStats.total_ball_collisions += match_results.ball_collisions;
         }
 
         tourn_size = pool_size;

@@ -9,6 +9,7 @@
 struct gameInformations {
     unsigned int collisions;
     unsigned int goals;
+    int ball_collisions;
     double score;
 };
 
@@ -16,6 +17,7 @@ struct gameStatistics {
     unsigned int n;
     unsigned long totalCollisions;
     unsigned int totalGoals;
+    int total_ball_collisions;
 };
 
 double randomDouble(double min, double max);

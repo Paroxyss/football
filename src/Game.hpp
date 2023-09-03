@@ -55,7 +55,8 @@ class Game {
     wall *walls;
     wall *goals;
 
-    gameInformations infos = {.collisions = 0, .goals = 0, .score = 0};
+    gameInformations infos = {
+        .collisions = 0, .goals = 0, .score = 0, .ball_collisions = 0};
 
     void set_players(const int conf[], int n);
 

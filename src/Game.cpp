@@ -339,6 +339,10 @@ void Game::tick(double timeToAdvance, bool root) {
         case CIRCLE:
             computeCollisionCircle(firstCollision->actor,
                                    firstCollision->secondary);
+            if ((firstCollision->actor->size == BALL_SIZE ||
+                 firstCollision->secondary->size == BALL_SIZE)) {
+                this->infos.ball_collisions += 1;
+            }
             break;
         case WALL:
             computeCollisionWall(*firstCollision->actor,
@@ -366,8 +370,8 @@ void Game::writePlayers() {
     csvOutputFile << std::endl;
 }
 
-// Effectue une action pour un joueur donné (ce qui lui permet de tourner et/ou
-// d'accélérer)
+// Effectue une action pour un joueur donné (ce qui lui permet de tourner
+// et/ou d'accélérer)
 void Game::setAccelerations(unsigned int id, double rotation,
                             double acceleration) {
     players[id].raccel = rotation;
@@ -413,8 +417,8 @@ void Game::setPlayer(int id, vector pos, vector speed, double orientation,
     this->players[id].mass = mass;
 }
 
-// Regarde si la balle est dans la cage n°id, ou alors qu'elle va la traverser
-// dans la seconde suivante
+// Regarde si la balle est dans la cage n°id, ou alors qu'elle va la
+// traverser dans la seconde suivante
 bool Game::checkGoal(int id) {
     double cage = getWallCollisionTime(&this->ball, &this->goals[id]);
 
@@ -435,8 +439,8 @@ bool Game::checkGoal(int id) {
 
 /*
     La valeur de g.infos.score est positive lorsque c1 remporte la partie,
-    négative dans le cas contraire. c1 est placé à gauche du terrain tandis que
-    c2 à droite.
+    négative dans le cas contraire. c1 est placé à gauche du terrain tandis
+   que c2 à droite.
 */
 gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     auto g = Game(2 * EQUIPE_SIZE, save);

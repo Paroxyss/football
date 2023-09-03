@@ -93,17 +93,14 @@ gameStatistics Population::next(int n_thread, bool save) {
             if (likelyness(CROSSOVER_PROBABILITY)) {
                 nxt[count] = crossover(*std::get<0>(winners[i]),
                                        *std::get<1>(winners[i]));
-
-                auto tournResult = std::get<2>(winners[i]);
-                update_statistics(tourn_stats, &tournResult, matchs_count[i]);
-
-                count++;
             } else {
-                Chromosome *c = (likelyness(0.5) ? std::get<0>(winners[i])
-                                                 : std::get<1>(winners[i]));
-
+                Chromosome *c = likelyness(0.5) ? std::get<0>(winners[i])
+                                                : std::get<1>(winners[i]);
                 nxt[count] = cloneChromosome(c);
             }
+
+            auto tournResult = std::get<2>(winners[i]);
+            update_statistics(tourn_stats, &tournResult, matchs_count[i]);
 
             if ((count % outRate) == 0) {
                 std::cout << "*";
@@ -114,8 +111,8 @@ gameStatistics Population::next(int n_thread, bool save) {
         }
     }
 
-    // On introduit des individus complètement nouveau pour explorer le plus de
-    // solutions possible.
+    // On introduit des individus complètement nouveau pour explorer le plus
+    // de solutions possible.
     while (count < this->size) {
         nxt[count] = new Chromosome();
         nxt[count]->initialize();

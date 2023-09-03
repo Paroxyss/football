@@ -41,8 +41,8 @@ void play_random_match(const char *filename) {
 
     Population *p = Population::read(input);
 
-    Chromosome *c1 = cloneChromosome(p->pop[rand() % p->size]);
-    Chromosome *c2 = cloneChromosome(p->pop[rand() % p->size]);
+    Chromosome *c1 = cloneChromosome(p->pop[thrand(0, p->size - 1)]);
+    Chromosome *c2 = cloneChromosome(p->pop[thrand(0, p->size - 1)]);
 
     play_match(c1, c2, 1);
     input.close();
@@ -60,8 +60,8 @@ void see_goal(const char *filename) {
     Population *p = Population::read(input);
 
     for (;;) {
-        Chromosome *c1 = cloneChromosome(p->pop[rand() % p->size]);
-        Chromosome *c2 = cloneChromosome(p->pop[rand() % p->size]);
+        Chromosome *c1 = cloneChromosome(p->pop[thrand(0, p->size - 1)]);
+        Chromosome *c2 = cloneChromosome(p->pop[thrand(0, p->size - 1)]);
 
         gameInformations info = play_match(c1, c2, 1);
 

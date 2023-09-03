@@ -57,7 +57,7 @@ Matrix *uniform_crossover(Matrix &a, Matrix &b) {
 
     for (int i = 0; i < a.ligne; i++) {
         for (int j = 0; j < a.col; j++) {
-            double x = (rand() % 2 == 0 ? a : b).get(i, j);
+            double x = (likelyness(0.5) ? a : b).get(i, j);
             c->set(i, j, x);
         }
     }

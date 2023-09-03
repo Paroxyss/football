@@ -140,7 +140,7 @@ Population::tournament(int tourn_size, bool save) {
 
     for (int i = 0; i < tourn_size; i++) {
         // TODO: Apparemment rand() n'est pas thread-safe.
-        int k = rand() % tourn_size;
+        int k = thrand(0, tourn_size - 1);
 
         while (selected[k]) {
             k++;

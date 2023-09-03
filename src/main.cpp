@@ -22,7 +22,6 @@
 */
 
 int main(int argc, char *argv[]) {
-    srand(time(NULL));
 
     if (argc < 2) {
         std::cerr

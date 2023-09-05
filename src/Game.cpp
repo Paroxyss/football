@@ -375,7 +375,7 @@ void Game::writePlayers() {
 void Game::setAccelerations(unsigned int id, double rotation,
                             double acceleration) {
     players[id].raccel = rotation;
-    players[id].acceleration = acceleration;
+    players[id].acceleration = acceleration * PLAYER_ACCELERATION;
 };
 
 void Game::executePlayerActions(double time) {
@@ -394,11 +394,11 @@ void Game::executePlayerActions(double time) {
 void Game::applyFriction(double time) {
     // On applique les frottements
     // Ces frottements sont des frottements fluides (F = K*v)
-    ball.vitesse -= (norme(ball.vitesse) * ball.vitesse / 200) * time;
+    ball.vitesse -= (ball.vitesse * BALL_FROTTEMENT) * time;
 
     for (int i = 0; i < playerNumber; i++) {
         players[i].vitesse -=
-            (norme(players[i].vitesse) * players[i].vitesse / 40) * time;
+            (players[i].vitesse * PLAYER_FROTTEMENT) * time;
     }
 }
 

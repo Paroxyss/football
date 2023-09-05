@@ -139,6 +139,12 @@ Matrix *Chromosome::apply(player *equipeAlliee) {
 double mmn(double x, double min, double max) {
     return (x - min) / (max - min);
 }
+double mmn_negatif(double x, double min, double max) {
+    return mmn(x, min, max) * 2 - 1;
+}
+double normalizeAngle(double a) {
+    return mmn_negatif(a, -M_PI, M_PI);
+}
 
 /**
  * @brief Si les valeurs d'entrées ne sont pas normalisées, certaines valeurs
@@ -146,32 +152,34 @@ double mmn(double x, double min, double max) {
  * par rapport à la distance à la balle seront plus importantes que d'autres qui
  * peuvent être naturellement plus petite comme l'orientation.
  */
-void normalize_inputs(Matrix &inputs, int i) {
+void normalize_inputs(Matrix &inputs) {
     // Position du joueur
-    inputs.set(0, i,
-               mmn(inputs.get(0, i), PLAYER_SIZE, MAP_LENGTH - PLAYER_SIZE));
-    inputs.set(1, i,
-               mmn(inputs.get(1, i), PLAYER_SIZE, MAP_HEIGHT - PLAYER_SIZE));
+    inputs.set(0, 0,
+               mmn(inputs.get(0, 0), PLAYER_SIZE, MAP_LENGTH - PLAYER_SIZE));
+    inputs.set(1, 0,
+               mmn(inputs.get(1, 0), PLAYER_SIZE, MAP_HEIGHT - PLAYER_SIZE));
 
     // Vitesse du joueur
     // TODO: Vitesse max???
-    inputs.set(2, i, mmn(inputs.get(2, i), 0, 100));
-    inputs.set(3, i, mmn(inputs.get(3, i), 0, 100));
+    double vmax = PLAYER_ACCELERATION / PLAYER_FROTTEMENT;
+
+    inputs.set(2, 0, mmn(inputs.get(2, 0), -vmax, vmax));
+    inputs.set(3, 0, normalizeAngle(inputs.get(3, 0)));
 
     // Distance et orientation relative de la balle
-    inputs.set(4, i,
-               mmn(inputs.get(4, i), BALL_SIZE + PLAYER_SIZE,
+    inputs.set(4, 0,
+               mmn(inputs.get(4, 0), BALL_SIZE + PLAYER_SIZE,
                    d_map - BALL_SIZE - PLAYER_SIZE));
-    inputs.set(5, i, mmn(inputs.get(5, i), 0, 2 * M_PI));
+    inputs.set(5, 0, normalizeAngle(inputs.get(5, 0)));
 
     // Distance et orientation relative de la cage adverse
-    inputs.set(6, i, mmn(inputs.get(6, i), PLAYER_SIZE, d_cage - PLAYER_SIZE));
-    inputs.set(7, i, mmn(inputs.get(7, i), 0, 2 * M_PI));
+    inputs.set(6, 0, mmn(inputs.get(6, 0), PLAYER_SIZE, d_cage - PLAYER_SIZE));
+    inputs.set(7, 0, normalizeAngle(inputs.get(7, 0)));
 
     // Joueur le plus proche
-    inputs.set(8, i,
-               mmn(inputs.get(8, i), 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE));
-    inputs.set(9, i, mmn(inputs.get(9, i), 0, 2 * M_PI));
+    inputs.set(8, 0,
+               mmn(inputs.get(8, 0), 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE));
+    inputs.set(9, 0, normalizeAngle(inputs.get(9, 0)));
 
     // TODO: Il faut trouver un moyen de normaliser didier...
     // TODO: Il faut trouver un moyen de passer sur le fichier game.csv les
@@ -192,11 +200,8 @@ void writeInputs(player &target, player *equipeAdverse, ball *b, bool team) {
     mat->set(0, 0, fakePos.x);
     mat->set(1, 0, fakePos.y);
 
-    // Vitesse du joueur
-    vector fakeVitesse = team ? -target.vitesse : target.vitesse;
-
-    mat->set(2, 0, fakeVitesse.x);
-    mat->set(3, 0, fakeVitesse.y);
+    mat->set(2, 0, norme(target.vitesse));
+    mat->set(3, 0, -angleRounded(target.orientation - vangle(target.vitesse)));
 
     // Distance et orientation relative de la balle
     vector ball_fakePos = team ? mapSize - b->pos : b->pos;
@@ -233,6 +238,8 @@ void writeInputs(player &target, player *equipeAdverse, ball *b, bool team) {
     mat->set(8, 0, d);
     mat->set(9, 0,
              -angleRounded(target.orientation - vangle(nearest - fakePos)));
+
+	normalize_inputs(*mat);
 }
 
 Matrix *Chromosome::collect_and_apply(player *equipeAlliee,

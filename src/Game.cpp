@@ -309,8 +309,8 @@ void Game::tick(double timeToAdvance, bool root) {
             csvOutputFile << "1" << std::endl;
             writePlayers();
         }
-        executePlayerActions(timeToAdvance);
         applyFriction(timeToAdvance);
+        executePlayerActions(timeToAdvance);
     }
     // On fait tout avancer de la durée voulue
     moveAllObj(timeToAdvance);

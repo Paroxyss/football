@@ -16,10 +16,10 @@ const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 8, 6, NETWORK_OUTPUT_SIZE};
 
 #define GAME_RESOLUTION 1
 
-#define GAME_DURATION (20 * 60)
+#define GAME_DURATION (60 * 60)
 
-#define MAP_LENGTH (119 * 10)
-#define MAP_HEIGHT (75 * 10)
+#define MAP_LENGTH (119 * 5)
+#define MAP_HEIGHT (75 * 5)
 #define GOAL_HEIGHT (15 * 10)
 
 #define PLAYER_MASS 100
@@ -35,9 +35,9 @@ const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 8, 6, NETWORK_OUTPUT_SIZE};
 #define CROSSOVER_PROBABILITY 0.9
 
 // entre 0.001 et 0.1
-#define MUTATION_PROBABILITY 0.01
+#define MUTATION_PROBABILITY 0.001
 
-#define NEW_BLOOD 0.05
+#define NEW_BLOOD 0
 
 // nombre de générations
 #define N 10

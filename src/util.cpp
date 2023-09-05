@@ -62,6 +62,7 @@ std::ostream &operator<<(std::ostream &out, gameStatistics stats) {
         << stats.total_ball_collisions / (double)(stats.n)
         << ", goals : " << stats.totalGoals << " | "
         << stats.totalGoals / (double)(stats.n) << " }";
+
     return out;
 }
 

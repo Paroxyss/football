@@ -7,7 +7,7 @@ def meter(x):
 
 # dimensions du stade de France, j'ai augmenté la taille
 # des cages pour que ce soit plus facile de marquer.
-SCREEN_WIDTH, SCREEN_HEIGHT = meter(119), meter(75)
+SCREEN_WIDTH, SCREEN_HEIGHT = meter(119 / 2), meter(75 / 2)
 PLAYER_SIZE = meter(2)
 BALL_SIZE = meter(0.5)
 GOAL_SIZE = meter(15)

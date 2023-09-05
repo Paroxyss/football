@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 
 
@@ -7,39 +6,49 @@ def nonlinear_function(x, a, b, c):
     return a * np.exp(-b * x) + c
 
 
-file_path = "data/c1.txt"
-numbers = []
+# mutation: 0.05, new blood: 0.05
+n1 = {"uniform": [], "average": [], "onepointer": []}
+# crossover: uniform, new blood: 0.05
+n2 = {"0,05": [], "0,01": [], "0,005": [], "0,0001": [], "0,001": []}
+# crossover: uniform, mutation: 0.0001
+n3 = {"nb-0,05": [], "nb-0,1": [], "nb-0,01": [], "nb-0": []}
+# crossover: uniform, mutation: 0.0001, new blood: 0
+n4 = {"cb-0,9": [], "cb-0,95": [], "cb-0,8": [], "cb-0,6": [], "cb-1": []}
+
+colors = ["blue", "red", "green", "pink", "yellow", "brown"]
 
 # Read the file and process each line
-with open(file_path, "r") as file:
-    for line in file:
-        try:
-            num = float(line.strip())
-            numbers.append(num)
-        except ValueError:
-            pass
-
-x_values = list(range(1, len(numbers) + 1))
-y_values = numbers
 
 
-plt.grid(True)
-plt.legend()
+def show(numbers, titre):
+    for i, k in enumerate(numbers):
+        with open("data/" + k + ".txt", "r") as file:
+            for line in file:
+                try:
+                    num = float(line.strip())
+                    numbers[k].append(num)
+                except ValueError:
+                    pass
 
-x_values = np.array(x_values).reshape(-1, 1)
-y_values = np.array(y_values).reshape(-1, 1)
+            x_values = list(range(1, len(numbers[k]) + 1))
+            y_values = numbers[k]
 
-model = LinearRegression()
-model.fit(x_values, y_values)
+            plt.plot(
+                x_values, y_values, color=colors[i], label=k, marker="", linestyle="-"
+            )
 
-x_fit = np.linspace(min(x_values), max(x_values), 100).reshape(-1, 1)
-y_fit = model.predict(x_fit)
+    plt.xlabel("Generations")
+    plt.ylabel("Nombre de touches")
+    plt.grid(True)
 
-plt.plot(x_fit, y_fit, label="Linear Regression", marker="", color="orange")
-plt.plot(x_values, y_values, color="b", label="Curve", marker="", linestyle="-")
-plt.xlabel("Generations")
-plt.ylabel("Average Goal Per Match")
-plt.title("Progression Curve")
+    plt.title(titre)
+
+    plt.legend()
+
+    plt.show()
 
 
-plt.show()
+show(n1, "Crossover function")
+show(n2, "Mutation rate")
+show(n3, "New blood rate")
+show(n4, "Crossover Probability")

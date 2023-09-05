@@ -29,4 +29,4 @@ double angleRounded(double input);
 bool likelyness(double v);
 
 std::ostream &operator<<(std::ostream &out, gameStatistics stats);
-std::ostream &operator<<(std::ostream &out, gameInformations stats);
+std::ostream &operator<<(std::ostream &out, gameInformations stats); 

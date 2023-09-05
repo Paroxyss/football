@@ -31,4 +31,7 @@ class Chromosome {
 
 void mutate(Chromosome &c);
 Chromosome *crossover(Chromosome &a, Chromosome &b);
-void writeInputs(player &target, player *equipeAdverse, ball *b, bool team);
+double mmn(double x, double min, double max);
+void normalize_inputs(Matrix &inputs, int i);
+void writeInputs(Matrix *m, player *equipeAlliee, player *equipeAdverse, int i,
+                 ball *b, bool team);

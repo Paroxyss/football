@@ -101,11 +101,19 @@ def show_data(infos, k, nb_joueurs):
     # joueur le plus proche
 
     if side == "gauche":
-        epx = x + cos(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
-        epy = y + sin(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
+        epx = (
+            x + cos(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
+        )
+        epy = (
+            y + sin(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
+        )
     else:
-        epx = x - cos(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
-        epy = y - sin(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
+        epx = (
+            x - cos(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
+        )
+        epy = (
+            y - sin(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
+        )
 
     ep = (int(epx), int(epy))
 

@@ -16,6 +16,8 @@ running = True
 parsed = []
 show = [False for _ in range(nb_joueurs)]
 
+# data = data[1:]
+
 for i in range(1, len(data)):
     if data[i][0] == 2.0:
         parsed.append(parse(data[i][3:], nb_joueurs))
@@ -23,12 +25,13 @@ for i in range(1, len(data)):
 while running:
     for i in range(1, len(parsed)):
         lineType = data[i][0]
-        if(lineType == 1.0):
+        if lineType == 1.0:
             clock.tick(60)
-        elif(lineType == 2.0):
+        elif lineType == 2.0:
             draw_field()
             draw_goal()
             progression_bar(i, len(parsed))
+
             draw_ball(data[i][1], data[i][2])
 
             for k in range(1, nb_joueurs + 1):

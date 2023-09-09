@@ -1,7 +1,5 @@
 import pygame as pg
 
-SIZE = 1.5
-
 
 def meter(x):
     return x * 10
@@ -9,12 +7,12 @@ def meter(x):
 
 # dimensions du stade de France, j'ai augmenté la taille
 # des cages pour que ce soit plus facile de marquer.
-SCREEN_WIDTH, SCREEN_HEIGHT = meter(119 / 2) * SIZE, meter(75 / 2) * SIZE
-PLAYER_SIZE = meter(2) * SIZE
-BALL_SIZE = 10 * SIZE
-GOAL_SIZE = meter(15) * SIZE
+SCREEN_WIDTH, SCREEN_HEIGHT = meter(119 / 2), meter(75 / 2)
+PLAYER_SIZE = meter(2)
+BALL_SIZE = 10
+GOAL_SIZE = meter(15)
 # GOAL_SIZE = meter(7.32)
-GOAL_THICKNESS = 5 * SIZE
+GOAL_THICKNESS = 5
 
 RED = (255, 0, 0)
 WHITE = (255, 255, 255)

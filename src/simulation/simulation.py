@@ -29,16 +29,6 @@ while running:
 
         draw_ball(data[i][1], data[i][2])
 
-        font = pg.font.Font(None, 24)
-        screen.blit(
-            font.render(
-                "(" + str(data[i][1]) + ", " + str(data[i][2]) + ") at " + str(i),
-                True,
-                WHITE,
-            ),
-            (100, 100),
-        )
-
         for k in range(1, nb_joueurs + 1):
             if show[k - 1]:
                 show_data(parsed[i][k - 1], k, nb_joueurs)
@@ -73,5 +63,6 @@ while running:
                         show[k] = not show[k]
 
         pg.display.flip()
+        screen.fill(FIELD_GREEN)
 
 pg.quit()

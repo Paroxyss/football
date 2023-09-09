@@ -9,7 +9,7 @@ def meter(x):
 # des cages pour que ce soit plus facile de marquer.
 SCREEN_WIDTH, SCREEN_HEIGHT = meter(119 / 2), meter(75 / 2)
 PLAYER_SIZE = meter(2)
-BALL_SIZE = meter(0.5)
+BALL_SIZE = 10
 GOAL_SIZE = meter(15)
 # GOAL_SIZE = meter(7.32)
 GOAL_THICKNESS = 5

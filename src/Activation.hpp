@@ -17,7 +17,7 @@ inline double ReLu(double x) {
 }
 
 inline double sigmoide(double x) {
-    return 2 / (1 + exp(-x)) - 1;
+    return 5 / (1 + exp(-x)) - 5 / 2.;
 }
 
 inline double Heaviside(double x) {
@@ -39,7 +39,7 @@ inline double mish(double x) {
 inline void input_layer_activation(Matrix &c) {
     for (int i = 0; i < c.ligne; i++) {
         for (int j = 0; j < c.col; j++) {
-            c.set(i, j, tanh(c.get(i, j) / 1000.));
+            c.set(i, j, sigmoide(c.get(i, j) / 1000.));
         }
     }
 }
@@ -51,7 +51,7 @@ inline void input_layer_activation(Matrix &c) {
 inline void hidden_layer_activation(Matrix &c) {
     for (int i = 0; i < c.ligne; i++) {
         for (int j = 0; j < c.col; j++) {
-            c.set(i, j, tanh(c.get(i, j)));
+            c.set(i, j, sigmoide(c.get(i, j)));
         }
     }
 }

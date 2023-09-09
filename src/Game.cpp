@@ -306,7 +306,6 @@ void Game::tick(double timeToAdvance, bool root) {
     // récursif
     if (root) {
         if (logToFile) {
-            csvOutputFile << "1" << std::endl;
             writePlayers();
         }
         applyFriction(timeToAdvance);
@@ -374,6 +373,7 @@ void Game::writePlayers() {
 // et/ou d'accélérer)
 void Game::setAccelerations(unsigned int id, double rotation,
                             double acceleration) {
+
     players[id].raccel = rotation;
     players[id].acceleration = acceleration * PLAYER_ACCELERATION;
 };
@@ -397,8 +397,7 @@ void Game::applyFriction(double time) {
     ball.vitesse -= (ball.vitesse * BALL_FROTTEMENT) * time;
 
     for (int i = 0; i < playerNumber; i++) {
-        players[i].vitesse -=
-            (players[i].vitesse * PLAYER_FROTTEMENT) * time;
+        players[i].vitesse -= (players[i].vitesse * PLAYER_FROTTEMENT) * time;
     }
 }
 
@@ -461,7 +460,7 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
             for (int i = 0; i < EQUIPE_SIZE; i++) {
                 Matrix *r = (a == 0) ? r1 : r2;
 
-                double rotation = r->get(0, i) / 10;
+                double rotation = r->get(0, i);
                 double acceleration = r->get(1, i);
 
                 if (acceleration < 0) {

@@ -49,7 +49,7 @@ gameStatistics Population::next(int n_thread, bool save) {
     Chromosome **nxt = new Chromosome *[this->size];
 
     int count = 0;
-    int expected = this->size * (1 - NEW_BLOOD);
+    int expected = (double)this->size * ((double)1 - (double)NEW_BLOOD);
 
     std::thread threads[n_thread];
     std::tuple<Chromosome *, Chromosome *, gameStatistics> winners[n_thread];

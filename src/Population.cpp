@@ -73,11 +73,11 @@ gameStatistics Population::next(int n_thread, bool save) {
             n_thread = 1;
         }
 
-            for (int i = 0; i < n_thread; i++) {
-                // on choisit une puissance de 2 aléatoire car ça permet
-                // d'organiser des petites compétitions et donc limiter la
-                // pression selective.
-                int tourn_size = random_power(this->size / 2);
+        for (int i = 0; i < n_thread; i++) {
+            // on choisit une puissance de 2 aléatoire car ça permet
+            // d'organiser des petites compétitions et donc limiter la
+            // pression selective.
+            int tourn_size = random_power(this->size / 2);
 
             matchs_count[i] = tourn_size - 1;
 

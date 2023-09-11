@@ -46,6 +46,9 @@ void update_statistics(gameStatistics &tourn_stats, gameStatistics *tournResult,
 }
 
 gameStatistics Population::next(int n_thread, bool save) {
+    for (int i = 0; i < this->size; i++) {
+        this->pop[i]->stats.instanceAge++;
+    }
     Chromosome **nxt = new Chromosome *[this->size];
 
     int count = 0;
@@ -119,6 +122,17 @@ gameStatistics Population::next(int n_thread, bool save) {
         count++;
     }
 
+    int heightedGoals = 0;
+    int maxAge = 0;
+    int maxAgeGoals = 0;
+    for (int i = 0; i < this->size; i++) {
+        auto &stats = this->pop[i]->stats;
+        heightedGoals += stats.instanceGoals * stats.instanceAge;
+        if (stats.instanceAge > maxAge) {
+            maxAge = stats.instanceAge;
+            maxAgeGoals = stats.instanceGoals;
+        }
+    }
     for (int i = 0; i < this->size; i++) {
         mutate(*nxt[i]);
 
@@ -128,6 +142,9 @@ gameStatistics Population::next(int n_thread, bool save) {
 
     delete[] nxt;
     delete[] matchs_count;
+    std::cout << std::endl
+              << " Age | buts " << maxAge << " | " << maxAgeGoals << std::endl;
+
     return tourn_stats;
 }
 
@@ -202,6 +219,9 @@ Chromosome *cloneChromosome(Chromosome *original) {
             }
         }
     }
+    clone->stats.instanceGoals = original->stats.instanceGoals;
+    clone->stats.instanceAge = original->stats.instanceAge;
+
     return clone;
 }
 

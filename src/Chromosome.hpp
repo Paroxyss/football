@@ -5,8 +5,15 @@
 #include "config.h"
 #include <fstream>
 
+typedef struct chromosomeStats {
+    unsigned short instanceGoals;
+	int instanceAge;
+} chromosomeStats;
+
 class Chromosome {
   public:
+    chromosomeStats stats = {.instanceGoals = 0, .instanceAge = 0};
+
     Matrix *matrix[EQUIPE_SIZE][NETWORK_SIZE - 1];
 
     Chromosome();

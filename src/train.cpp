@@ -34,7 +34,7 @@ void train(int n_gen, int population_size, int n_thread) {
         gen += 1;
         last_save += 1;
 
-        std::cout << "\nStats gen " << gen << " " << stats << " in "
+        std::cout << "Stats gen " << gen << " " << stats << " in "
                   << elapsed_seconds.count() << std::endl;
 
         if (last_save > SAVE_RATE) {

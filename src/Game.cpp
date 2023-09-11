@@ -479,7 +479,13 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
         bool bc1 = g.checkGoal(0);
         bool bc2 = g.checkGoal(1);
         if (bc1 || bc2) {
-            g.infos.score += bc1 ? -1 : 1;
+            if (bc1) {
+                c2->stats.instanceGoals += 1;
+                g.infos.score -= 1;
+            } else {
+                c1->stats.instanceGoals += 1;
+                g.infos.score += 1;
+            }
             g.infos.goals += 1;
 
             g.ball.pos.x = (float)MAP_LENGTH / 2;
@@ -492,7 +498,15 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     }
 
     if (g.infos.score == 0) {
-        g.infos.score = likelyness(0.5) ? 1 : -1;
+        if (c1->stats.instanceGoals > c2->stats.instanceGoals) {
+            g.infos.score = 1;
+        } else if (c2->stats.instanceGoals > c1->stats.instanceGoals) {
+            g.infos.score = -1;
+        } else if (likelyness(0.5)) {
+            g.infos.score = 1;
+        } else {
+            g.infos.score = -1;
+        }
     }
 
     return g.infos;

@@ -25,11 +25,11 @@ const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 8, 6, NETWORK_OUTPUT_SIZE};
 #define PLAYER_MASS 100
 #define PLAYER_SIZE (2 * 10)
 #define PLAYER_ACCELERATION 1
-#define PLAYER_FROTTEMENT (1 / 200.)
+#define PLAYER_FROTTEMENT (1 / 100.)
 
 #define BALL_MASS 40
 #define BALL_SIZE 10
-#define BALL_FROTTEMENT (1 / 40.)
+#define BALL_FROTTEMENT (1 / 100.)
 
 #define POPULATION_SIZE 1000
 
@@ -39,7 +39,7 @@ const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 8, 6, NETWORK_OUTPUT_SIZE};
 // entre 0.001 et 0.1
 #define MUTATION_PROBABILITY 0.001
 
-#define NEW_BLOOD 0
+#define NEW_BLOOD 0.1
 
 // nombre de générations
 #define N 10

@@ -96,7 +96,7 @@ gameStatistics Population::next(int n_thread, bool save) {
                 nxt[count] = crossover(*std::get<0>(winners[i]),
                                        *std::get<1>(winners[i]));
             } else {
-                Chromosome *c = likelyness(0.5) ? std::get<0>(winners[i])
+                Chromosome *c = likelyness(0.8) ? std::get<0>(winners[i])
                                                 : std::get<1>(winners[i]);
                 nxt[count] = cloneChromosome(c);
             }

@@ -50,7 +50,7 @@ void play_random_match(const char *filename) {
     delete p;
 }
 
-void see_goal(const char *filename) {
+void see_goal(const char *filename, int nGoal) {
     std::ifstream input;
     input.open(filename);
 
@@ -65,7 +65,7 @@ void see_goal(const char *filename) {
 
         gameInformations info = play_match(c1, c2, 1);
 
-        if (info.goals != 0)
+        if (info.goals >= nGoal)
             break;
     }
 

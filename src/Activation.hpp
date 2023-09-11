@@ -32,6 +32,15 @@ inline double mish(double x) {
     return x * tanh(log(1 + exp(x)));
 }
 
+inline double outF(double x) {
+    double v = tanh(3*x);
+    if (v > 1)
+        v = 1;
+    if (v < -1)
+        v = -1;
+    return v;
+}
+
 /**
  * @brief applique la fonction d'activation
  * pour les couches d'input.
@@ -63,7 +72,7 @@ inline void hidden_layer_activation(Matrix &c) {
 inline void output_layer_activation(Matrix &c) {
     for (int i = 0; i < c.ligne; i++) {
         for (int j = 0; j < c.col; j++) {
-            c.set(i, j, tanh(c.get(i, j)));
+            c.set(i, j, outF(c.get(i, j)));
         }
     }
 }

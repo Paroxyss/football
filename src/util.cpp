@@ -19,7 +19,7 @@ double randomDouble(double min, double max) {
 }
 
 double randomDouble() {
-    return randomDouble(0, 1);
+    return randomDouble(-1.77, 1.77);
 }
 
 int previous_power(int n) {

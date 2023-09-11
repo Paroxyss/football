@@ -91,7 +91,7 @@ Game::~Game() {
 */
 void Game::set_players(const int conf[], int n) {
     int c = 0, s = 0;
-    double spx = MAP_LENGTH / 2. / (double)(n + 1);
+    double spx = (double)MAP_LENGTH / 2. / (double)(n + 1);
 
     for (int i = 0; i < n; i++) {
         s += conf[i];
@@ -105,25 +105,26 @@ void Game::set_players(const int conf[], int n) {
 
         for (int k = 1; k <= conf[i]; k++) {
             this->players[c].pos = {.x = (i + 1) * spx, .y = k * spy};
-            this->players[c].vitesse = {.x = 0, .y = 0};
-            this->players[c].orientation = randomDouble() * M_PI;
+            this->players[c].vitesse = {.x = 0.01, .y = 0};
+            this->players[c].orientation = randomDouble(-M_PI, M_PI);
 
             c++;
         }
     }
 
     for (int i = 0; i < n; i++) {
-        double spy = MAP_HEIGHT / (double)(conf[i] + 1);
-
         for (int k = conf[i]; k >= 1; k--) {
-            this->players[c].pos = {.x = MAP_HEIGHT / 2. + spx * (n - i + 1),
-                                    .y = k * spy};
-            this->players[c].vitesse = {.x = 0, .y = 0};
+            // symétrie centrale par rapport à au centre du terrain
+            vector centre = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
+            this->players[c].pos =
+                players[c - s].pos + 2 * (centre - players[c - s].pos);
+            this->players[c].vitesse = {.x = -0.01, .y = 0};
 
             // on donne aux joueurs de droite le même angle que ceux de gauche,
             // c'est après en python que l'on ajoute M_PI pour donner la
             // symétrie.
-            this->players[c].orientation = this->players[c - s].orientation;
+            this->players[c].orientation =
+                this->players[c - s].orientation + M_PI;
 
             c++;
         }
@@ -357,8 +358,8 @@ void Game::tick(double timeToAdvance, bool root) {
 
 // Écrit l'état des joueurs dans un fichier
 void Game::writePlayers() {
-    csvOutputFile << "2," << (double)ball.pos.x << "," << (double)ball.pos.y
-                  << ",";
+    csvOutputFile << "2," << (double)this->ball.pos.x << ","
+                  << (double)this->ball.pos.y << ",";
     for (int i = 0; i < playerNumber; i++) {
         csvOutputFile << (double)this->players[i].orientation << ",";
         for (int j = 0; j < NETWORK_INPUT_SIZE; j++) {

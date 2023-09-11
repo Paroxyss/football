@@ -160,10 +160,9 @@ void normalize_inputs(Matrix &inputs) {
                mmn(inputs.get(1, 0), PLAYER_SIZE, MAP_HEIGHT - PLAYER_SIZE));
 
     // Vitesse du joueur
-    // TODO: Vitesse max???
     double vmax = PLAYER_ACCELERATION / PLAYER_FROTTEMENT;
 
-    inputs.set(2, 0, mmn(inputs.get(2, 0), -vmax, vmax));
+    inputs.set(2, 0, mmn(inputs.get(2, 0), 0, vmax));
     inputs.set(3, 0, normalizeAngle(inputs.get(3, 0)));
 
     // Distance et orientation relative de la balle
@@ -203,43 +202,38 @@ void writeInputs(player &target, player *equipeAdverse, ball *b, bool team) {
     mat->set(2, 0, norme(target.vitesse));
     mat->set(3, 0, -angleRounded(target.orientation - vangle(target.vitesse)));
 
-    // Distance et orientation relative de la balle
-    vector ball_fakePos = team ? mapSize - b->pos : b->pos;
-
-    mat->set(4, 0, norme(ball_fakePos - fakePos));
+    mat->set(4, 0, norme(b->pos - target.pos));
     // on l'inverse pour que ce soit la valeur à corriger pour aller vers la
     // balle, plus logique pour le joueur
-    mat->set(
-        5, 0,
-        -angleRounded(target.orientation - vangle(ball_fakePos - fakePos)));
+    mat->set(5, 0,
+             -angleRounded(target.orientation - vangle(b->pos - target.pos)));
 
     // Distance et orientation relative de la cage adverse
-    vector cage = {.x = MAP_LENGTH, .y = (double)MAP_HEIGHT / 2};
-    mat->set(6, 0, norme(cage - fakePos));
+    vector cage = {.x = static_cast<double>(team ? 0 : MAP_LENGTH),
+                   .y = (double)MAP_HEIGHT / 2};
+    mat->set(6, 0, norme(cage - target.pos));
     // idem que pour l'orientation relative de la balle, on passe la valeur
     // angulaire à corriger
-    mat->set(7, 0, -angleRounded(target.orientation - vangle(cage - fakePos)));
+    mat->set(7, 0,
+             -angleRounded(target.orientation - vangle(cage - target.pos)));
 
     // Joueur le plus proche
     vector nearest;
     double d = INFINITY;
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
-        vector opponent_fakePos =
-            team ? mapSize - equipeAdverse[i].pos : equipeAdverse[i].pos;
-
-        double nd = norme(opponent_fakePos - fakePos);
+        double nd = norme(equipeAdverse[i].pos - target.pos);
         if (nd < d) {
-            nearest = opponent_fakePos;
+            nearest = equipeAdverse[i].pos;
             d = nd;
         };
     }
 
     mat->set(8, 0, d);
     mat->set(9, 0,
-             -angleRounded(target.orientation - vangle(nearest - fakePos)));
+             -angleRounded(target.orientation - vangle(nearest - target.pos)));
 
-	normalize_inputs(*mat);
+    normalize_inputs(*mat);
 }
 
 Matrix *Chromosome::collect_and_apply(player *equipeAlliee,

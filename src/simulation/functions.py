@@ -8,7 +8,7 @@ def draw_player(t, x, y, d):
         x = SCREEN_WIDTH - x
         y = SCREEN_HEIGHT - y
         color = RED
-        d = d + pi
+        d = d
     else:
         color = BLUE
 
@@ -60,12 +60,8 @@ def show_data(infos, k, nb_joueurs):
 
     # balle
 
-    if side == "gauche":
-        epx = x + cos(infos["ball_angle"] + infos["orientation"]) * infos["ball_dist"]
-        epy = y + sin(infos["ball_angle"] + infos["orientation"]) * infos["ball_dist"]
-    else:
-        epx = x - cos(infos["ball_angle"] + infos["orientation"]) * infos["ball_dist"]
-        epy = y - sin(infos["ball_angle"] + infos["orientation"]) * infos["ball_dist"]
+    epx = x + cos(infos["ball_angle"] + infos["orientation"]) * infos["ball_dist"]
+    epy = y + sin(infos["ball_angle"] + infos["orientation"]) * infos["ball_dist"]
 
     ep = (int(epx), int(epy))
 
@@ -81,12 +77,8 @@ def show_data(infos, k, nb_joueurs):
 
     # pour epy je ne suis pas sur, peut être que je corrige un problème
     # qui provient en fait du cpp mais je ne sais pas...
-    if side == "gauche":
-        epx = x + cos(infos["cage_angle"] + infos["orientation"]) * infos["cage_dist"]
-        epy = y + sin(infos["cage_angle"] + infos["orientation"]) * infos["cage_dist"]
-    else:
-        epx = x - cos(infos["cage_angle"] + infos["orientation"]) * infos["cage_dist"]
-        epy = y - sin(infos["cage_angle"] + infos["orientation"]) * infos["cage_dist"]
+    epx = x + cos(infos["cage_angle"] + infos["orientation"]) * infos["cage_dist"]
+    epy = y + sin(infos["cage_angle"] + infos["orientation"]) * infos["cage_dist"]
 
     ep = (int(epx), int(epy))
 
@@ -100,20 +92,12 @@ def show_data(infos, k, nb_joueurs):
 
     # joueur le plus proche
 
-    if side == "gauche":
-        epx = (
-            x + cos(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
-        )
-        epy = (
-            y + sin(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
-        )
-    else:
-        epx = (
-            x - cos(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
-        )
-        epy = (
-            y - sin(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
-        )
+    epx = (
+        x + cos(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
+    )
+    epy = (
+        y + sin(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
+    )
 
     ep = (int(epx), int(epy))
 

@@ -122,12 +122,10 @@ gameStatistics Population::next(int n_thread, bool save) {
         count++;
     }
 
-    int heightedGoals = 0;
     int maxAge = 0;
     int maxAgeGoals = 0;
     for (int i = 0; i < this->size; i++) {
         auto &stats = this->pop[i]->stats;
-        heightedGoals += stats.instanceGoals * stats.instanceAge;
         if (stats.instanceAge > maxAge) {
             maxAge = stats.instanceAge;
             maxAgeGoals = stats.instanceGoals;

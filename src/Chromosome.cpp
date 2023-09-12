@@ -300,6 +300,10 @@ void Chromosome::write(std::ofstream &file) {
         file.write((char *)&PLAYER_LAYERS[i], sizeof(int));
     }
 
+    // Stats
+    file.write((char *)&this->stats.instanceAge, sizeof(int));
+    file.write((char *)&this->stats.instanceGoals, sizeof(int));
+
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             this->matrix[i][j]->write(file);
@@ -326,12 +330,17 @@ Chromosome *Chromosome::read(std::ifstream &file) {
     for (int i = 0; i < NETWORK_SIZE; i++) {
         file.read((char *)&pLayers[i], sizeof(int));
         if (pLayers[i] != PLAYER_LAYERS[i]) {
+            std::cout << i << ":" << pLayers[i] << " =/= " << PLAYER_LAYERS[i];
             throw std::invalid_argument(
                 "Misconfigured Chromosome file (bad player layers)");
         }
     }
 
     Chromosome *c = new Chromosome();
+
+    // Stats
+    file.read((char *)&c->stats.instanceAge, sizeof(int));
+    file.read((char *)&c->stats.instanceGoals, sizeof(int));
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {

@@ -5,12 +5,31 @@ namespace fs = std::__fs::filesystem;
 #include "Chromosome.hpp"
 #include "Population.hpp"
 #include "config.h"
+#include "train.hpp"
 #include "util.hpp"
 
 #define POPNAME(gen)                                                           \
     "pops/pop-gen" + std::to_string(gen) + "-at-" + std::to_string(time(NULL))
 
 void train(int n_gen, int population_size, int n_thread) {
+    Population *pop = new Population(population_size);
+    pop->initialize();
+    std::cout << "Nouvelle population crée" << std::endl;
+    trainPop(pop, n_gen, population_size, n_thread);
+    delete pop;
+}
+
+void trainFromFile(const char *inputFile, int n_gen, int population_size,
+                   int n_thread) {
+    std::ifstream input;
+    input.open(inputFile);
+    Population *pop = Population::read(input);
+    std::cout << "Population chargée depuis " << inputFile << std::endl;
+    trainPop(pop, n_gen, population_size, n_thread);
+    delete pop;
+}
+
+void trainPop(Population *pop, int n_gen, int population_size, int n_thread) {
     std::ofstream ofs;
     ofs.open("stats.csv", std::ofstream::out | std::ofstream::trunc);
     ofs.close();
@@ -26,9 +45,6 @@ void train(int n_gen, int population_size, int n_thread) {
 
     int gen = 0;
     int last_save = 0;
-
-    Population *pop = new Population(population_size);
-    pop->initialize();
 
     while (gen < n_gen) {
 
@@ -72,8 +88,6 @@ void train(int n_gen, int population_size, int n_thread) {
     statsFile.close();
     fs::remove("pops/latest");
     fs::create_hard_link(outFName, "pops/latest");
-
-    delete pop;
 }
 
 void play_match(const char *fileC1, const char *fileC2) {

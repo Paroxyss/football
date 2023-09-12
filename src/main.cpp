@@ -55,12 +55,20 @@ int main(int argc, char *argv[]) {
         if (argc >= 5) {
             n_thread = std::stoi(argv[4]);
         }
+        char *fn = NULL;
+        if (argc >= 6) {
+            fn = argv[5];
+        }
 
         // Il doit au moins être possible d'organiser un tournois
         if (pop_size < 4)
             throw std::invalid_argument("Population trop petite.");
 
-        train(n_gen, pop_size, n_thread);
+        if (fn)
+            trainFromFile(fn, n_gen, pop_size, n_thread);
+        else
+            train(n_gen, pop_size, n_thread);
+
     } else if (strcmp(argv[1], "play") == 0) {
         if (argc < 3) {
             throw std::invalid_argument("Missing argument popFile");

@@ -1,6 +1,6 @@
 #pragma once
 
-#define NETWORK_SIZE 4
+#define NETWORK_SIZE 6
 
 // pour l'instant le réseau ne prend pas l'accélération en entrée
 // pour pouvoir évoluer plus facilement.
@@ -12,7 +12,8 @@
 
 #define EQUIPE_SIZE 1
 
-const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 8, 6, NETWORK_OUTPUT_SIZE};
+const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 10, 8, 6, 4,
+                             NETWORK_OUTPUT_SIZE};
 
 #define GAME_RESOLUTION 1
 
@@ -24,12 +25,12 @@ const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 8, 6, NETWORK_OUTPUT_SIZE};
 
 #define PLAYER_MASS 100
 #define PLAYER_SIZE (2 * 10)
-#define PLAYER_ACCELERATION 1
-#define PLAYER_FROTTEMENT (1 / 100.)
+#define PLAYER_ACCELERATION 0.30
+#define PLAYER_FROTTEMENT (1 / 20.)
 
 #define BALL_MASS 40
 #define BALL_SIZE 10
-#define BALL_FROTTEMENT (1 / 100.)
+#define BALL_FROTTEMENT (1 / 50.)
 
 #define POPULATION_SIZE 1000
 
@@ -44,4 +45,4 @@ const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 8, 6, NETWORK_OUTPUT_SIZE};
 // nombre de générations
 #define N 10
 // intervalle (en génération) des sauvegardes
-#define SAVE_RATE 100
+#define SAVE_RATE 10

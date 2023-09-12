@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(argv[1], "seegoal") == 0) {
         int nGoal = 1;
         if (argc > 3) {
-			nGoal = std::stoi(argv[3]);
+            nGoal = std::stoi(argv[3]);
         }
         see_goal(argv[2], nGoal);
     }

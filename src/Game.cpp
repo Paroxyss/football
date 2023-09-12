@@ -464,9 +464,9 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
                 double rotation = r->get(0, i);
                 double acceleration = r->get(1, i);
 
-                if (acceleration < 0) {
-                    acceleration = -acceleration;
-                }
+                if (acceleration < 0)
+                    acceleration = 0;
+
                 g.setAccelerations(i + a * EQUIPE_SIZE, rotation, acceleration);
             }
         }

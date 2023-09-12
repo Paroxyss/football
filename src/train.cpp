@@ -11,6 +11,14 @@ namespace fs = std::__fs::filesystem;
     "pops/pop-gen" + std::to_string(gen) + "-at-" + std::to_string(time(NULL))
 
 void train(int n_gen, int population_size, int n_thread) {
+    std::ofstream ofs;
+    ofs.open("stats.csv", std::ofstream::out | std::ofstream::trunc);
+    ofs.close();
+
+    std::ofstream statsFile;
+
+    // opening file using ofstream
+    statsFile.open("stats.csv", std::ios::app);
 
     std::cout << "Starting a train of " << n_gen << " generations with "
               << population_size << " chromosomes on " << n_thread
@@ -37,6 +45,10 @@ void train(int n_gen, int population_size, int n_thread) {
         std::cout << "Stats gen " << gen << " " << stats << " in "
                   << elapsed_seconds.count() << std::endl;
 
+        statsFile << gen << ", " << stats.totalCollisions / (double)stats.n
+                  << ", " << stats.total_ball_collisions / (double)stats.n
+                  << ", " << stats.totalGoals / (double)stats.n << std::endl;
+
         if (last_save > SAVE_RATE) {
             std::ofstream out;
             auto backup_fname = POPNAME(gen);
@@ -57,6 +69,7 @@ void train(int n_gen, int population_size, int n_thread) {
 
     pop->write(out);
     out.close();
+    statsFile.close();
     fs::remove("pops/latest");
     fs::create_hard_link(outFName, "pops/latest");
 

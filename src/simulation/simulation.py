@@ -1,4 +1,5 @@
 import pygame as pg
+import sys
 
 from functions import *
 from readcsv import *
@@ -10,7 +11,14 @@ pg.init()
 
 running = True
 clock = pg.time.Clock()
-data = read("game.csv")
+
+filename = "game.csv"
+if(len(sys.argv)>=2):
+    filename = sys.argv[1]
+print(sys.argv)
+
+data = read(filename)
+
 nb_joueurs = int(data[0][1] * 2)
 running = True
 parsed = []

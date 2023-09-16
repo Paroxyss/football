@@ -21,8 +21,6 @@ def read(name):
             reader = csv.reader(f)
             for l in reader:
                 lines.append(convert(l))
-    except FileNotFoundError:
-        print("mskn")
     except Exception as e:
         print(str(e))
 

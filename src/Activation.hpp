@@ -34,6 +34,7 @@ inline double mish(double x) {
 
 inline double outF(double x) {
     double v = tanh(3 * x);
+
     if (v > 1)
         v = 1;
     if (v < -1)

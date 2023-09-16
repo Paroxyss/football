@@ -447,8 +447,8 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
     g.ball.vitesse = {.x = 0, .y = 0};
 
-    int c[] = {1};
-    g.set_players(c, 1);
+    int c[] = {1, 2};
+    g.set_players(c, 2);
 
     for (int k = 0; k < GAME_DURATION; k++) {
 
@@ -493,7 +493,7 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
             g.ball.vitesse.x = 0;
             g.ball.vitesse.y = 0;
 
-            g.set_players(c, 1);
+            g.set_players(c, 2);
         }
     }
 

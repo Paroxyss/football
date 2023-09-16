@@ -89,7 +89,7 @@ Matrix *Chromosome::apply(player *equipeAlliee) {
 
         // On copie la matrice d'input dans celle de calcul
         for (int j = 0; j < NETWORK_INPUT_SIZE; j++) {
-            mcalcul.set(j, 0, selected.inputs->get(j, i));
+            mcalcul.set(j, 0, selected.inputs->get(j, 0));
         }
 
         mcalcul.mult_inv(*this->matrix[i][0]);

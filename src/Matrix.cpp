@@ -64,7 +64,7 @@ void Matrix::initialize() {
  */
 double Matrix::get(int i, int j) {
     if (i >= this->ligne || j >= this->col) {
-        throw std::invalid_argument("Bad matrice get");
+        throw std::invalid_argument("Bad matrice get: ");
     }
 
     return this->t[i * this->col + j];

@@ -1,5 +1,5 @@
 import pygame as pg
-from math import cos, sin, pi
+from math import cos, sin
 from config import *
 
 
@@ -41,7 +41,7 @@ def progression_bar(p, max):
     x = 10
     y = 10
 
-    for i in range(4):
+    for _ in range(4):
         pg.draw.rect(screen, (255, 255, 255), (x, y, 200, 15), 1)
 
     pg.draw.rect(screen, (255, 255, 255), (x, y, 2 * (p / max * 100), 15), 15)
@@ -56,10 +56,8 @@ def calcy(infos, k, nb_joueurs):
 def show_data(infos, k, nb_joueurs):
     y = calcy(infos, k, nb_joueurs)
     x = calcx(infos, k, nb_joueurs)
-    side = "droite" if k > nb_joueurs / 2 else "gauche"
 
     # balle
-
     epx = x + cos(infos["ball_angle"] + infos["orientation"]) * infos["ball_dist"]
     epy = y + sin(infos["ball_angle"] + infos["orientation"]) * infos["ball_dist"]
 
@@ -92,12 +90,8 @@ def show_data(infos, k, nb_joueurs):
 
     # joueur le plus proche
 
-    epx = (
-        x + cos(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
-    )
-    epy = (
-        y + sin(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
-    )
+    epx = x + cos(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
+    epy = y + sin(infos["nearest_angle"] + infos["orientation"]) * infos["nearest_dist"]
 
     ep = (int(epx), int(epy))
 

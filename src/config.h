@@ -19,9 +19,9 @@ const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 10, 8, 6, 4,
 
 #define GAME_DURATION (40 * 60)
 
-#define MAP_LENGTH (119 * 5)
-#define MAP_HEIGHT (75 * 5)
-#define GOAL_HEIGHT (15 * 10)
+#define MAP_LENGTH (119 * 7)
+#define MAP_HEIGHT (75 * 7)
+#define GOAL_HEIGHT (15 * 12)
 
 #define PLAYER_MASS 100
 #define PLAYER_SIZE (2 * 10)

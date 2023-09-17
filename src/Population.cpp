@@ -80,11 +80,10 @@ gameStatistics Population::next(int n_thread, bool save) {
                                   &nxt, &tourn_stats, outRate]() {
             while (true) {
                 auto localCount = count++;
-								 
-                int tourn_size =
-                    this->size / 2; // random_power(this->size / 2);
+
+                int tourn_size = random_power(this->size / 2);
                 auto outcome = this->tournament(tourn_size, save);
-								 
+
                 if (localCount > expected)
                     break;
 

@@ -40,7 +40,7 @@ def animate(i):
     ys_3 = [x[3] for x in graph_data]
     ax3.clear()
     ax3.plot(xs, ys_3)
-    ax3.set_title("Nombre moyen de butes")
+    ax3.set_title("Nombre moyen de buts")
     ax3.set_xlabel("Générations")
     ax3.set_ylabel("Butes / Nombre de matches")
     ax3.grid(axis="y")

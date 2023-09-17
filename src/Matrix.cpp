@@ -18,7 +18,10 @@
 Matrix::Matrix(int ligne, int col) {
     this->ligne = ligne;
     this->col = col;
-    this->t = new double[ligne * col];
+    if (ligne * col <= DEFAULT_M_SIZE) {
+        this->t = new double[DEFAULT_M_SIZE];
+        this->ct = new double[DEFAULT_M_SIZE];
+    }
 }
 
 /**
@@ -26,6 +29,7 @@ Matrix::Matrix(int ligne, int col) {
  */
 Matrix::~Matrix() {
     delete[] this->t;
+    delete[] this->ct;
 }
 
 /**
@@ -63,10 +67,7 @@ void Matrix::initialize() {
  * @return Valeur de la matrice à la ligne `i` et colonne `j`
  */
 double Matrix::get(int i, int j) {
-    if (i >= this->ligne || j >= this->col) {
-        throw std::invalid_argument("Bad matrice get: ");
-    }
-
+    STRICT_ASSERT(i >= this->ligne || j >= this->col, "Bad matrice get")
     return this->t[i * this->col + j];
 }
 
@@ -78,10 +79,7 @@ double Matrix::get(int i, int j) {
  * @param x Valeur
  */
 void Matrix::set(int i, int j, double x) {
-    if (i >= this->ligne || j >= this->col) {
-        throw std::invalid_argument("Bad matrice set");
-    }
-
+    STRICT_ASSERT(i >= this->ligne || j >= this->col, "Bad matrice set")
     this->t[i * this->col + j] = x;
 }
 
@@ -91,24 +89,68 @@ void Matrix::set(int i, int j, double x) {
  *
  * @param a Matrice à multiplier à gauche
  */
+#define STATICMULT(l, c)                                                       \
+    case (l + (c << 8)):                                                       \
+        for (int i = 0; i < l; i++) {                                          \
+            for (int j = 0; j < c; j++) {                                      \
+                this->ct[i * c + j] = 0;                                       \
+                for (int k = 0; k < l; k++) {                                  \
+                    double v1 = this->t[i * c + k];                            \
+                    double v2 = a.t[k * c + j];                                \
+                    this->ct[i * c + j] += v1 * v2;                            \
+                }                                                              \
+            }                                                                  \
+        }                                                                      \
+        break
+
 void Matrix::mult_inv(Matrix &a) {
+    STRICT_ASSERT(this->ligne != a.col, "lol multinv")
+    STRICT_ASSERT(a.ligne * this->col > DEFAULT_M_SIZE,
+                  "Multiv avec des matrices trop grandes")
+
+    switch (a.ligne + (this->col << 8)) {
+        STATICMULT(12, 1);
+        STATICMULT(10, 1);
+        STATICMULT(8, 1);
+        STATICMULT(6, 1);
+        STATICMULT(4, 1);
+        STATICMULT(2, 1);
+    default:
+        std::cout << "Attention: calcul de matrice non statique : " << a.ligne
+                  << ", " << this->col << std::endl;
+        lent_mult_inv(a);
+        return;
+    }
+
+    auto tmp = this->ct;
+    this->ct = this->t;
+    this->t = tmp;
+
+    this->ligne = a.ligne;
+}
+
+void Matrix::lent_mult_inv(Matrix &a) {
     if (this->ligne != a.col) {
         throw std::invalid_argument("lol multinv");
     }
-
-    double *nt = new double[a.ligne * this->col];
+    if (a.ligne * this->col > DEFAULT_M_SIZE) {
+        std::cout << a.ligne << "x" << this->col << std::endl;
+        throw std::invalid_argument("Multiv avec des matrices trop grandes");
+    }
 
     for (int i = 0; i < a.ligne; i++) {
         for (int j = 0; j < this->col; j++) {
-            nt[i * this->col + j] = 0;
+            this->ct[i * this->col + j] = 0;
             for (int k = 0; k < this->ligne; k++) {
-                nt[i * this->col + j] += a.get(i, k) * this->get(k, j);
+                this->ct[i * this->col + j] += a.get(i, k) * this->get(k, j);
             }
         }
     }
 
-    delete[] this->t;
-    this->t = nt;
+    auto tmp = this->ct;
+    this->ct = this->t;
+    this->t = tmp;
+
     this->ligne = a.ligne;
 }
 

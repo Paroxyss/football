@@ -33,3 +33,11 @@ bool likelyness(double v);
 
 std::ostream &operator<<(std::ostream &out, gameStatistics stats);
 std::ostream &operator<<(std::ostream &out, gameInformations stats);
+
+#ifdef DEBUG
+#define DEBUG_LINE(code) code
+#else
+#define DEBUG_LINE(code)
+#endif
+#define STRICT_ASSERT(condition, erreur) DEBUG_LINE(if(condition){throw std::logic_error(erreur);})
+

@@ -36,13 +36,15 @@ void Population::initialize() {
     }
 }
 
+std::mutex statsMutex;
 void update_statistics(gameStatistics &tourn_stats, gameStatistics *tournResult,
                        int matchs_count) {
-
+    statsMutex.lock();
     tourn_stats.totalCollisions += tournResult->totalCollisions;
     tourn_stats.totalGoals += tournResult->totalGoals;
     tourn_stats.n += matchs_count;
     tourn_stats.total_ball_collisions += tournResult->total_ball_collisions;
+    statsMutex.unlock();
 }
 
 gameStatistics Population::next(int n_thread, bool save) {
@@ -51,7 +53,9 @@ gameStatistics Population::next(int n_thread, bool save) {
     }
     Chromosome **nxt = new Chromosome *[this->size];
 
-    int count = 0;
+    std::atomic<int> count;
+    count = 0;
+
     int expected = (double)this->size * ((double)1 - (double)NEW_BLOOD);
 
     std::thread threads[n_thread];
@@ -67,51 +71,42 @@ gameStatistics Population::next(int n_thread, bool save) {
     int outRate = std::floor(expected / 10);
     int *matchs_count = new int[n_thread];
 
-    while (count < expected) {
+    for (int i = 0; i < n_thread; i++) {
+        // on choisit une puissance de 2 aléatoire car ça permet
+        // d'organiser des petites compétitions et donc limiter la
+        // pression selective.
 
-        if (expected - count < n_thread) {
-            n_thread = 1;
-        }
-
-        for (int i = 0; i < n_thread; i++) {
-            // on choisit une puissance de 2 aléatoire car ça permet
-            // d'organiser des petites compétitions et donc limiter la
-            // pression selective.
-            int tourn_size = random_power(this->size / 2);
-
-            matchs_count[i] = tourn_size - 1;
-
-            threads[i] = std::thread([this, tourn_size, save, &winners, i]() {
+        threads[i] = std::thread([this, save, &winners, i, &count, expected,
+                                  &nxt, &tourn_stats, outRate]() {
+            while (true) {
+                auto localCount = count++;
+								 
+                int tourn_size =
+                    this->size / 2; // random_power(this->size / 2);
                 auto outcome = this->tournament(tourn_size, save);
-                winners[i] = outcome;
-            });
-        }
+								 
+                if (localCount > expected)
+                    break;
 
-        for (int i = 0; i < n_thread; ++i) {
-            threads[i].join();
-        }
+                if (likelyness(CROSSOVER_PROBABILITY)) {
+                    nxt[localCount] =
+                        crossover(*std::get<0>(outcome), *std::get<1>(outcome));
+                } else {
+                    Chromosome *c = likelyness(0.8) ? std::get<0>(outcome)
+                                                    : std::get<1>(outcome);
+                    nxt[localCount] = cloneChromosome(c);
+                }
 
-        for (int i = 0; i < n_thread; i++) {
-            if (likelyness(CROSSOVER_PROBABILITY)) {
-                nxt[count] = crossover(*std::get<0>(winners[i]),
-                                       *std::get<1>(winners[i]));
-            } else {
-                Chromosome *c = likelyness(0.8) ? std::get<0>(winners[i])
-                                                : std::get<1>(winners[i]);
-                nxt[count] = cloneChromosome(c);
+                auto tournResult = std::get<2>(outcome);
+                update_statistics(tourn_stats, &tournResult, tourn_size - 1);
             }
-
-            auto tournResult = std::get<2>(winners[i]);
-            update_statistics(tourn_stats, &tournResult, matchs_count[i]);
-
-            if ((count % outRate) == 0) {
-                std::cout << "*";
-                fflush(stdout);
-            }
-
-            count++;
-        }
+        });
     }
+
+    for (int i = 0; i < n_thread; ++i) {
+        threads[i].join();
+    }
+    count = expected;
 
     // On introduit des individus complètement nouveau pour explorer le plus
     // de solutions possible.

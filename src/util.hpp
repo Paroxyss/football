@@ -5,6 +5,9 @@
 #include <ostream>
 #include <random>
 #include <thread>
+#include "config.h"
+
+extern std::mutex coutMutex;
 
 struct gameInformations {
     unsigned int collisions;

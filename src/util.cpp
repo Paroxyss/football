@@ -1,6 +1,10 @@
 #include "util.hpp"
 #include "Rand.h"
 
+
+thread_local std::uniform_real_distribution<double> realDistrib(0, 1);
+std::mutex coutMutex;
+
 /**
  * @brief Apparemment la fonction rand() n'est pas "thread-safe" et peut
  * sortir plusieurs fois le même nombre lorsque celui-ci est sollicité
@@ -9,13 +13,11 @@
  * ATTENTION LES DEUX BORNES SONT INCLUES
  */
 int thrand(int min, int max) {
-    std::uniform_int_distribution<int> distribution(min, max);
-    return distribution(rng);
+    return realDistrib(rng) * (double)(max - min) + (double)min;
 }
 
 double randomDouble(double min, double max) {
-    std::uniform_real_distribution<double> distribution(min, max);
-    return distribution(rng);
+    return realDistrib(rng) * (double)(max - min) + (double)min;
 }
 
 double randomDouble() {

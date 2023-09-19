@@ -13,7 +13,7 @@ running = True
 clock = pg.time.Clock()
 
 filename = "game.csv"
-if(len(sys.argv)>=2):
+if len(sys.argv) >= 2:
     filename = sys.argv[1]
 print(sys.argv)
 
@@ -69,6 +69,24 @@ while running:
 
                     if dist <= PLAYER_SIZE:
                         show[k] = not show[k]
+            elif event.type == pg.KEYDOWN:
+                # Check if a number key is pressed (0-9)
+                if event.key in [
+                    pg.K_0,
+                    pg.K_1,
+                    pg.K_2,
+                    pg.K_3,
+                    pg.K_4,
+                    pg.K_5,
+                    pg.K_6,
+                    pg.K_7,
+                    pg.K_8,
+                    pg.K_9,
+                ]:
+                    if event.key == pg.K_0:
+                        show = [False for _ in range(nb_joueurs)]
+                    elif event.key in [pg.K_1, pg.K_2, pg.K_3, pg.K_4, pg.K_5, pg.K_6]:
+                        show[event.key - pg.K_1] = not show[event.key - pg.K_1]
 
         pg.display.flip()
         screen.fill(FIELD_GREEN)

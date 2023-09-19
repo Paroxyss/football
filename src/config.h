@@ -1,6 +1,6 @@
 #pragma once
 
-#define NETWORK_SIZE 6
+#define NETWORK_SIZE 8
 
 // pour l'instant le réseau ne prend pas l'accélération en entrée
 // pour pouvoir évoluer plus facilement.
@@ -8,11 +8,11 @@
 // cage, distance abverse + proche, angle adverse + proche, com1, .. ,
 // com{COM_SIZE}
 #define NETWORK_OUTPUT_SIZE 2
-#define NETWORK_INPUT_SIZE 10
+#define NETWORK_INPUT_SIZE 18
 
 #define EQUIPE_SIZE 3
 
-const int PLAYER_LAYERS[] = {NETWORK_INPUT_SIZE, 10, 8, 6, 4,
+const int PLAYER_LAYERS[NETWORK_SIZE] = {NETWORK_INPUT_SIZE, 24, 24, 16, 12, 8, 4,
                              NETWORK_OUTPUT_SIZE};
 
 #define GAME_RESOLUTION 1

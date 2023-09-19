@@ -15,8 +15,14 @@
 
 // Opérations couteuses donc mises en statiques, elles sont utilisées
 // pour la normalisation min-max.
-static double d_map = sqrt(pow(MAP_LENGTH, 2) + pow(MAP_HEIGHT, 2));
-static double d_cage = sqrt(pow(MAP_HEIGHT / 2, 2) + pow(MAP_LENGTH, 2));
+static const double d_map = sqrt(pow(MAP_LENGTH, 2) + pow(MAP_HEIGHT, 2));
+static const double d_bordure_cage =
+    sqrt(pow((MAP_HEIGHT + GOAL_HEIGHT) / 2, 2) + pow(MAP_LENGTH, 2));
+
+// Vitesse maximum du joueur
+static const double vjmax = PLAYER_ACCELERATION / PLAYER_FROTTEMENT;
+// Vitesse maximum de la balle
+static const double vbmax = vjmax * sqrt(PLAYER_MASS / BALL_MASS);
 
 Chromosome::Chromosome() {
     for (int i = 0; i < EQUIPE_SIZE; i++) {
@@ -153,32 +159,44 @@ double normalizeAngle(double a) {
  * peuvent être naturellement plus petite comme l'orientation.
  */
 void normalize_inputs(Matrix &inputs) {
-    // Position du joueur
-    inputs.set(0, 0,
-               mmn(inputs.get(0, 0), PLAYER_SIZE, MAP_LENGTH - PLAYER_SIZE));
-    inputs.set(1, 0,
-               mmn(inputs.get(1, 0), PLAYER_SIZE, MAP_HEIGHT - PLAYER_SIZE));
 
     // Vitesse du joueur
-    double vmax = PLAYER_ACCELERATION / PLAYER_FROTTEMENT;
+    inputs.set(0, 0, mmn(inputs.get(0, 0), 0, vjmax));
+    inputs.set(1, 0, normalizeAngle(inputs.get(1, 0)));
 
-    inputs.set(2, 0, mmn(inputs.get(2, 0), 0, vmax));
+    // Distance et orientation relative des limites la cage adverse
+    // haut
+    inputs.set(
+        2, 0, mmn(inputs.get(2, 0), PLAYER_SIZE, d_bordure_cage - PLAYER_SIZE));
     inputs.set(3, 0, normalizeAngle(inputs.get(3, 0)));
-
-    // Distance et orientation relative de la balle
-    inputs.set(4, 0,
-               mmn(inputs.get(4, 0), BALL_SIZE + PLAYER_SIZE,
-                   d_map - BALL_SIZE - PLAYER_SIZE));
+    // bas
+    inputs.set(
+        4, 0, mmn(inputs.get(4, 0), PLAYER_SIZE, d_bordure_cage - PLAYER_SIZE));
     inputs.set(5, 0, normalizeAngle(inputs.get(5, 0)));
 
-    // Distance et orientation relative de la cage adverse
-    inputs.set(6, 0, mmn(inputs.get(6, 0), PLAYER_SIZE, d_cage - PLAYER_SIZE));
+    // Distance et orientation relative de la balle
+    inputs.set(6, 0,
+               mmn(inputs.get(6, 0), BALL_SIZE + PLAYER_SIZE,
+                   d_map - BALL_SIZE - PLAYER_SIZE));
     inputs.set(7, 0, normalizeAngle(inputs.get(7, 0)));
+    inputs.set(8, 0, mmn(inputs.get(8, 0), 0, vjmax + vbmax));
+	inputs.set(9, 0, normalizeAngle(inputs.get(9,0)));
 
-    // Joueur le plus proche
-    inputs.set(8, 0,
-               mmn(inputs.get(8, 0), 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE));
-    inputs.set(9, 0, normalizeAngle(inputs.get(9, 0)));
+    // Joueur ami le plus proche
+    inputs.set(10, 0,
+               mmn(inputs.get(10, 0), 2 * PLAYER_SIZE,
+                   d_map - 2 * PLAYER_SIZE));
+    inputs.set(11, 0, normalizeAngle(inputs.get(11, 0)));
+    inputs.set(12, 0, mmn(inputs.get(12, 0), 0, 2*vjmax));
+	inputs.set(13, 0, normalizeAngle(inputs.get(13,0)));
+
+	// Joueur adverse le plus proche
+    inputs.set(14, 0,
+               mmn(inputs.get(14, 0), 2 * PLAYER_SIZE,
+                   d_map - 2 * PLAYER_SIZE));
+    inputs.set(15, 0, normalizeAngle(inputs.get(15, 0)));
+    inputs.set(16, 0, mmn(inputs.get(16, 0), 0, 2*vjmax));
+	inputs.set(17, 0, normalizeAngle(inputs.get(17,0)));
 
     // TODO: Il faut trouver un moyen de normaliser didier...
     // TODO: Il faut trouver un moyen de passer sur le fichier game.csv les
@@ -189,49 +207,88 @@ void normalize_inputs(Matrix &inputs) {
     team == false -> gauche
     team == true -> droite
 */
-void writeInputs(player &target, player *equipeAdverse, ball *b, bool team) {
+void writeInputs(player &target, player *equipeAlliee, player *equipeAdverse,
+                 ball *b, bool team) {
     Matrix *&mat = target.inputs;
 
-    // Position du joueur
-    vector mapSize = {.x = MAP_LENGTH, .y = MAP_HEIGHT};
-    vector fakePos = team ? mapSize - target.pos : target.pos;
+    mat->set(0, 0, norme(target.vitesse));
+    mat->set(1, 0, -angleRounded(target.orientation - vangle(target.vitesse)));
 
-    mat->set(0, 0, fakePos.x);
-    mat->set(1, 0, fakePos.y);
+    vector centreCage = {.x = static_cast<double>(team ? 0 : MAP_LENGTH),
+                         .y = (double)MAP_HEIGHT / 2};
 
-    mat->set(2, 0, norme(target.vitesse));
-    mat->set(3, 0, -angleRounded(target.orientation - vangle(target.vitesse)));
+    vector cageHaut = {.x = centreCage.x, .y = centreCage.y + GOAL_HEIGHT / 2.};
+    vector cageBas = {.x = centreCage.x, .y = centreCage.y - GOAL_HEIGHT / 2.};
 
-    mat->set(4, 0, norme(b->pos - target.pos));
-    // on l'inverse pour que ce soit la valeur à corriger pour aller vers la
-    // balle, plus logique pour le joueur
-    mat->set(5, 0,
-             -angleRounded(target.orientation - vangle(b->pos - target.pos)));
-
-    // Distance et orientation relative de la cage adverse
-    vector cage = {.x = static_cast<double>(team ? 0 : MAP_LENGTH),
-                   .y = (double)MAP_HEIGHT / 2};
-    mat->set(6, 0, norme(cage - target.pos));
+    // Position des cages
     // idem que pour l'orientation relative de la balle, on passe la valeur
     // angulaire à corriger
+    mat->set(2, 0, norme(cageHaut - target.pos));
+    mat->set(3, 0,
+             -angleRounded(target.orientation - vangle(cageHaut - target.pos)));
+    mat->set(4, 0, norme(cageBas - target.pos));
+    mat->set(5, 0,
+             -angleRounded(target.orientation - vangle(cageBas - target.pos)));
+
+    // Position de la balle
+    mat->set(6, 0, norme(b->pos - target.pos));
+    // on l'inverse pour que ce soit la valeur à corriger pour aller vers la
+    // balle, plus logique pour le joueur
+    // Distance et orientation relative de la cage adverse
     mat->set(7, 0,
-             -angleRounded(target.orientation - vangle(cage - target.pos)));
+             -angleRounded(target.orientation - vangle(b->pos - target.pos)));
+
+    vector vitesseRelatBalle = b->vitesse - target.vitesse;
+
+    mat->set(8, 0, norme(vitesseRelatBalle));
+    mat->set(9, 0,
+             -angleRounded(target.orientation - vangle(vitesseRelatBalle)));
 
     // Joueur le plus proche
-    vector nearest;
+    player *nearestCopain = &target;
     double d = INFINITY;
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
-        double nd = norme(equipeAdverse[i].pos - target.pos);
-        if (nd < d) {
-            nearest = equipeAdverse[i].pos;
+        double nd = norme(equipeAlliee[i].pos - target.pos);
+        if (nd < d && nd > PLAYER_SIZE / 2.) {
+            nearestCopain = &equipeAlliee[i];
             d = nd;
         };
     }
 
-    mat->set(8, 0, d);
-    mat->set(9, 0,
-             -angleRounded(target.orientation - vangle(nearest - target.pos)));
+    mat->set(10, 0, d);
+    mat->set(11, 0,
+             -angleRounded(target.orientation -
+                           vangle(nearestCopain->pos - target.pos)));
+
+    vector vitesseRelatCopain = nearestCopain->vitesse - target.vitesse;
+
+    mat->set(12, 0, norme(vitesseRelatCopain));
+    mat->set(13, 0,
+             -angleRounded(target.orientation - vangle(vitesseRelatCopain)));
+
+    // Joueur le plus proche
+    player *nearestAdv;
+    d = INFINITY;
+
+    for (int i = 0; i < EQUIPE_SIZE; i++) {
+        double nd = norme(equipeAdverse[i].pos - target.pos);
+        if (nd < d) {
+            nearestAdv = &equipeAdverse[i];
+            d = nd;
+        };
+    }
+
+    mat->set(14, 0, d);
+    mat->set(15, 0,
+             -angleRounded(target.orientation -
+                           vangle(nearestAdv->pos - target.pos)));
+
+    vector vitesseRelatadv = nearestAdv->vitesse - target.vitesse;
+
+    mat->set(16, 0, norme(vitesseRelatadv));
+    mat->set(17, 0,
+             -angleRounded(target.orientation - vangle(vitesseRelatadv)));
 
     normalize_inputs(*mat);
 }
@@ -241,7 +298,7 @@ Matrix *Chromosome::collect_and_apply(player *equipeAlliee,
                                       bool team) {
     // On sauvegarde les inputs dans les joueurs
     for (int i = 0; i < EQUIPE_SIZE; i++) {
-        writeInputs(equipeAlliee[i], equipeAdverse, b, team);
+        writeInputs(equipeAlliee[i], equipeAlliee, equipeAdverse, b, team);
     }
 
     // Evaluation du réseau de neurones de chaque joueurs.

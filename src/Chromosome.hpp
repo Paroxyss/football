@@ -40,4 +40,4 @@ void mutate(Chromosome &c);
 Chromosome *crossover(Chromosome &a, Chromosome &b);
 double mmn(double x, double min, double max);
 void normalize_inputs(Matrix &inputs, int i);
-void writeInputs(player &target, player *equipeAdverse, ball *b, bool team);
+void writeInputs(player &target,player *equipeAlliee, player *equipeAdverse, ball *b, bool team);

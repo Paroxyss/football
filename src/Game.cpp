@@ -361,7 +361,9 @@ void Game::writePlayers() {
     csvOutputFile << "2," << (double)this->ball.pos.x << ","
                   << (double)this->ball.pos.y << ",";
     for (int i = 0; i < playerNumber; i++) {
-        csvOutputFile << (double)this->players[i].orientation << ",";
+        csvOutputFile << (double)this->players[i].orientation << ","
+                      << this->players[i].pos.x << "," << this->players[i].pos.y
+                      << ",";
         for (int j = 0; j < NETWORK_INPUT_SIZE; j++) {
             csvOutputFile << (double)(this->players[i].inputs->get(j, 0))
                           << ",";

@@ -18,7 +18,8 @@
 Matrix::Matrix(int ligne, int col) {
     this->ligne = ligne;
     this->col = col;
-    this->t = new double[ligne * col];
+    this->t = new double[MATRIX_SIZE];
+    this->ct = new double[MATRIX_SIZE];
 }
 
 /**
@@ -26,6 +27,7 @@ Matrix::Matrix(int ligne, int col) {
  */
 Matrix::~Matrix() {
     delete[] this->t;
+    delete[] this->ct;
 }
 
 /**
@@ -63,9 +65,9 @@ void Matrix::initialize() {
  * @return Valeur de la matrice à la ligne `i` et colonne `j`
  */
 double Matrix::get(int i, int j) {
-    if (i >= this->ligne || j >= this->col) {
+    /*if (i >= this->ligne || j >= this->col) {
         throw std::invalid_argument("Bad matrice get: ");
-    }
+    }*/
 
     return this->t[i * this->col + j];
 }
@@ -78,9 +80,9 @@ double Matrix::get(int i, int j) {
  * @param x Valeur
  */
 void Matrix::set(int i, int j, double x) {
-    if (i >= this->ligne || j >= this->col) {
+    /*if (i >= this->ligne || j >= this->col) {
         throw std::invalid_argument("Bad matrice set");
-    }
+    }*/
 
     this->t[i * this->col + j] = x;
 }
@@ -92,23 +94,23 @@ void Matrix::set(int i, int j, double x) {
  * @param a Matrice à multiplier à gauche
  */
 void Matrix::mult_inv(Matrix &a) {
-    if (this->ligne != a.col) {
+    /*if (this->ligne != a.col) {
         throw std::invalid_argument("lol multinv");
-    }
-
-    double *nt = new double[a.ligne * this->col];
+    }*/
 
     for (int i = 0; i < a.ligne; i++) {
         for (int j = 0; j < this->col; j++) {
-            nt[i * this->col + j] = 0;
+            this->ct[i * this->col + j] = 0;
             for (int k = 0; k < this->ligne; k++) {
-                nt[i * this->col + j] += a.get(i, k) * this->get(k, j);
+                this->ct[i * this->col + j] += a.get(i, k) * this->get(k, j);
             }
         }
     }
 
-    delete[] this->t;
-    this->t = nt;
+    auto tmp = this->t;
+    this->t = this->ct;
+    this->ct = tmp;
+
     this->ligne = a.ligne;
 }
 

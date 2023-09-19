@@ -1,9 +1,12 @@
 #pragma once
 #include <fstream>
 
+#define MATRIX_SIZE 25*25
+
 class Matrix {
   private:
     double *t;
+    double *ct;
 
   public:
     int col = 0, ligne = 0;

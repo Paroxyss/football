@@ -500,11 +500,17 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     }
 
     if (g.infos.score == 0) {
-        if (c1->stats.instanceGoals > c2->stats.instanceGoals) {
-            g.infos.score = 1;
-        } else if (c2->stats.instanceGoals > c1->stats.instanceGoals) {
-            g.infos.score = -1;
-        } else if (likelyness(0.5)) {
+        // le biais modifie la probabilité qu'une équipe soit séléctionnée en
+        // cas d'égalité
+        double b1 = c1->stats.instanceGoals;
+        double b2 = c2->stats.instanceGoals;
+        // pour éviter une division par 0
+        b1 += 0.001;
+        b2 += 0.001;
+
+        double biais = tanh(log1p(b1 / b2 - 1)) * 0.25;
+
+        if (likelyness(0.5 + biais)) {
             g.infos.score = 1;
         } else {
             g.infos.score = -1;

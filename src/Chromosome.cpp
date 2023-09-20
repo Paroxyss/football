@@ -316,6 +316,8 @@ Matrix *Chromosome::collect_and_apply(player *equipeAlliee,
 */
 
 void mutate(Chromosome &c) {
+	// on mute le chromosome donc il perd en capacité, donc ses buts précédents doivent être moins prépondérants
+    c.stats.instanceGoals = (double)c.stats.instanceGoals / 2.;
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             mutation(*c.matrix[i][j]);

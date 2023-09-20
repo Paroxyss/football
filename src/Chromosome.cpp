@@ -180,23 +180,23 @@ void normalize_inputs(Matrix &inputs) {
                    d_map - BALL_SIZE - PLAYER_SIZE));
     inputs.set(7, 0, normalizeAngle(inputs.get(7, 0)));
     inputs.set(8, 0, mmn(inputs.get(8, 0), 0, vjmax + vbmax));
-	inputs.set(9, 0, normalizeAngle(inputs.get(9,0)));
+    inputs.set(9, 0, normalizeAngle(inputs.get(9, 0)));
 
     // Joueur ami le plus proche
-    inputs.set(10, 0,
-               mmn(inputs.get(10, 0), 2 * PLAYER_SIZE,
-                   d_map - 2 * PLAYER_SIZE));
+    inputs.set(
+        10, 0,
+        mmn(inputs.get(10, 0), 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE));
     inputs.set(11, 0, normalizeAngle(inputs.get(11, 0)));
-    inputs.set(12, 0, mmn(inputs.get(12, 0), 0, 2*vjmax));
-	inputs.set(13, 0, normalizeAngle(inputs.get(13,0)));
+    inputs.set(12, 0, mmn(inputs.get(12, 0), 0, 2 * vjmax));
+    inputs.set(13, 0, normalizeAngle(inputs.get(13, 0)));
 
-	// Joueur adverse le plus proche
-    inputs.set(14, 0,
-               mmn(inputs.get(14, 0), 2 * PLAYER_SIZE,
-                   d_map - 2 * PLAYER_SIZE));
+    // Joueur adverse le plus proche
+    inputs.set(
+        14, 0,
+        mmn(inputs.get(14, 0), 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE));
     inputs.set(15, 0, normalizeAngle(inputs.get(15, 0)));
-    inputs.set(16, 0, mmn(inputs.get(16, 0), 0, 2*vjmax));
-	inputs.set(17, 0, normalizeAngle(inputs.get(17,0)));
+    inputs.set(16, 0, mmn(inputs.get(16, 0), 0, 2 * vjmax));
+    inputs.set(17, 0, normalizeAngle(inputs.get(17, 0)));
 
     // TODO: Il faut trouver un moyen de normaliser didier...
     // TODO: Il faut trouver un moyen de passer sur le fichier game.csv les

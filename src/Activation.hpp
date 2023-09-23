@@ -1,6 +1,7 @@
 #pragma once
 #include "Matrix.h"
 #include <cmath>
+#include <iostream>
 
 /*
  * J'ai lu que ReLu était le choix par défaut pour les fonction d'activation
@@ -33,12 +34,12 @@ inline double mish(double x) {
 }
 
 inline double outF(double x) {
-    double v = tanh(3 * x);
+    double v = tanh((1. / 3.) * x);
 
-    if (v > 1)
+    /*if (v > 1)
         v = 1;
     if (v < -1)
-        v = -1;
+        v = -1;*/
     return v;
 }
 

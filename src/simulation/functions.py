@@ -81,7 +81,7 @@ def show_data(infos, k, nb_joueurs):
 
     pg.draw.line(
         screen,
-        BLUE,
+        LIGHT_BLUE,
         (x, y),
         ep,
         3,

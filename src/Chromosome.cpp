@@ -217,18 +217,34 @@ void writeInputs(player &target, player *equipeAlliee, player *equipeAdverse,
     vector centreCage = {.x = static_cast<double>(team ? 0 : MAP_LENGTH),
                          .y = (double)MAP_HEIGHT / 2};
 
-    vector cageHaut = {.x = centreCage.x, .y = centreCage.y + GOAL_HEIGHT / 2.};
-    vector cageBas = {.x = centreCage.x, .y = centreCage.y - GOAL_HEIGHT / 2.};
+    vector cageHaut = {.x = centreCage.x,
+                       .y = centreCage.y + (double)GOAL_HEIGHT / 2.};
+    auto normeC1 = norme(cageHaut - target.pos);
+    auto angleC1 =
+        -angleRounded(target.orientation - vangle(cageHaut - target.pos));
+    ;
+
+    vector cageBas = {.x = centreCage.x,
+                      .y = centreCage.y - (double)GOAL_HEIGHT / 2.};
+    auto normeC2 = norme(cageBas - target.pos);
+    auto angleC2 =
+        -angleRounded(target.orientation - vangle(cageBas - target.pos));
+    ;
 
     // Position des cages
     // idem que pour l'orientation relative de la balle, on passe la valeur
     // angulaire à corriger
-    mat->set(2, 0, norme(cageHaut - target.pos));
-    mat->set(3, 0,
-             -angleRounded(target.orientation - vangle(cageHaut - target.pos)));
-    mat->set(4, 0, norme(cageBas - target.pos));
-    mat->set(5, 0,
-             -angleRounded(target.orientation - vangle(cageBas - target.pos)));
+    if (team) {
+        mat->set(2, 0, normeC1);
+        mat->set(3, 0, angleC1);
+        mat->set(4, 0, normeC2);
+        mat->set(5, 0, angleC2);
+    } else {
+        mat->set(2, 0, normeC2);
+        mat->set(3, 0, angleC2);
+        mat->set(4, 0, normeC1);
+        mat->set(5, 0, angleC1);
+    }
 
     // Position de la balle
     mat->set(6, 0, norme(b->pos - target.pos));
@@ -263,9 +279,16 @@ void writeInputs(player &target, player *equipeAlliee, player *equipeAdverse,
 
     vector vitesseRelatCopain = nearestCopain->vitesse - target.vitesse;
 
-    mat->set(12, 0, norme(vitesseRelatCopain));
-    mat->set(13, 0,
-             -angleRounded(target.orientation - vangle(vitesseRelatCopain)));
+	// pour éviter des mauvais atan au début
+    auto vCopain = norme(vitesseRelatCopain);
+    mat->set(12, 0, vCopain);
+    if (vCopain == 0) {
+        mat->set(13, 0, 0);
+    } else {
+        mat->set(
+            13, 0,
+            -angleRounded(target.orientation - vangle(vitesseRelatCopain)));
+    }
 
     // Joueur le plus proche
     player *nearestAdv;
@@ -316,7 +339,8 @@ Matrix *Chromosome::collect_and_apply(player *equipeAlliee,
 */
 
 void mutate(Chromosome &c) {
-	// on mute le chromosome donc il perd en capacité, donc ses buts précédents doivent être moins prépondérants
+    // on mute le chromosome donc il perd en capacité, donc ses buts précédents
+    // doivent être moins prépondérants
     c.stats.instanceGoals = (double)c.stats.instanceGoals / 2.;
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {

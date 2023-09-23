@@ -15,7 +15,6 @@ clock = pg.time.Clock()
 filename = "game.csv"
 if len(sys.argv) >= 2:
     filename = sys.argv[1]
-print(sys.argv)
 
 data = read(filename)
 
@@ -34,6 +33,9 @@ while running:
         draw_field()
         draw_goal()
         progression_bar(i, len(parsed))
+
+        font = pg.font.Font(None, 24)
+        screen.blit(font.render(str(i), True, WHITE), (SCREEN_WIDTH - 50, 30))
 
         draw_ball(data[i][1], data[i][2])
 

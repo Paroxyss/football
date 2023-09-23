@@ -364,6 +364,7 @@ void Game::writePlayers() {
         csvOutputFile << (double)this->players[i].orientation << ","
                       << this->players[i].pos.x << "," << this->players[i].pos.y
                       << ",";
+
         for (int j = 0; j < NETWORK_INPUT_SIZE; j++) {
             csvOutputFile << (double)(this->players[i].inputs->get(j, 0))
                           << ",";
@@ -452,12 +453,20 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     int c[] = {1, 2};
     g.set_players(c, 2);
 
+    Matrix didier1 = Matrix(COM_SIZE * EQUIPE_SIZE, 1);
+    Matrix didier2 = Matrix(COM_SIZE * EQUIPE_SIZE, 1);
+
+    // Lors du premier tick, les valeurs injectées par didier aux joueurs
+    // sont arbitrairement choisies nulles.
+    didier1.nullify();
+    didier2.nullify();
+
     for (int k = 0; k < GAME_DURATION; k++) {
 
         auto r1 = c1->collect_and_apply(g.players, g.players + EQUIPE_SIZE,
-                                        &g.ball, false);
+                                        didier1, &g.ball, false);
         auto r2 = c2->collect_and_apply(g.players + EQUIPE_SIZE, g.players,
-                                        &g.ball, true);
+                                        didier2, &g.ball, true);
 
         for (int a = 0; a < 2; a++) {
             for (int i = 0; i < EQUIPE_SIZE; i++) {

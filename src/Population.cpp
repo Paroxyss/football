@@ -217,6 +217,15 @@ Chromosome *cloneChromosome(Chromosome *original) {
             }
         }
     }
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        for (int k = 0; k < original->didier[i]->ligne; k++) {
+            for (int l = 0; l < original->didier[i]->col; l++) {
+                clone->didier[i]->set(k, l, original->didier[i]->get(k, l));
+            }
+        }
+    }
+
     clone->stats.instanceGoals = original->stats.instanceGoals;
     clone->stats.instanceAge = original->stats.instanceAge;
 

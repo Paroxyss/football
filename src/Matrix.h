@@ -1,7 +1,7 @@
 #pragma once
 #include <fstream>
 
-#define MATRIX_SIZE 25*25
+#define MATRIX_SIZE 25 * 25
 
 class Matrix {
   private:
@@ -19,6 +19,7 @@ class Matrix {
     void print();
     Matrix *crossover(Matrix *a);
     void initialize();
+    void nullify();
     void write(std::ofstream &file);
     static Matrix *read(std::ifstream &file);
 };

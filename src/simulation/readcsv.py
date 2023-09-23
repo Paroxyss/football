@@ -80,6 +80,8 @@ def parse(line, nb_joueurs):
                 "nearest_adv_angle": dnmm_a(line[i * n + 18]),
                 "nearest_adv_v": dnmm(line[i * n + 19], 0, 2 * vmax),
                 "nearest_adv_v_angle": dnmm_a(line[i * n + 20]),
+                "com1": line[i * n + 21],
+                "com2": line[i * n + 22],
             }
         )
 

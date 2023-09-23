@@ -57,6 +57,14 @@ void Matrix::initialize() {
     }
 }
 
+void Matrix::nullify() {
+    for (int i = 0; i < this->ligne; i++) {
+        for (int j = 0; j < this->col; j++) {
+            this->set(i, j, 0);
+        }
+    }
+}
+
 /**
  * @brief Permet d'accéder à une valeur de la matrice.
  *

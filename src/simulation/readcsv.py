@@ -56,30 +56,31 @@ def parse(line, nb_joueurs):
                 "y": line[i * n + 2],
                 "v_joueur": dnmm(line[i * n + 3], 0, vmax),
                 "v_angle": dnmm_a(line[i * n + 4]),
-                "cage_haut_dist": dnmm(line[i * n + 5], PLAYER_SIZE / 2, d_cage),
-                "cage_haut_angle": dnmm_a(line[i * n + 6]),
-                "cage_bas_dist": dnmm(line[i * n + 7], PLAYER_SIZE / 2, d_cage),
-                "cage_bas_angle": dnmm_a(line[i * n + 8]),
+                "cage_dist": dnmm(line[i * n + 5], PLAYER_SIZE / 2, d_cage),
+                "cage_angle": dnmm_a(line[i * n + 6]),
+                "cage_tan_dist": dnmm(
+                    line[i * n + 7], 0, SCREEN_HEIGHT / 2 - PLAYER_SIZE
+                ),
                 "ball_dist": dnmm(
-                    line[i * n + 9],
+                    line[i * n + 8],
                     BALL_SIZE + PLAYER_SIZE,
                     d_map - BALL_SIZE - PLAYER_SIZE,
                 ),
-                "ball_angle_relat": dnmm_a(line[i * n + 10]),
-                "v_ball": dnmm(line[i * n + 11], 0, vball_max + vmax),
-                "v_ball_angle": dnmm_a(line[i * n + 12]),
+                "ball_angle_relat": dnmm_a(line[i * n + 9]),
+                "v_ball": dnmm(line[i * n + 10], 0, vball_max + vmax),
+                "v_ball_angle": dnmm_a(line[i * n + 11]),
                 "nearest_copain_dist": dnmm(
-                    line[i * n + 13], 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE
+                    line[i * n + 12], 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE
                 ),
-                "nearest_copain_angle": dnmm_a(line[i * n + 14]),
-                "nearest_copain_v": dnmm(line[i * n + 15], 0, 2 * vmax),
-                "nearest_copain_v_angle": dnmm_a(line[i * n + 16]),
+                "nearest_copain_angle": dnmm_a(line[i * n + 13]),
+                "nearest_copain_v": dnmm(line[i * n + 14], 0, 2 * vmax),
+                "nearest_copain_v_angle": dnmm_a(line[i * n + 15]),
                 "nearest_adv_dist": dnmm(
-                    line[i * n + 17], 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE
+                    line[i * n + 16], 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE
                 ),
-                "nearest_adv_angle": dnmm_a(line[i * n + 18]),
-                "nearest_adv_v": dnmm(line[i * n + 19], 0, 2 * vmax),
-                "nearest_adv_v_angle": dnmm_a(line[i * n + 20]),
+                "nearest_adv_angle": dnmm_a(line[i * n + 17]),
+                "nearest_adv_v": dnmm(line[i * n + 18], 0, 2 * vmax),
+                "nearest_adv_v_angle": dnmm_a(line[i * n + 19]),
             }
         )
 
@@ -102,22 +103,19 @@ def parse_normalized(line, nb_joueurs):
                 "v_angle": line[i * n + 4],
                 "cage_haut_dist": line[i * n + 5],
                 "cage_haut_angle": line[i * n + 6],
-                "cage_bas_dist": line[i * n + 7],
-                "cage_bas_angle": line[i * n + 8],
-                "ball_dist": line[i * n + 9],
-                "ball_angle_relat": line[i * n + 10],
-                "v_ball": line[i * n + 11],
-                "v_ball_angle": line[i * n + 12],
-                "nearest_copain_dist": line[i * n + 13],
-                "nearest_copain_angle": line[i * n + 14],
-                "nearest_copain_v": line[i * n + 15],
-                "nearest_copain_v_angle": line[i * n + 16],
-                "nearest_adv_dist": line[i * n + 17],
-                "nearest_adv_angle": line[i * n + 18],
-                "nearest_adv_v": line[i * n + 19],
-                "nearest_adv_v_angle": line[i * n + 20],
-                "com1": line[i * n + 21],
-                "com2": line[i * n + 22],
+                "cage_tan_dist": line[i * n + 7],
+                "ball_dist": line[i * n + 8],
+                "ball_angle_relat": line[i * n + 9],
+                "v_ball": line[i * n + 10],
+                "v_ball_angle": line[i * n + 11],
+                "nearest_copain_dist": line[i * n + 12],
+                "nearest_copain_angle": line[i * n + 13],
+                "nearest_copain_v": line[i * n + 14],
+                "nearest_copain_v_angle": line[i * n + 15],
+                "nearest_adv_dist": line[i * n + 16],
+                "nearest_adv_angle": line[i * n + 17],
+                "nearest_adv_v": line[i * n + 18],
+                "nearest_adv_v_angle": line[i * n + 19],
             }
         )
 

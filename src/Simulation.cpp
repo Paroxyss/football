@@ -72,3 +72,27 @@ void see_goal(const char *filename, int nGoal) {
     input.close();
     delete p;
 }
+
+void see_ball(const char *filename, int n_ball) {
+    std::ifstream input;
+    input.open(filename);
+
+    if (!input.is_open()) {
+        throw std::invalid_argument("File not found");
+    }
+
+    Population *p = Population::read(input);
+
+    for (;;) {
+        Chromosome *c1 = cloneChromosome(p->pop[thrand(0, p->size - 1)]);
+        Chromosome *c2 = cloneChromosome(p->pop[thrand(0, p->size - 1)]);
+
+        gameInformations info = play_match(c1, c2, 1);
+
+        if (info.ball_collisions >= n_ball)
+            break;
+    }
+
+    input.close();
+    delete p;
+}

@@ -91,6 +91,14 @@ int main(int argc, char *argv[]) {
             nGoal = std::stoi(argv[3]);
         }
         see_goal(argv[2], nGoal);
+    } else if (strcmp(argv[1], "seeball") == 0) {
+        int n_ball = 1;
+
+        if (argc > 3) {
+            n_ball = std::stoi(argv[3]);
+        }
+
+        see_ball(argv[2], n_ball);
     }
 
     _exit(EXIT_SUCCESS);

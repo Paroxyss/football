@@ -12,15 +12,15 @@
 
 #define EQUIPE_SIZE 3
 
-const int PLAYER_LAYERS[NETWORK_SIZE] = {NETWORK_INPUT_SIZE, 24, 24, 16, 12, 8, 4,
-                             NETWORK_OUTPUT_SIZE};
+const int PLAYER_LAYERS[NETWORK_SIZE] = {
+    NETWORK_INPUT_SIZE, 24, 24, 16, 12, 8, 4, NETWORK_OUTPUT_SIZE};
 
 #define GAME_RESOLUTION 1
 
 #define GAME_DURATION (40 * 60)
 
-#define MAP_LENGTH (119 * 7)
-#define MAP_HEIGHT (75 * 7)
+#define MAP_LENGTH (119 * 10)
+#define MAP_HEIGHT (75 * 10)
 #define GOAL_HEIGHT (15 * 12)
 
 #define PLAYER_MASS 100
@@ -28,9 +28,9 @@ const int PLAYER_LAYERS[NETWORK_SIZE] = {NETWORK_INPUT_SIZE, 24, 24, 16, 12, 8, 
 #define PLAYER_ACCELERATION 0.30
 #define PLAYER_FROTTEMENT (1 / 20.)
 
-#define BALL_MASS 40
+#define BALL_MASS 5
 #define BALL_SIZE 10
-#define BALL_FROTTEMENT (1 / 50.)
+#define BALL_FROTTEMENT (1 / 40.)
 
 #define POPULATION_SIZE 1000
 

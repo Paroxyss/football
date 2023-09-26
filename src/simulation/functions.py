@@ -74,8 +74,8 @@ def show_data(infos, k, nb_joueurs):
 
     # pour epy je ne suis pas sur, peut être que je corrige un problème
     # qui provient en fait du cpp mais je ne sais pas...
-    epx = x + cos(infos["cage_haut_angle"] + infos["orientation"]) * infos["cage_haut_dist"]
-    epy = y + sin(infos["cage_haut_angle"] + infos["orientation"]) * infos["cage_haut_dist"]
+    epx = x + cos(infos["cage_angle"] + infos["orientation"]) * infos["cage_dist"]
+    epy = y + sin(infos["cage_angle"] + infos["orientation"]) * infos["cage_dist"]
 
     ep = (int(epx), int(epy))
 
@@ -87,16 +87,12 @@ def show_data(infos, k, nb_joueurs):
         3,
     )
 
-    epx = x + cos(infos["cage_bas_angle"] + infos["orientation"]) * infos["cage_bas_dist"]
-    epy = y + sin(infos["cage_bas_angle"] + infos["orientation"]) * infos["cage_bas_dist"]
-
-    ep = (int(epx), int(epy))
 
     pg.draw.line(
         screen,
         BLUE,
         (x, y),
-        ep,
+        (x, y + infos["cage_tan_dist"] * (2*(k<=nb_joueurs/2) - 1)),
         3,
     )
 

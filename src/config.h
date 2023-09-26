@@ -8,7 +8,7 @@
 // cage, distance abverse + proche, angle adverse + proche, com1, .. ,
 // com{COM_SIZE}
 #define NETWORK_OUTPUT_SIZE 2
-#define NETWORK_INPUT_SIZE 18
+#define NETWORK_INPUT_SIZE 17
 
 #define EQUIPE_SIZE 3
 

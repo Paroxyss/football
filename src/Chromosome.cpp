@@ -16,8 +16,8 @@
 // Opérations couteuses donc mises en statiques, elles sont utilisées
 // pour la normalisation min-max.
 static const double d_map = sqrt(pow(MAP_LENGTH, 2) + pow(MAP_HEIGHT, 2));
-static const double d_bordure_cage =
-    sqrt(pow((MAP_HEIGHT + GOAL_HEIGHT) / 2, 2) + pow(MAP_LENGTH, 2));
+static const double d_centre_cage =
+    sqrt(pow(MAP_HEIGHT / 2, 2) + pow(MAP_LENGTH, 2));
 
 // Vitesse maximum du joueur
 static const double vjmax = PLAYER_ACCELERATION / PLAYER_FROTTEMENT;
@@ -167,36 +167,34 @@ void normalize_inputs(Matrix &inputs) {
     // Distance et orientation relative des limites la cage adverse
     // haut
     inputs.set(
-        2, 0, mmn(inputs.get(2, 0), PLAYER_SIZE, d_bordure_cage - PLAYER_SIZE));
+        2, 0, mmn(inputs.get(2, 0), PLAYER_SIZE, d_centre_cage - PLAYER_SIZE));
     inputs.set(3, 0, normalizeAngle(inputs.get(3, 0)));
-    // bas
-    inputs.set(
-        4, 0, mmn(inputs.get(4, 0), PLAYER_SIZE, d_bordure_cage - PLAYER_SIZE));
-    inputs.set(5, 0, normalizeAngle(inputs.get(5, 0)));
+	
+    inputs.set(4, 0, mmn(inputs.get(4, 0), 0, MAP_HEIGHT / 2. - PLAYER_SIZE));
 
     // Distance et orientation relative de la balle
-    inputs.set(6, 0,
+    inputs.set(5, 0,
                mmn(inputs.get(6, 0), BALL_SIZE + PLAYER_SIZE,
                    d_map - BALL_SIZE - PLAYER_SIZE));
-    inputs.set(7, 0, normalizeAngle(inputs.get(7, 0)));
-    inputs.set(8, 0, mmn(inputs.get(8, 0), 0, vjmax + vbmax));
-    inputs.set(9, 0, normalizeAngle(inputs.get(9, 0)));
+    inputs.set(6, 0, normalizeAngle(inputs.get(6, 0)));
+    inputs.set(7, 0, mmn(inputs.get(7, 0), 0, vjmax + vbmax));
+    inputs.set(8, 0, normalizeAngle(inputs.get(8, 0)));
 
     // Joueur ami le plus proche
     inputs.set(
-        10, 0,
-        mmn(inputs.get(10, 0), 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE));
-    inputs.set(11, 0, normalizeAngle(inputs.get(11, 0)));
-    inputs.set(12, 0, mmn(inputs.get(12, 0), 0, 2 * vjmax));
-    inputs.set(13, 0, normalizeAngle(inputs.get(13, 0)));
+        9, 0,
+        mmn(inputs.get(9, 0), 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE));
+    inputs.set(10, 0, normalizeAngle(inputs.get(10, 0)));
+    inputs.set(11, 0, mmn(inputs.get(11, 0), 0, 2 * vjmax));
+    inputs.set(12, 0, normalizeAngle(inputs.get(12, 0)));
 
     // Joueur adverse le plus proche
     inputs.set(
-        14, 0,
-        mmn(inputs.get(14, 0), 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE));
-    inputs.set(15, 0, normalizeAngle(inputs.get(15, 0)));
-    inputs.set(16, 0, mmn(inputs.get(16, 0), 0, 2 * vjmax));
-    inputs.set(17, 0, normalizeAngle(inputs.get(17, 0)));
+        13, 0,
+        mmn(inputs.get(13, 0), 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE));
+    inputs.set(14, 0, normalizeAngle(inputs.get(14, 0)));
+    inputs.set(15, 0, mmn(inputs.get(15, 0), 0, 2 * vjmax));
+    inputs.set(16, 0, normalizeAngle(inputs.get(16, 0)));
 
     // TODO: Il faut trouver un moyen de normaliser didier...
     // TODO: Il faut trouver un moyen de passer sur le fichier game.csv les
@@ -217,47 +215,30 @@ void writeInputs(player &target, player *equipeAlliee, player *equipeAdverse,
     vector centreCage = {.x = static_cast<double>(team ? 0 : MAP_LENGTH),
                          .y = (double)MAP_HEIGHT / 2};
 
-    vector cageHaut = {.x = centreCage.x,
-                       .y = centreCage.y + (double)GOAL_HEIGHT / 2.};
-    auto normeC1 = norme(cageHaut - target.pos);
-    auto angleC1 =
-        -angleRounded(target.orientation - vangle(cageHaut - target.pos));
-    ;
+	vector vCage = centreCage - target.pos;
+    auto normeCage = norme(vCage);
+    auto angleCage =
+        -angleRounded(target.orientation - vangle(vCage));
 
-    vector cageBas = {.x = centreCage.x,
-                      .y = centreCage.y - (double)GOAL_HEIGHT / 2.};
-    auto normeC2 = norme(cageBas - target.pos);
-    auto angleC2 =
-        -angleRounded(target.orientation - vangle(cageBas - target.pos));
-    ;
-
-    // Position des cages
-    // idem que pour l'orientation relative de la balle, on passe la valeur
-    // angulaire à corriger
-    if (team) {
-        mat->set(2, 0, normeC1);
-        mat->set(3, 0, angleC1);
-        mat->set(4, 0, normeC2);
-        mat->set(5, 0, angleC2);
-    } else {
-        mat->set(2, 0, normeC2);
-        mat->set(3, 0, angleC2);
-        mat->set(4, 0, normeC1);
-        mat->set(5, 0, angleC1);
-    }
+    mat->set(2, 0, normeCage);
+    mat->set(3, 0, angleCage);
+    vector ex = {.x = 0, .y = 1};
+	double h = dotProduct(ex, vCage);
+	if(team) h = -h;
+    mat->set(4, 0, h);
 
     // Position de la balle
-    mat->set(6, 0, norme(b->pos - target.pos));
+    mat->set(5, 0, norme(b->pos - target.pos));
     // on l'inverse pour que ce soit la valeur à corriger pour aller vers la
     // balle, plus logique pour le joueur
     // Distance et orientation relative de la cage adverse
-    mat->set(7, 0,
+    mat->set(6, 0,
              -angleRounded(target.orientation - vangle(b->pos - target.pos)));
 
     vector vitesseRelatBalle = b->vitesse - target.vitesse;
 
-    mat->set(8, 0, norme(vitesseRelatBalle));
-    mat->set(9, 0,
+    mat->set(7, 0, norme(vitesseRelatBalle));
+    mat->set(8, 0,
              -angleRounded(target.orientation - vangle(vitesseRelatBalle)));
 
     // Joueur le plus proche
@@ -272,21 +253,21 @@ void writeInputs(player &target, player *equipeAlliee, player *equipeAdverse,
         };
     }
 
-    mat->set(10, 0, d);
-    mat->set(11, 0,
+    mat->set(9, 0, d);
+    mat->set(10, 0,
              -angleRounded(target.orientation -
                            vangle(nearestCopain->pos - target.pos)));
 
     vector vitesseRelatCopain = nearestCopain->vitesse - target.vitesse;
 
-	// pour éviter des mauvais atan au début
+    // pour éviter des mauvais atan au début
     auto vCopain = norme(vitesseRelatCopain);
-    mat->set(12, 0, vCopain);
+    mat->set(11, 0, vCopain);
     if (vCopain == 0) {
-        mat->set(13, 0, 0);
+        mat->set(12, 0, 0);
     } else {
         mat->set(
-            13, 0,
+            12, 0,
             -angleRounded(target.orientation - vangle(vitesseRelatCopain)));
     }
 
@@ -302,15 +283,15 @@ void writeInputs(player &target, player *equipeAlliee, player *equipeAdverse,
         };
     }
 
-    mat->set(14, 0, d);
-    mat->set(15, 0,
+    mat->set(13, 0, d);
+    mat->set(14, 0,
              -angleRounded(target.orientation -
                            vangle(nearestAdv->pos - target.pos)));
 
     vector vitesseRelatadv = nearestAdv->vitesse - target.vitesse;
 
-    mat->set(16, 0, norme(vitesseRelatadv));
-    mat->set(17, 0,
+    mat->set(15, 0, norme(vitesseRelatadv));
+    mat->set(16, 0,
              -angleRounded(target.orientation - vangle(vitesseRelatadv)));
 
     normalize_inputs(*mat);

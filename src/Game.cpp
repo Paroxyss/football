@@ -385,6 +385,7 @@ void Game::executePlayerActions(double time) {
     for (int id = 0; id < playerNumber; id++) {
         player &selected = players[id];
         selected.orientation += selected.raccel * time;
+        selected.orientation = angleRounded(selected.orientation);
         selected.vitesse.x +=
             selected.acceleration * cos(players[id].orientation) * time;
         selected.vitesse.y +=
@@ -412,7 +413,7 @@ void Game::setPlayer(int id, vector pos, vector speed, double orientation,
                      double size, double mass) {
     this->players[id].pos = pos;
     this->players[id].vitesse = speed;
-    this->players[id].orientation = orientation;
+    this->players[id].orientation = angleRounded(orientation);
     this->players[id].size = size;
     this->players[id].acceleration = 0;
     this->players[id].raccel = 0;

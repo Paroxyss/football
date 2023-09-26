@@ -14,8 +14,13 @@ data = data[1:]
 # On parse le fichier
 parsed = []
 
+not_normalized = ["x", "y", "orientation"]
+
 for i in range(len(data)):
-    parsed.append(parse(data[i][3:], nb_joueurs))
+    if sys.argv[-1] == "+":
+        parsed.append(parse_normalized(data[i][3:], nb_joueurs))
+    else:
+        parsed.append(parse(data[i][3:], nb_joueurs))
 
 
 # On affiche les courbes pour le joueurs 1
@@ -39,10 +44,10 @@ for k in range(n):
     curr = list(joueur[0].keys())[k]
 
     if "all" in keys or curr in keys:
-        x = range(len(joueur))
-        y = [j[curr] for j in joueur]
-
-        plt.plot(x, y, label=curr)
+        if sys.argv[-1] != "+" or not curr in not_normalized:
+            x = range(len(joueur))
+            y = [j[curr] for j in joueur]
+            plt.plot(x, y, label=curr)
 
 # On affiche la courbe
 plt.grid()

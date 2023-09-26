@@ -84,3 +84,41 @@ def parse(line, nb_joueurs):
         )
 
     return data
+
+
+def parse_normalized(line, nb_joueurs):
+    data = []
+    # il y a un élément vide à la fin de la ligne
+
+    n = int((len(line) - 1) / nb_joueurs)
+
+    for i in range(nb_joueurs):
+        data.append(
+            {
+                "orientation": line[i * n],
+                "x": line[i * n + 1],
+                "y": line[i * n + 2],
+                "v_joueur": line[i * n + 3],
+                "v_angle": line[i * n + 4],
+                "cage_haut_dist": line[i * n + 5],
+                "cage_haut_angle": line[i * n + 6],
+                "cage_bas_dist": line[i * n + 7],
+                "cage_bas_angle": line[i * n + 8],
+                "ball_dist": line[i * n + 9],
+                "ball_angle_relat": line[i * n + 10],
+                "v_ball": line[i * n + 11],
+                "v_ball_angle": line[i * n + 12],
+                "nearest_copain_dist": line[i * n + 13],
+                "nearest_copain_angle": line[i * n + 14],
+                "nearest_copain_v": line[i * n + 15],
+                "nearest_copain_v_angle": line[i * n + 16],
+                "nearest_adv_dist": line[i * n + 17],
+                "nearest_adv_angle": line[i * n + 18],
+                "nearest_adv_v": line[i * n + 19],
+                "nearest_adv_v_angle": line[i * n + 20],
+                "com1": line[i * n + 21],
+                "com2": line[i * n + 22],
+            }
+        )
+
+    return data

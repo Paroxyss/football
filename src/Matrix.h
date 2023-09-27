@@ -1,7 +1,7 @@
 #pragma once
 #include <fstream>
 
-#define MATRIX_SIZE 25*25
+#define MATRIX_SIZE 30*30
 
 class Matrix {
   private:

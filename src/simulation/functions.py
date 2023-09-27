@@ -5,41 +5,29 @@ from config import *
 
 def draw_player(t, x, y, d):
     if t == "droite":
-        x = x
-        y = y
         color = RED
-        d = d
     else:
         color = BLUE
 
-    pg.draw.circle(
-        screen,
-        color,
-        (x, y),
-        PLAYER_SIZE,
-    )
+    pg.draw.circle( screen, color, (x, y), PLAYER_SIZE)
 
-    pg.draw.line(
-        screen,
-        WHITE,
-        (x, y),
+    pg.draw.line( screen, WHITE, (x, y),
         (
             x + cos(-d) * PLAYER_SIZE,
             y - sin(-d) * PLAYER_SIZE,
-        ),
-        2,
+        ), 2
     )
 
 
 def calcx(infos, k, nb_joueurs):
     if k <= nb_joueurs / 2:
-        return infos["x"]
-    return SCREEN_WIDTH - infos["x"]
+        return infos["pos"]["x"]
+    return SCREEN_WIDTH - infos["pos"]["x"]
     
 def calcy(infos, k, nb_joueurs):
     if k <= nb_joueurs / 2:
-        return infos["y"]
-    return SCREEN_WIDTH - infos["y"]
+        return infos["pos"]["y"]
+    return SCREEN_WIDTH - infos["pos"]["y"]
 
 
 def progression_bar(p, max):
@@ -53,15 +41,16 @@ def progression_bar(p, max):
 
 
 def show_data(infos, k, nb_joueurs):
-    x = infos["x"]
-    y = infos["y"]
+    x = infos["pos"]["x"]
+    y = infos["pos"]["y"]
+    ori = infos["orientation"]
 
     # balle
-    epx = x + cos(infos["ball_angle_relat"] + infos["orientation"]) * infos["ball_dist"]
-    epy = y + sin(infos["ball_angle_relat"] + infos["orientation"]) * infos["ball_dist"]
-
-    ep = (int(epx), int(epy))
-
+    ballePos = infos["balle"]["pos"]
+    ep = (
+        x + cos(ballePos["angle"] + ori) * ballePos["norme"],
+        y + sin(ballePos["angle"] + ori) * ballePos["norme"]
+    )
     pg.draw.line(screen, WHITE, (x, y), ep, 4)
 
     # numéro
@@ -71,13 +60,11 @@ def show_data(infos, k, nb_joueurs):
     screen.blit(font.render(str(k), True, WHITE), (x + 30, y - 30))
 
     # cage adverse
-
-    # pour epy je ne suis pas sur, peut être que je corrige un problème
-    # qui provient en fait du cpp mais je ne sais pas...
-    epx = x + cos(infos["cage_angle"] + infos["orientation"]) * infos["cage_dist"]
-    epy = y + sin(infos["cage_angle"] + infos["orientation"]) * infos["cage_dist"]
-
-    ep = (int(epx), int(epy))
+    cagePos = infos["cage"]
+    ep = (
+        x + cos(cagePos["angle"] + ori) * cagePos["norme"],
+        y + sin(cagePos["angle"] + ori) * cagePos["norme"]
+    )
 
     pg.draw.line(
         screen,
@@ -92,37 +79,27 @@ def show_data(infos, k, nb_joueurs):
         screen,
         BLUE,
         (x, y),
-        (x, y + infos["cage_tan_dist"] * (2*(k<=nb_joueurs/2) - 1)),
+        (x, y + infos["h"] * (2*(k<=nb_joueurs/2) - 1)),
         3,
     )
 
     # joueur le plus proche
 
-    epx = x + cos(infos["nearest_copain_angle"] + infos["orientation"]) * infos["nearest_copain_dist"]
-    epy = y + sin(infos["nearest_copain_angle"] + infos["orientation"]) * infos["nearest_copain_dist"]
+    copainPos = infos["joueurAllie"]["pos"]
+    ep = (
+        x + cos(copainPos["angle"] + ori) * copainPos["norme"],
+        y + sin(copainPos["angle"] + ori) * copainPos["norme"]
+    )
+    pg.draw.line( screen, PINK, (x, y), ep, 2)
 
-    ep = (int(epx), int(epy))
-
-    pg.draw.line(
-        screen,
-        PINK,
-        (x, y),
-        ep,
-        2,
+    
+    advPos = infos["joueurAdverse"]["pos"]
+    ep = (
+        x + cos(advPos["angle"] + ori) * advPos["norme"],
+        y + sin(advPos["angle"] + ori) * advPos["norme"]
     )
 
-    epx = x + cos(infos["nearest_adv_angle"] + infos["orientation"]) * infos["nearest_adv_dist"]
-    epy = y + sin(infos["nearest_adv_angle"] + infos["orientation"]) * infos["nearest_adv_dist"]
-
-    ep = (int(epx), int(epy))
-
-    pg.draw.line(
-        screen,
-        PURPLE,
-        (x, y),
-        ep,
-        2,
-    )
+    pg.draw.line( screen, PURPLE, (x, y), ep, 2)
 
 
 def draw_goal():

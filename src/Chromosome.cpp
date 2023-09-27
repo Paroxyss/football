@@ -152,149 +152,97 @@ double normalizeAngle(double a) {
     return mmn_negatif(a, -M_PI, M_PI);
 }
 
-/**
- * @brief Si les valeurs d'entrées ne sont pas normalisées, certaines valeurs
- * qui sont naturellement plus élevée, comme par exemple la distance à la cage
- * par rapport à la distance à la balle seront plus importantes que d'autres qui
- * peuvent être naturellement plus petite comme l'orientation.
- */
-void normalize_inputs(Matrix &inputs) {
+// fonctions qui écrivent dans la matrices d'entrée un certain objet
 
-    // Vitesse du joueur
-    inputs.set(0, 0, mmn(inputs.get(0, 0), 0, vjmax));
-    inputs.set(1, 0, normalizeAngle(inputs.get(1, 0)));
+// cout : 1 entrée
+inline void writeValRaw(Matrix &mat, double v, uint &i) {
+    mat.set(i, 0, v);
+    i++;
+}
 
-    // Distance et orientation relative des limites la cage adverse
-    // haut
-    inputs.set(
-        2, 0, mmn(inputs.get(2, 0), PLAYER_SIZE, d_centre_cage - PLAYER_SIZE));
-    inputs.set(3, 0, normalizeAngle(inputs.get(3, 0)));
-	
-    inputs.set(4, 0, mmn(inputs.get(4, 0), 0, MAP_HEIGHT / 2. - PLAYER_SIZE));
+// cout : 1 entrée
+inline void writeVal(Matrix &mat, double v, uint &i, double min, double max) {
+    mat.set(i, 0, mmn(v, min, max));
+    i++;
+}
 
-    // Distance et orientation relative de la balle
-    inputs.set(5, 0,
-               mmn(inputs.get(6, 0), BALL_SIZE + PLAYER_SIZE,
-                   d_map - BALL_SIZE - PLAYER_SIZE));
-    inputs.set(6, 0, normalizeAngle(inputs.get(6, 0)));
-    inputs.set(7, 0, mmn(inputs.get(7, 0), 0, vjmax + vbmax));
-    inputs.set(8, 0, normalizeAngle(inputs.get(8, 0)));
+inline void writeValn(Matrix &mat, double v, uint &i, double min, double max) {
+    mat.set(i, 0, mmn_negatif(v, min, max));
+    i++;
+}
 
-    // Joueur ami le plus proche
-    inputs.set(
-        9, 0,
-        mmn(inputs.get(9, 0), 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE));
-    inputs.set(10, 0, normalizeAngle(inputs.get(10, 0)));
-    inputs.set(11, 0, mmn(inputs.get(11, 0), 0, 2 * vjmax));
-    inputs.set(12, 0, normalizeAngle(inputs.get(12, 0)));
+// cout : 2 entrées
+inline void writeAngle(Matrix &mat, double angle, uint &i) {
+    // déjà entre -1 et 1
+    writeValRaw(mat, sin(angle), i);
+    writeValRaw(mat, cos(angle), i);
+}
 
-    // Joueur adverse le plus proche
-    inputs.set(
-        13, 0,
-        mmn(inputs.get(13, 0), 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE));
-    inputs.set(14, 0, normalizeAngle(inputs.get(14, 0)));
-    inputs.set(15, 0, mmn(inputs.get(15, 0), 0, 2 * vjmax));
-    inputs.set(16, 0, normalizeAngle(inputs.get(16, 0)));
+// cout : 3 entrées
+inline void writeVector(Matrix &mat, player &viewer, vector vec, uint &i,
+                        double maxNorme) {
+    double nv = norme(vec);
+    writeVal(mat, nv, i, 0, maxNorme);
+    writeAngle(mat, nv == 0 ? 0 : vangle(vec) - viewer.orientation, i);
+}
 
-    // TODO: Il faut trouver un moyen de normaliser didier...
-    // TODO: Il faut trouver un moyen de passer sur le fichier game.csv les
-    // valeurs non normalisées.
+// cout : 6 entrées
+inline void writeObject(Matrix &mat, player &viewer, ball &target, uint &i,
+                        double vMax) {
+    writeVector(mat, viewer, target.pos - viewer.pos, i, d_map);
+    writeVector(mat, viewer, target.vitesse - viewer.vitesse, i, vMax);
+}
+
+// Écrit le joueur le plus proche de l'équipe spécifiée
+// cout : 6 entrées
+inline void writeNearestPlayer(Matrix &mat, player &viewer, player *&equipe,
+                               uint &i) {
+    player *nearest = &viewer;
+    double d = INFINITY;
+
+    for (int i = 0; i < EQUIPE_SIZE; i++) {
+        double nd = norme(equipe[i].pos - viewer.pos);
+        if (nd < d && nd > PLAYER_SIZE / 2.) {
+            nearest = &equipe[i];
+            d = nd;
+        };
+    }
+    // 2*vjmax car les joueurs peuvent aller à vitesse max en s'éloignant
+    writeObject(mat, viewer, *nearest, i, 2 * vjmax);
 }
 
 /*
     team == false -> gauche
     team == true -> droite
 */
-void writeInputs(player &target, player *equipeAlliee, player *equipeAdverse,
+void writeInputs(player &viewer, player *equipeAlliee, player *equipeAdverse,
                  ball *b, bool team) {
-    Matrix *&mat = target.inputs;
-
-    mat->set(0, 0, norme(target.vitesse));
-    mat->set(1, 0, -angleRounded(target.orientation - vangle(target.vitesse)));
+    Matrix &mat = *viewer.inputs;
+    uint indice = 0;
+    // vitesse du joueur
+    writeVector(mat, viewer, viewer.vitesse, indice, vjmax);
 
     vector centreCage = {.x = static_cast<double>(team ? 0 : MAP_LENGTH),
                          .y = (double)MAP_HEIGHT / 2};
 
-	vector vCage = centreCage - target.pos;
-    auto normeCage = norme(vCage);
-    auto angleCage =
-        -angleRounded(target.orientation - vangle(vCage));
+    vector vCage = centreCage - viewer.pos;
+    // position de la cage adverse
+    writeVector(mat, viewer, vCage, indice, d_centre_cage);
 
-    mat->set(2, 0, normeCage);
-    mat->set(3, 0, angleCage);
     vector ex = {.x = 0, .y = 1};
-	double h = dotProduct(ex, vCage);
-	if(team) h = -h;
-    mat->set(4, 0, h);
+    double h = dotProduct(ex, vCage);
+    if (team)
+        h = -h;
+    // distance normale au milieu
+    writeValn(mat, h, indice, -MAP_HEIGHT / 2., MAP_HEIGHT / 2.);
 
-    // Position de la balle
-    mat->set(5, 0, norme(b->pos - target.pos));
-    // on l'inverse pour que ce soit la valeur à corriger pour aller vers la
-    // balle, plus logique pour le joueur
-    // Distance et orientation relative de la cage adverse
-    mat->set(6, 0,
-             -angleRounded(target.orientation - vangle(b->pos - target.pos)));
+    // balle
+    writeObject(mat, viewer, *b, indice, vbmax + vjmax);
 
-    vector vitesseRelatBalle = b->vitesse - target.vitesse;
+    // Joueur le plus proche des équipes alliée et adverse
+    writeNearestPlayer(mat, viewer, equipeAlliee, indice);
+    writeNearestPlayer(mat, viewer, equipeAdverse, indice);
 
-    mat->set(7, 0, norme(vitesseRelatBalle));
-    mat->set(8, 0,
-             -angleRounded(target.orientation - vangle(vitesseRelatBalle)));
-
-    // Joueur le plus proche
-    player *nearestCopain = &target;
-    double d = INFINITY;
-
-    for (int i = 0; i < EQUIPE_SIZE; i++) {
-        double nd = norme(equipeAlliee[i].pos - target.pos);
-        if (nd < d && nd > PLAYER_SIZE / 2.) {
-            nearestCopain = &equipeAlliee[i];
-            d = nd;
-        };
-    }
-
-    mat->set(9, 0, d);
-    mat->set(10, 0,
-             -angleRounded(target.orientation -
-                           vangle(nearestCopain->pos - target.pos)));
-
-    vector vitesseRelatCopain = nearestCopain->vitesse - target.vitesse;
-
-    // pour éviter des mauvais atan au début
-    auto vCopain = norme(vitesseRelatCopain);
-    mat->set(11, 0, vCopain);
-    if (vCopain == 0) {
-        mat->set(12, 0, 0);
-    } else {
-        mat->set(
-            12, 0,
-            -angleRounded(target.orientation - vangle(vitesseRelatCopain)));
-    }
-
-    // Joueur le plus proche
-    player *nearestAdv;
-    d = INFINITY;
-
-    for (int i = 0; i < EQUIPE_SIZE; i++) {
-        double nd = norme(equipeAdverse[i].pos - target.pos);
-        if (nd < d) {
-            nearestAdv = &equipeAdverse[i];
-            d = nd;
-        };
-    }
-
-    mat->set(13, 0, d);
-    mat->set(14, 0,
-             -angleRounded(target.orientation -
-                           vangle(nearestAdv->pos - target.pos)));
-
-    vector vitesseRelatadv = nearestAdv->vitesse - target.vitesse;
-
-    mat->set(15, 0, norme(vitesseRelatadv));
-    mat->set(16, 0,
-             -angleRounded(target.orientation - vangle(vitesseRelatadv)));
-
-    normalize_inputs(*mat);
 }
 
 Matrix *Chromosome::collect_and_apply(player *equipeAlliee,

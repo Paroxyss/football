@@ -8,12 +8,12 @@
 // cage, distance abverse + proche, angle adverse + proche, com1, .. ,
 // com{COM_SIZE}
 #define NETWORK_OUTPUT_SIZE 2
-#define NETWORK_INPUT_SIZE 17
+#define NETWORK_INPUT_SIZE 25
 
 #define EQUIPE_SIZE 3
 
 const int PLAYER_LAYERS[NETWORK_SIZE] = {
-    NETWORK_INPUT_SIZE, 24, 24, 16, 12, 8, 4, NETWORK_OUTPUT_SIZE};
+    NETWORK_INPUT_SIZE, 28, 28, 20, 16, 10, 6, NETWORK_OUTPUT_SIZE};
 
 #define GAME_RESOLUTION 1
 

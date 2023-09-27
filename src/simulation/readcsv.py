@@ -1,7 +1,6 @@
 import csv
-from math import pi, sqrt, pow
+from math import pi, sqrt, pow, atan2
 from config import *
-
 
 def convert(lst):
     for i in range(len(lst)):
@@ -27,10 +26,9 @@ def read(name):
     return lines
 
 
-d_map = sqrt(pow(SCREEN_WIDTH, 2) + pow(SCREEN_HEIGHT, 2))
+dmap = sqrt(pow(SCREEN_WIDTH, 2) + pow(SCREEN_HEIGHT, 2))
 d_cage = sqrt(pow(SCREEN_HEIGHT / 2, 2) + pow(SCREEN_WIDTH, 2))
 vmax = PLAYER_ACCELERATION / PLAYER_FROTTEMENT
-d_cage = sqrt(pow(SCREEN_WIDTH + GOAL_SIZE / 2, 2) + pow(SCREEN_WIDTH / 2, 2))
 vball_max = vmax * sqrt(MASS_PLAYER / MASS_BALL)
 
 
@@ -41,82 +39,71 @@ def dnmm(x, min, max):
 def dnmm_a(x):
     return x * pi
 
+def readValue(state):
+    val = state["line"][state["index"]]
+    state["index"] += 1
+    return val
 
-def parse(line, nb_joueurs):
-    data = []
-    # il y a un élément vide à la fin de la ligne
+def readAngle(state):
+    s = readValue(state)
+    c = readValue(state)
+    return atan2(s, c)
 
-    n = int((len(line) - 1) / nb_joueurs)
+def readAngularVector(state):
+    return {
+        "norme": readValue(state), 
+        "angle": readAngle(state)
+    }
 
-    for i in range(nb_joueurs):
-        data.append(
-            {
-                "orientation": line[i * n],
-                "x": line[i * n + 1],
-                "y": line[i * n + 2],
-                "v_joueur": dnmm(line[i * n + 3], 0, vmax),
-                "v_angle": dnmm_a(line[i * n + 4]),
-                "cage_dist": dnmm(line[i * n + 5], PLAYER_SIZE / 2, d_cage),
-                "cage_angle": dnmm_a(line[i * n + 6]),
-                "cage_tan_dist": dnmm(
-                    line[i * n + 7], 0, SCREEN_HEIGHT / 2 - PLAYER_SIZE
-                ),
-                "ball_dist": dnmm(
-                    line[i * n + 8],
-                    BALL_SIZE + PLAYER_SIZE,
-                    d_map - BALL_SIZE - PLAYER_SIZE,
-                ),
-                "ball_angle_relat": dnmm_a(line[i * n + 9]),
-                "v_ball": dnmm(line[i * n + 10], 0, vball_max + vmax),
-                "v_ball_angle": dnmm_a(line[i * n + 11]),
-                "nearest_copain_dist": dnmm(
-                    line[i * n + 12], 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE
-                ),
-                "nearest_copain_angle": dnmm_a(line[i * n + 13]),
-                "nearest_copain_v": dnmm(line[i * n + 14], 0, 2 * vmax),
-                "nearest_copain_v_angle": dnmm_a(line[i * n + 15]),
-                "nearest_adv_dist": dnmm(
-                    line[i * n + 16], 2 * PLAYER_SIZE, d_map - 2 * PLAYER_SIZE
-                ),
-                "nearest_adv_angle": dnmm_a(line[i * n + 17]),
-                "nearest_adv_v": dnmm(line[i * n + 18], 0, 2 * vmax),
-                "nearest_adv_v_angle": dnmm_a(line[i * n + 19]),
+def readObject(state):
+    return {
+        "pos": readAngularVector(state),
+        "vitesse": readAngularVector(state)
+    }
+
+def readPositionnalVector(state):
+    return {
+        "x": readValue(state),
+        "y": readValue(state)
+    }
+
+def readPlayer(state):
+    # NE PAS CHANGER L'ORDRE, c'est l'ordre de lecture
+    return {
+                "orientation": readValue(state),
+                "pos": readPositionnalVector(state),
+                "vitesse": readAngularVector(state),
+                "cage": readAngularVector(state),
+                "h": readValue(state),
+                "balle": readObject(state),
+                "joueurAllie": readObject(state),
+                "joueurAdverse": readObject(state)
             }
-        )
-
-    return data
-
-
+    
 def parse_normalized(line, nb_joueurs):
     data = []
     # il y a un élément vide à la fin de la ligne
 
     n = int((len(line) - 1) / nb_joueurs)
 
+    state = {"line": line, "index": 0}
     for i in range(nb_joueurs):
-        data.append(
-            {
-                "orientation": line[i * n],
-                "x": line[i * n + 1],
-                "y": line[i * n + 2],
-                "v_joueur": line[i * n + 3],
-                "v_angle": line[i * n + 4],
-                "cage_haut_dist": line[i * n + 5],
-                "cage_haut_angle": line[i * n + 6],
-                "cage_tan_dist": line[i * n + 7],
-                "ball_dist": line[i * n + 8],
-                "ball_angle_relat": line[i * n + 9],
-                "v_ball": line[i * n + 10],
-                "v_ball_angle": line[i * n + 11],
-                "nearest_copain_dist": line[i * n + 12],
-                "nearest_copain_angle": line[i * n + 13],
-                "nearest_copain_v": line[i * n + 14],
-                "nearest_copain_v_angle": line[i * n + 15],
-                "nearest_adv_dist": line[i * n + 16],
-                "nearest_adv_angle": line[i * n + 17],
-                "nearest_adv_v": line[i * n + 18],
-                "nearest_adv_v_angle": line[i * n + 19],
-            }
-        )
+        data.append(readPlayer(state))
 
     return data
+
+def denormalize_player(player):
+    player["vitesse"]["norme"] = dnmm(player["vitesse"]["norme"], 0, vmax)
+    player["cage"]["norme"] = dnmm(player["cage"]["norme"], PLAYER_SIZE, d_cage)
+    player["h"] *= (SCREEN_HEIGHT/2) 
+    player["balle"]["pos"]["norme"] = dnmm(player["balle"]["pos"]["norme"], 0, dmap)
+    player["balle"]["vitesse"]["norme"] = dnmm(player["balle"]["vitesse"]["norme"], 0, vball_max + vmax)
+    player["joueurAllie"]["pos"]["norme"] = dnmm(player["joueurAllie"]["pos"]["norme"], 0, dmap)
+    player["joueurAllie"]["vitesse"]["norme"] = dnmm(player["joueurAllie"]["vitesse"]["norme"], 0, 2 * vmax)
+    player["joueurAdverse"]["pos"]["norme"] = dnmm(player["joueurAdverse"]["pos"]["norme"], 0, dmap)
+    player["joueurAdverse"]["vitesse"]["norme"] = dnmm(player["joueurAdverse"]["vitesse"]["norme"], 0, 2 * vmax)
+    
+def parse(line, nb_joueurs):
+    players = parse_normalized(line, nb_joueurs)
+    for player in players: denormalize_player(player)
+    return players 

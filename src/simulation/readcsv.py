@@ -72,6 +72,7 @@ def readPlayer(state):
     return {
                 "orientation": readValue(state),
                 "pos": readPositionnalVector(state),
+                "vrotation": readValue(state),
                 "vitesse": readAngularVector(state),
                 "cage": readAngularVector(state),
                 "h": readValue(state),

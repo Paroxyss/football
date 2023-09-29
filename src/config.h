@@ -8,7 +8,7 @@
 // cage, distance abverse + proche, angle adverse + proche, com1, .. ,
 // com{COM_SIZE}
 #define NETWORK_OUTPUT_SIZE 2
-#define NETWORK_INPUT_SIZE 25
+#define NETWORK_INPUT_SIZE 26
 
 #define EQUIPE_SIZE 3
 
@@ -26,10 +26,12 @@ const int PLAYER_LAYERS[NETWORK_SIZE] = {
 #define PLAYER_SIZE (2 * 10)
 #define PLAYER_ACCELERATION 0.30
 #define PLAYER_FROTTEMENT (1 / 20.)
+#define PLAYER_ROTATION_ACCELERATION 0.10
+#define PLAYER_ROTATION_FROTTEMENT (1 / 3.)
 
-#define BALL_MASS 5
+#define BALL_MASS 10 
 #define BALL_SIZE 10
-#define BALL_FROTTEMENT (1 / 40.)
+#define BALL_FROTTEMENT (1 / 35.)
 
 #define POPULATION_SIZE 1000
 

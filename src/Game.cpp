@@ -298,6 +298,7 @@ void Game::moveAllObj(double time) {
     ball.pos += ball.vitesse * time;
     for (int i = 0; i < playerNumber; i++) {
         players[i].pos += players[i].vitesse * time;
+		players[i].orientation += players[i].rvitesse * time;
     }
 }
 
@@ -384,15 +385,14 @@ void Game::writePlayers() {
 void Game::setAccelerations(unsigned int id, double rotation,
                             double acceleration) {
 
-    players[id].raccel = rotation;
+    players[id].raccel = rotation * PLAYER_ROTATION_ACCELERATION;
     players[id].acceleration = acceleration * PLAYER_ACCELERATION;
 };
 
 void Game::executePlayerActions(double time, bool clearAccels) {
     for (int id = 0; id < playerNumber; id++) {
         player &selected = players[id];
-        selected.orientation += selected.raccel * time;
-        selected.orientation = angleRounded(selected.orientation);
+        selected.rvitesse += selected.raccel * time;
         selected.vitesse.x +=
             selected.acceleration * cos(players[id].orientation) * time;
         selected.vitesse.y +=
@@ -411,6 +411,7 @@ void Game::applyFriction(double time) {
 
     for (int i = 0; i < playerNumber; i++) {
         players[i].vitesse -= (players[i].vitesse * PLAYER_FROTTEMENT) * time;
+        players[i].rvitesse -= (players[i].rvitesse * PLAYER_ROTATION_FROTTEMENT) * time;
     }
 }
 

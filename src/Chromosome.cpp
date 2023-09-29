@@ -24,6 +24,8 @@ static const double vjmax = PLAYER_ACCELERATION / PLAYER_FROTTEMENT;
 // Vitesse maximum de la balle
 static const double vbmax = vjmax * sqrt(PLAYER_MASS / BALL_MASS);
 
+static const double vrjmax = PLAYER_ROTATION_ACCELERATION / PLAYER_ROTATION_FROTTEMENT;
+
 Chromosome::Chromosome() {
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
@@ -219,6 +221,7 @@ void writeInputs(player &viewer, player *equipeAlliee, player *equipeAdverse,
                  ball *b, bool team) {
     Matrix &mat = *viewer.inputs;
     uint indice = 0;
+	writeValn(mat, viewer.rvitesse, indice, -vrjmax, vrjmax);
     // vitesse du joueur
     writeVector(mat, viewer, viewer.vitesse, indice, vjmax);
 

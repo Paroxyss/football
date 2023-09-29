@@ -12,8 +12,8 @@ struct ball {
 };
 
 struct player : ball {
-    // raccel en rad.s-1, orientation en radian, acceleration en m.s-2
-    double raccel, orientation, acceleration;
+    // raccel en rad.s-2, rvitesse en rad.s-1, orientation en radian, acceleration en m.s-2
+    double raccel, rvitesse, orientation, acceleration;
     Matrix *inputs;
 };
 

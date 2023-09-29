@@ -302,15 +302,22 @@ void Game::moveAllObj(double time) {
 }
 
 // effectue un pas de simulation, d'une durée souhaitée
-void Game::tick(double timeToAdvance, bool root) {
+void Game::tick(double timeToAdvance, bool root, bool clearAccels,
+                bool canSave) {
     // ici, root est un bouléen défini à vrai ssi c'est le premier appel
     // récursif
     if (root) {
-        if (logToFile) {
-            writePlayers();
+        if (logToFile && canSave) {
+            while (timeSinceLastSave >= 1) {
+                writePlayers();
+                timeSinceLastSave -= 1;
+            }
         }
+
+        timeSinceLastSave += timeToAdvance;
         applyFriction(timeToAdvance);
-        executePlayerActions(timeToAdvance);
+
+        executePlayerActions(timeToAdvance, clearAccels);
     }
     // On fait tout avancer de la durée voulue
     moveAllObj(timeToAdvance);
@@ -381,7 +388,7 @@ void Game::setAccelerations(unsigned int id, double rotation,
     players[id].acceleration = acceleration * PLAYER_ACCELERATION;
 };
 
-void Game::executePlayerActions(double time) {
+void Game::executePlayerActions(double time, bool clearAccels) {
     for (int id = 0; id < playerNumber; id++) {
         player &selected = players[id];
         selected.orientation += selected.raccel * time;
@@ -390,8 +397,10 @@ void Game::executePlayerActions(double time) {
             selected.acceleration * cos(players[id].orientation) * time;
         selected.vitesse.y +=
             selected.acceleration * sin(players[id].orientation) * time;
-        selected.raccel = 0;
-        selected.acceleration = 0;
+        if (clearAccels) {
+            selected.raccel = 0;
+            selected.acceleration = 0;
+        }
     }
 }
 
@@ -453,7 +462,9 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     int c[] = {1, 2};
     g.set_players(c, 2);
 
-    for (int k = 0; k < GAME_DURATION; k++) {
+    for (int k = 0, timeRemainingToScore = MAX_SCORE_DURATION;
+         k < MAX_GAME_DURATION && timeRemainingToScore > 0;
+         k++, timeRemainingToScore--) {
 
         auto r1 = c1->collect_and_apply(g.players, g.players + EQUIPE_SIZE,
                                         &g.ball, false);
@@ -477,7 +488,12 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
         delete r1;
         delete r2;
 
-        g.tick(1);
+        // on tick 10 fois pour beaucoup plus de précisions
+        g.tick(0.1, true, false, true);
+        for (int i = 0; i < 8; i++) {
+            g.tick(0.1, true, false, false);
+        }
+        g.tick(0.1, true, true, false);
 
         bool bc1 = g.checkGoal(0);
         bool bc2 = g.checkGoal(1);
@@ -497,6 +513,12 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
             g.ball.vitesse.y = 0;
 
             g.set_players(c, 2);
+			timeRemainingToScore = MAX_SCORE_DURATION;
+        }
+
+        // 2-0, on arrête
+        if (abs(g.infos.score) >= 2 && !save) {
+            break;
         }
     }
 

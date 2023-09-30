@@ -1,3 +1,5 @@
+#include "Chromosome.hpp"
+#include "Game.hpp"
 #include "Matrix.h"
 #include "Simulation.hpp"
 #include "config.h"
@@ -99,6 +101,47 @@ int main(int argc, char *argv[]) {
         }
 
         see_ball(argv[2], n_ball);
+    } else if (strcmp(argv[1], "benchmarkMatch") == 0) {
+        int matchPerIter = 100;
+		int chromosomeCount = 20;
+		
+        unsigned long nbMatch = 0;
+        double totalTime = 0;
+        Chromosome c[chromosomeCount];
+        std::vector<double> valeurs;
+        std::vector<double> vc;
+        while (true) {
+            for (int i = 0; i < chromosomeCount; i++) {
+                c[i].initialize();
+            }
+            auto start = std::chrono::high_resolution_clock::now();
+
+            for (int i = 0; i < matchPerIter; i++) {
+                play_match(&c[i%chromosomeCount], &c[i/chromosomeCount]);
+            }
+
+            auto end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end - start;
+			
+            nbMatch += matchPerIter;
+
+            valeurs.push_back(matchPerIter / elapsed_seconds.count());
+
+            double mean =
+                std::reduce(valeurs.begin(), valeurs.end()) / valeurs.size();
+            vc = valeurs;
+            std::transform(valeurs.begin(), valeurs.end(), vc.begin(),
+                           [mean](double v) { return pow(mean - v, 2); });
+
+            double incertitude =
+                sqrt(std::reduce(vc.begin(), vc.end()) / (vc.size() - 1));
+
+            totalTime += elapsed_seconds.count();
+            std::cout << mean << " ± " << incertitude
+                      << " matchs par seconde "
+                      << "(" << nbMatch << " / " << totalTime << "s)"
+                      << std::endl;
+        }
     }
 
     _exit(EXIT_SUCCESS);

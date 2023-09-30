@@ -298,7 +298,7 @@ void Game::moveAllObj(double time) {
     ball.pos += ball.vitesse * time;
     for (int i = 0; i < playerNumber; i++) {
         players[i].pos += players[i].vitesse * time;
-		players[i].orientation += players[i].rvitesse * time;
+        players[i].orientation += players[i].rvitesse * time;
     }
 }
 
@@ -411,7 +411,8 @@ void Game::applyFriction(double time) {
 
     for (int i = 0; i < playerNumber; i++) {
         players[i].vitesse -= (players[i].vitesse * PLAYER_FROTTEMENT) * time;
-        players[i].rvitesse -= (players[i].rvitesse * PLAYER_ROTATION_FROTTEMENT) * time;
+        players[i].rvitesse -=
+            (players[i].rvitesse * PLAYER_ROTATION_FROTTEMENT) * time;
     }
 }
 
@@ -463,9 +464,9 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     int c[] = {1, 2};
     g.set_players(c, 2);
 
-    for (int k = 0, timeRemainingToScore = MAX_SCORE_DURATION;
-         k < MAX_GAME_DURATION && timeRemainingToScore > 0;
-         k++, timeRemainingToScore--) {
+    int to_touch = MAX_TOUCH_DURATION;
+
+    for (int k = 0; k < MAX_GAME_DURATION; k++, to_touch--) {
 
         auto r1 = c1->collect_and_apply(g.players, g.players + EQUIPE_SIZE,
                                         &g.ball, false);
@@ -514,17 +515,24 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
             g.ball.vitesse.y = 0;
 
             g.set_players(c, 2);
-			timeRemainingToScore = MAX_SCORE_DURATION;
+        }
+
+        if (to_touch == 0) {
+            if (g.infos.ball_collisions == 0) {
+                break;
+            }
+
+            to_touch = MAX_TOUCH_DURATION;
         }
 
         // 2-0, on arrête
-        if (abs(g.infos.score) >= 2 && !save) {
+        if ((abs(g.infos.score) >= 2 && !save)) {
             break;
         }
     }
 
     if (g.infos.score == 0) {
-        // le biais modifie la probabilité qu'une équipe soit séléctionnée en
+        // le biais modifie la probabilité qu'une équipe soit sélectionnée en
         // cas d'égalité
         double b1 = c1->stats.instanceGoals;
         double b2 = c2->stats.instanceGoals;

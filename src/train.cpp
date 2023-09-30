@@ -61,9 +61,12 @@ void trainPop(Population *pop, int n_gen, int population_size, int n_thread) {
         std::cout << "Stats gen " << gen << " " << stats << " in "
                   << elapsed_seconds.count() << std::endl;
 
-        statsFile << gen << ", " << stats.totalCollisions / (double)stats.n
-                  << ", " << stats.total_ball_collisions / (double)stats.n
-                  << ", " << stats.totalGoals / (double)stats.n << ", " << (double)stats.n << std::endl;
+        double n = (double)stats.n;
+
+        statsFile << gen << ", " << stats.totalCollisions / n << ", "
+                  << stats.total_ball_collisions / n << ", "
+                  << stats.totalGoals / n << ", " << (stats.stopped / n) * 100.
+                  << std::endl;
 
         if (last_save > SAVE_RATE) {
             std::ofstream out;

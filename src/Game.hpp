@@ -12,7 +12,8 @@ struct ball {
 };
 
 struct player : ball {
-    // raccel en rad.s-2, rvitesse en rad.s-1, orientation en radian, acceleration en m.s-2
+    // raccel en rad.s-2, rvitesse en rad.s-1, orientation en radian,
+    // acceleration en m.s-2
     double raccel, rvitesse, orientation, acceleration;
     Matrix *inputs;
 };
@@ -46,7 +47,7 @@ extern std::ofstream csvOutputFile;
 class Game {
   public:
     bool logToFile;
-	double timeSinceLastSave = 1;
+    double timeSinceLastSave = 1;
 
     player *players;
     unsigned int playerNumber;
@@ -56,8 +57,11 @@ class Game {
     wall *walls;
     wall *goals;
 
-    gameInformations infos = {
-        .collisions = 0, .goals = 0, .ball_collisions = 0, .score = 0};
+    gameInformations infos = {.collisions = 0,
+                              .goals = 0,
+                              .ball_collisions = 0,
+                              .score = 0,
+                              .stopped = false};
 
     void set_players(const int conf[], int n);
 
@@ -65,7 +69,8 @@ class Game {
     ~Game();
 
     // fait avancer la simulation du temps souhaité
-    void tick(double timeToAdvance = 1, bool root = true, bool clearAccels = true, bool canSave = true);
+    void tick(double timeToAdvance = 1, bool root = true,
+              bool clearAccels = true, bool canSave = true);
 
     void setAccelerations(unsigned int id, double rotation,
                           double acceleration);

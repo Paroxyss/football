@@ -519,6 +519,7 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
 
         if (to_touch == 0) {
             if (g.infos.ball_collisions == 0) {
+                g.infos.stopped = true;
                 break;
             }
 

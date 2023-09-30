@@ -43,6 +43,7 @@ void update_statistics(gameStatistics &tourn_stats, gameStatistics *tournResult,
     tourn_stats.totalGoals += tournResult->totalGoals;
     tourn_stats.n += matchs_count;
     tourn_stats.total_ball_collisions += tournResult->total_ball_collisions;
+    tourn_stats.stopped += tournResult->stopped;
 }
 
 gameStatistics Population::next(int n_thread, bool save) {
@@ -60,7 +61,8 @@ gameStatistics Population::next(int n_thread, bool save) {
     gameStatistics tourn_stats = {.n = 0,
                                   .totalCollisions = 0,
                                   .totalGoals = 0,
-                                  .total_ball_collisions = 0};
+                                  .total_ball_collisions = 0,
+                                  .stopped = 0};
 
     // Pour la barre de progression, ne marche pas très bien pour les petites
     // populations mais bon
@@ -194,6 +196,7 @@ Population::tournament(int tourn_size, bool save) {
             gameStats.totalCollisions += match_results.collisions;
             gameStats.totalGoals += match_results.goals;
             gameStats.total_ball_collisions += match_results.ball_collisions;
+            gameStats.stopped += match_results.stopped ? 1 : 0;
         }
 
         tourn_size = pool_size;

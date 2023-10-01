@@ -461,8 +461,8 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
     g.ball.vitesse = {.x = 0, .y = 0};
 
-    int c[] = {1, 2};
-    g.set_players(c, 2);
+    int c[] = GAMECONFIG;
+    g.set_players(c, GAMECONFIGLENGTH);
 
     int to_touch = MAX_TOUCH_DURATION;
 
@@ -514,7 +514,7 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
             g.ball.vitesse.x = 0;
             g.ball.vitesse.y = 0;
 
-            g.set_players(c, 2);
+            g.set_players(c, GAMECONFIGLENGTH);
         }
 
         if (to_touch == 0) {

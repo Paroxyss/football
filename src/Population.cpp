@@ -10,6 +10,7 @@
 #include "Chromosome.hpp"
 #include "Game.hpp"
 #include "Population.hpp"
+#include "SafeQueue.hpp"
 #include "config.h"
 #include "util.hpp"
 
@@ -36,27 +37,28 @@ void Population::initialize() {
     }
 }
 
-void update_statistics(gameStatistics &tourn_stats, gameStatistics *tournResult,
-                       int matchs_count) {
+void update_statistics(gameStatistics &tourn_stats,
+                       gameStatistics &tournResult) {
 
-    tourn_stats.totalCollisions += tournResult->totalCollisions;
-    tourn_stats.totalGoals += tournResult->totalGoals;
-    tourn_stats.n += matchs_count;
-    tourn_stats.total_ball_collisions += tournResult->total_ball_collisions;
-    tourn_stats.stopped += tournResult->stopped;
+    tourn_stats.totalCollisions += tournResult.totalCollisions;
+    tourn_stats.totalGoals += tournResult.totalGoals;
+    tourn_stats.n += tournResult.n;
+    tourn_stats.total_ball_collisions += tournResult.total_ball_collisions;
+    tourn_stats.stopped += tournResult.stopped;
 }
 
 gameStatistics Population::next(int n_thread, bool save) {
     for (int i = 0; i < this->size; i++) {
         this->pop[i]->stats.instanceAge++;
     }
-    Chromosome **nxt = new Chromosome *[this->size];
 
-    int count = 0;
+    SafeQueue<Chromosome *> nextPop;
+    SafeQueue<gameStatistics> statsTournois;
+    SafeQueue<std::tuple<int, int>> attributions;
+
     int expected = (double)this->size * ((double)1 - (double)NEW_BLOOD);
 
     std::thread threads[n_thread];
-    std::tuple<Chromosome *, Chromosome *, gameStatistics> winners[n_thread];
 
     gameStatistics tourn_stats = {.n = 0,
                                   .totalCollisions = 0,
@@ -64,86 +66,74 @@ gameStatistics Population::next(int n_thread, bool save) {
                                   .total_ball_collisions = 0,
                                   .stopped = 0};
 
-    // Pour la barre de progression, ne marche pas très bien pour les petites
-    // populations mais bon
-    int outRate = std::floor(expected / 10);
-    int *matchs_count = new int[n_thread];
+    // on fait les tournois
+    for (int i = 0; i < n_thread; i++) {
+        threads[i] = std::thread([this, &nextPop, &expected, &statsTournois, i,
+                                  &attributions]() {
+            while (nextPop.reserve() < expected) {
+                int tourn_size = random_power(this->size / 2);
+                auto outcome = this->tournament(tourn_size, false);
 
-    while (count < expected) {
+                Chromosome *mutedWinner;
+                if (likelyness(CROSSOVER_PROBABILITY)) {
+                    mutedWinner =
+                        crossover(*std::get<0>(outcome), *std::get<1>(outcome));
+                } else {
+                    Chromosome *c = likelyness(0.8) ? std::get<0>(outcome)
+                                                    : std::get<1>(outcome);
+                    mutedWinner = cloneChromosome(c);
+                }
 
-        if (expected - count < n_thread) {
-            n_thread = 1;
-        }
-
-        for (int i = 0; i < n_thread; i++) {
-            // on choisit une puissance de 2 aléatoire car ça permet
-            // d'organiser des petites compétitions et donc limiter la
-            // pression selective.
-            int tourn_size = random_power(this->size / 2);
-
-            matchs_count[i] = tourn_size - 1;
-
-            threads[i] = std::thread([this, tourn_size, save, &winners, i]() {
-                auto outcome = this->tournament(tourn_size, save);
-                winners[i] = outcome;
-            });
-        }
-
-        for (int i = 0; i < n_thread; ++i) {
-            threads[i].join();
-        }
-
-        for (int i = 0; i < n_thread; i++) {
-            if (likelyness(CROSSOVER_PROBABILITY)) {
-                nxt[count] = crossover(*std::get<0>(winners[i]),
-                                       *std::get<1>(winners[i]));
-            } else {
-                Chromosome *c = likelyness(0.8) ? std::get<0>(winners[i])
-                                                : std::get<1>(winners[i]);
-                nxt[count] = cloneChromosome(c);
+                mutate(*mutedWinner);
+                nextPop.pushReserved(mutedWinner);
+                statsTournois.push(std::get<2>(outcome));
+                attributions.push(std::tuple(i, std::get<2>(outcome).n));
             }
-
-            auto tournResult = std::get<2>(winners[i]);
-            update_statistics(tourn_stats, &tournResult, matchs_count[i]);
-
-            if ((count % outRate) == 0) {
-                std::cout << "*";
-                fflush(stdout);
-            }
-
-            count++;
-        }
+        });
     }
+    // on attends la fin des tournois
+    for (int i = 0; i < n_thread; i++) {
+        threads[i].join();
+    }
+    nextPop.clearReservations();
+
+    // update_statistics(tourn_stats, &tournResult, matchs_count[i]);
 
     // On introduit des individus complètement nouveau pour explorer le plus
     // de solutions possible.
-    while (count < this->size) {
-        nxt[count] = new Chromosome();
-        nxt[count]->initialize();
-
-        count++;
+    while (nextPop.size() < this->size) {
+        Chromosome *c = new Chromosome();
+        c->initialize();
+        nextPop.push(c);
     }
 
-    int maxAge = 0;
-    int maxAgeGoals = 0;
-    for (int i = 0; i < this->size; i++) {
-        auto &stats = this->pop[i]->stats;
-        if (stats.instanceAge > maxAge) {
-            maxAge = stats.instanceAge;
-            maxAgeGoals = stats.instanceGoals;
-        }
+    if (nextPop.size() != this->size) {
+        throw std::logic_error("Incohérence entre la population actuelle et la "
+                               "population suivante");
     }
+
     for (int i = 0; i < this->size; i++) {
-        mutate(*nxt[i]);
+        Chromosome *c;
+        nextPop.pop(c);
 
         delete this->pop[i];
-        this->pop[i] = nxt[i];
+        this->pop[i] = c;
     }
 
-    delete[] nxt;
-    delete[] matchs_count;
-    std::cout << std::endl
-              << " Age | buts " << maxAge << " | " << maxAgeGoals << std::endl;
+    std::vector<int> perfs(n_thread, 0);
+    std::tuple<int, int> tstats;
+    while (attributions.pop(tstats)) {
+        perfs[std::get<0>(tstats)] += std::get<1>(tstats);
+    }
+    for (int i : perfs) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+    while (statsTournois.size()) {
+        gameStatistics s;
+        statsTournois.pop(s);
+        update_statistics(tourn_stats, s);
+    }
 
     return tourn_stats;
 }
@@ -173,9 +163,11 @@ Population::tournament(int tourn_size, bool save) {
     free(selected);
 
     gameStatistics gameStats = {
+        .n = 0,
         .totalCollisions = 0,
         .totalGoals = 0,
         .total_ball_collisions = 0,
+        .stopped = 0,
     };
 
     while (tourn_size > 2) {
@@ -197,6 +189,7 @@ Population::tournament(int tourn_size, bool save) {
             gameStats.totalGoals += match_results.goals;
             gameStats.total_ball_collisions += match_results.ball_collisions;
             gameStats.stopped += match_results.stopped ? 1 : 0;
+            gameStats.n++;
         }
 
         tourn_size = pool_size;

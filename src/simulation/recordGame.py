@@ -2,7 +2,7 @@ import pygame as pg
 import sys
 import os
 
-os.environ["SCREEN_FACTOR"] = "0.1"
+os.environ["SCREEN_FACTOR"] = str(0.3)
 from functions import *
 from readcsv import *
 from config import *
@@ -28,7 +28,7 @@ show = [False for _ in range(nb_joueurs)]
 
 data = data[1:]
 
-recorder = ScreenRecorder(int(SCREEN_WIDTH*0.1), int(SCREEN_HEIGHT*0.1), 60)
+recorder = ScreenRecorder(int(SCREEN_WIDTH*SCREEN_FACTOR), int(SCREEN_HEIGHT*SCREEN_FACTOR), 30)
 
 for i in range(0, len(data)):
     parsed.append(parse(data[i][3:], nb_joueurs))
@@ -61,7 +61,7 @@ for i in range(0, len(parsed), 3):
             parsed[i][k - 1]["orientation"],
         )
     clear_line()
-    print("simulation : "+str(i/len(parsed)*100)+"%")
+    print("simulation : "+str(int(i/len(parsed)*1000)/10)+"%")
     
     pg.display.flip()
     recorder.capture_frame(screen)

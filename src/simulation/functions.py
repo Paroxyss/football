@@ -13,9 +13,9 @@ def draw_player(t, x, y, d):
 
     pg.draw.line( screen, WHITE, (x * SCREEN_FACTOR, y * SCREEN_FACTOR),
         (
-            x + cos(-d) * PLAYER_SIZE * SCREEN_FACTOR,
-            y - sin(-d) * PLAYER_SIZE * SCREEN_FACTOR,
-        ), int(2 * SCREEN_FACTOR)
+            (x + cos(-d) * PLAYER_SIZE) * SCREEN_FACTOR,
+            (y - sin(-d) * PLAYER_SIZE) * SCREEN_FACTOR,
+        ), int(SCREEN_FACTOR) + 1
     )
 
 
@@ -48,8 +48,8 @@ def show_data(infos, k, nb_joueurs):
     # balle
     ballePos = infos["balle"]["pos"]
     ep = (
-        x + cos(ballePos["angle"] + ori) * ballePos["norme"] * SCREEN_FACTOR,
-        y + sin(ballePos["angle"] + ori) * ballePos["norme"] * SCREEN_FACTOR
+        (x + cos(ballePos["angle"] + ori) * ballePos["norme"]) * SCREEN_FACTOR,
+        (y + sin(ballePos["angle"] + ori) * ballePos["norme"]) * SCREEN_FACTOR
     )
     pg.draw.line(screen, WHITE, (x * SCREEN_FACTOR, y * SCREEN_FACTOR), ep, 4 * SCREEN_FACTOR)
 
@@ -62,8 +62,8 @@ def show_data(infos, k, nb_joueurs):
     # cage adverse
     cagePos = infos["cage"]
     ep = (
-        x + cos(cagePos["angle"] + ori) * cagePos["norme"] * SCREEN_FACTOR,
-        y + sin(cagePos["angle"] + ori) * cagePos["norme"] * SCREEN_FACTOR
+        (x + cos(cagePos["angle"] + ori) * cagePos["norme"]) * SCREEN_FACTOR,
+        (y + sin(cagePos["angle"] + ori) * cagePos["norme"]) * SCREEN_FACTOR
     )
 
     pg.draw.line(
@@ -79,7 +79,7 @@ def show_data(infos, k, nb_joueurs):
         screen,
         BLUE,
         (x * SCREEN_FACTOR, y * SCREEN_FACTOR),
-        (x * SCREEN_FACTOR, y + infos["h"] * (2*(k<=nb_joueurs/2) - 1) * SCREEN_FACTOR),
+        (x * SCREEN_FACTOR, (y + infos["h"] * (2*(k<=nb_joueurs/2) - 1)) * SCREEN_FACTOR),
         3 * SCREEN_FACTOR,
     )
 
@@ -87,16 +87,16 @@ def show_data(infos, k, nb_joueurs):
 
     copainPos = infos["joueurAllie"]["pos"]
     ep = (
-        x + cos(copainPos["angle"] + ori) * copainPos["norme"] * SCREEN_FACTOR,
-        y + sin(copainPos["angle"] + ori) * copainPos["norme"] * SCREEN_FACTOR
+        (x + cos(copainPos["angle"] + ori) * copainPos["norme"]) * SCREEN_FACTOR,
+        (y + sin(copainPos["angle"] + ori) * copainPos["norme"]) * SCREEN_FACTOR
     )
     pg.draw.line( screen, PINK, (x, y), ep, 2 * SCREEN_FACTOR)
 
     
     advPos = infos["joueurAdverse"]["pos"]
     ep = (
-        x + cos(advPos["angle"] + ori) * advPos["norme"] * SCREEN_FACTOR,
-        y + sin(advPos["angle"] + ori) * advPos["norme"] * SCREEN_FACTOR
+        (x + cos(advPos["angle"] + ori) * advPos["norme"]) * SCREEN_FACTOR,
+        (y + sin(advPos["angle"] + ori) * advPos["norme"]) * SCREEN_FACTOR
     )
 
     pg.draw.line( screen, PURPLE, (x * SCREEN_FACTOR, y * SCREEN_FACTOR), ep, 2 * SCREEN_FACTOR)

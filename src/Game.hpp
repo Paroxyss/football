@@ -9,6 +9,8 @@ struct ball {
     vector pos, vitesse;
     // size le rayon en m, mass en kg
     double size, mass;
+    int touching_wall_since;
+    bool touching_wall_updated = false;
 };
 
 struct player : ball {
@@ -61,7 +63,8 @@ class Game {
                               .goals = 0,
                               .ball_collisions = 0,
                               .score = 0,
-                              .stopped = false};
+                              .stopped = false,
+                              .stuck_reset = 0};
 
     void set_players(const int conf[], int n);
 
@@ -102,4 +105,5 @@ class Game {
     void aller_chercher_du_pain(int n);
 };
 
+bool player_is_ball(struct ball *p);
 gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save = false);

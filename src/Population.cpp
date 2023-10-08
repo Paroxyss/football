@@ -45,6 +45,7 @@ void update_statistics(gameStatistics &tourn_stats,
     tourn_stats.n += tournResult.n;
     tourn_stats.total_ball_collisions += tournResult.total_ball_collisions;
     tourn_stats.stopped += tournResult.stopped;
+    tourn_stats.stuck_reset += tournResult.stuck_reset;
 }
 
 gameStatistics Population::next(int n_thread, bool save) {
@@ -64,7 +65,8 @@ gameStatistics Population::next(int n_thread, bool save) {
                                   .totalCollisions = 0,
                                   .totalGoals = 0,
                                   .total_ball_collisions = 0,
-                                  .stopped = 0};
+                                  .stopped = 0,
+                                  .stuck_reset = 0};
 
     // on fait les tournois
     for (int i = 0; i < n_thread; i++) {

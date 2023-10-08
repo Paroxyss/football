@@ -82,6 +82,10 @@ Game::~Game() {
     delete[] goals;
 }
 
+bool player_is_ball(struct ball *p) {
+    return p->size == BALL_SIZE;
+}
+
 /*
     Répartis les joueurs sur le terrain selon la configuration voulue.
     Pour 3 joueurs, on peut par exemple avoir {2, 1}, placés comme au vrai foot
@@ -185,8 +189,10 @@ double getTwoBallCollisionTime(ball *b1, ball *b2) {
 collisionList *Game::getObjectCollisionList(int objId,
                                             collisionList *listToAppend) {
     struct ball *selected;
+
     if (objId == -1) {
         selected = &ball;
+        selected->touching_wall_updated = false;
     } else {
         selected = &(this->players[objId]);
     }
@@ -200,6 +206,11 @@ collisionList *Game::getObjectCollisionList(int objId,
         if (abs(d) <
             selected->size) { // la balle est trop près du mur, il y a collision
             listToAppend = insert(listToAppend, selected, &w, WALL);
+
+            if (player_is_ball(selected)) {
+                selected->touching_wall_since++;
+                selected->touching_wall_updated = true;
+            }
         }
     }
 
@@ -210,6 +221,10 @@ collisionList *Game::getObjectCollisionList(int objId,
             listToAppend =
                 insert(listToAppend, selected, &this->players[i], CIRCLE);
         }
+    }
+
+    if (!selected->touching_wall_updated) {
+        selected->touching_wall_since = 0;
     }
 
     return listToAppend;
@@ -347,8 +362,8 @@ void Game::tick(double timeToAdvance, bool root, bool clearAccels,
         case CIRCLE:
             computeCollisionCircle(firstCollision->actor,
                                    firstCollision->secondary);
-            if ((firstCollision->actor->size == BALL_SIZE ||
-                 firstCollision->secondary->size == BALL_SIZE)) {
+            if (player_is_ball(firstCollision->actor) ||
+                player_is_ball(firstCollision->secondary)) {
                 this->infos.ball_collisions += 1;
             }
             break;
@@ -514,6 +529,18 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
             g.ball.vitesse.x = 0;
             g.ball.vitesse.y = 0;
 
+            g.set_players(c, GAMECONFIGLENGTH);
+        }
+
+        if (g.ball.touching_wall_since >= 1) {
+            // touching_wall_since & touching_wall_updated sont remis
+            // à 0 automatiquement
+            g.ball.pos.x = (float)MAP_LENGTH / 2;
+            g.ball.pos.y = (float)MAP_HEIGHT / 2;
+            g.ball.vitesse.x = 0;
+            g.ball.vitesse.y = 0;
+
+            g.infos.stuck_reset++;
             g.set_players(c, GAMECONFIGLENGTH);
         }
 

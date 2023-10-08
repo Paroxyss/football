@@ -101,10 +101,12 @@ int main(int argc, char *argv[]) {
         }
 
         see_ball(argv[2], n_ball);
+    } else if (strcmp(argv[1], "seestuck") == 0) {
+        see_stuck(argv[2], 1);
     } else if (strcmp(argv[1], "benchmarkMatch") == 0) {
         int matchPerIter = 100;
-		int chromosomeCount = 20;
-		
+        int chromosomeCount = 20;
+
         unsigned long nbMatch = 0;
         double totalTime = 0;
         Chromosome c[chromosomeCount];
@@ -117,12 +119,12 @@ int main(int argc, char *argv[]) {
             auto start = std::chrono::high_resolution_clock::now();
 
             for (int i = 0; i < matchPerIter; i++) {
-                play_match(&c[i%chromosomeCount], &c[i/chromosomeCount]);
+                play_match(&c[i % chromosomeCount], &c[i / chromosomeCount]);
             }
 
             auto end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed_seconds = end - start;
-			
+
             nbMatch += matchPerIter;
 
             valeurs.push_back(matchPerIter / elapsed_seconds.count());
@@ -137,8 +139,7 @@ int main(int argc, char *argv[]) {
                 sqrt(std::reduce(vc.begin(), vc.end()) / (vc.size() - 1));
 
             totalTime += elapsed_seconds.count();
-            std::cout << mean << " ± " << incertitude
-                      << " matchs par seconde "
+            std::cout << mean << " ± " << incertitude << " matchs par seconde "
                       << "(" << nbMatch << " / " << totalTime << "s)"
                       << std::endl;
         }

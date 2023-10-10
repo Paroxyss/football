@@ -47,7 +47,7 @@ void trainPop(Generation &g, int n_gen, int population_size, int n_thread) {
 
         last_save += 1;
 
-        auto stats = g.stats.front();
+        auto stats = g.stats.back();
         double n = (double)stats.n;
 
         std::cout << "Stats gen " << g.generation << " " << stats << " in "

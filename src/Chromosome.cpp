@@ -27,6 +27,7 @@ static const double vbmax = vjmax * sqrt(PLAYER_MASS / BALL_MASS);
 static const double vrjmax = PLAYER_ROTATION_ACCELERATION / PLAYER_ROTATION_FROTTEMENT;
 
 Chromosome::Chromosome() {
+	this->id = uid();
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             this->matrix[i][j] =

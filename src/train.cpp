@@ -6,91 +6,67 @@ namespace fs = std::__fs::filesystem;
 #include "Population.hpp"
 #include "config.h"
 #include "train.hpp"
+#include "Generation.hpp"
 #include "util.hpp"
 
 #define POPNAME(gen)                                                           \
     "pops/pop-gen" + std::to_string(gen) + "-at-" + std::to_string(time(NULL))
 
 void train(int n_gen, int population_size, int n_thread) {
-    Population *pop = new Population(population_size);
-    pop->initialize();
+	Generation g((unsigned int)n_thread);
+	g.createPopulation(population_size);
     std::cout << "Nouvelle population crée" << std::endl;
-    trainPop(pop, n_gen, population_size, n_thread);
-    delete pop;
+    trainPop(g, n_gen, population_size, n_thread);
 }
 
 void trainFromFile(const char *inputFile, int n_gen, int population_size,
                    int n_thread) {
-    std::ifstream input;
-    input.open(inputFile);
-    Population *pop = Population::read(input);
-    std::cout << "Population chargée depuis " << inputFile << std::endl;
-    trainPop(pop, n_gen, population_size, n_thread);
-    delete pop;
+    /*    std::ifstream input;
+        input.open(inputFile);
+        Generation *g = Population::read(input);
+        std::cout << "Population chargée depuis " << inputFile << std::endl;
+        trainPop(pop, n_gen, population_size, n_thread);
+        delete pop;*/
 }
 
-void trainPop(Population *pop, int n_gen, int population_size, int n_thread) {
-    std::ofstream ofs;
-    ofs.open("stats.csv", std::ofstream::out | std::ofstream::trunc);
-    ofs.close();
-
-    std::ofstream statsFile;
-
-    // opening file using ofstream
-    statsFile.open("stats.csv", std::ios::app);
-
+void trainPop(Generation &g, int n_gen, int population_size, int n_thread) {
     std::cout << "Starting a train of " << n_gen << " generations with "
               << population_size << " chromosomes on " << n_thread
               << " threads." << std::endl;
 
-    int gen = 0;
     int last_save = 0;
 
-    while (gen < n_gen) {
+    while (g.generation < n_gen) {
 
         auto start = std::chrono::steady_clock::now();
 
-        gameStatistics stats = pop->next(n_thread);
+        g.step();
 
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start;
 
-        gen += 1;
         last_save += 1;
 
-        std::cout << "Stats gen " << gen << " " << stats << " in "
-                  << elapsed_seconds.count() << std::endl;
-
+        auto stats = g.stats.front();
         double n = (double)stats.n;
 
-        statsFile << gen << ", " << stats.totalCollisions / n << ", "
-                  << stats.total_ball_collisions / n << ", "
-                  << stats.totalGoals / n << ", " << (stats.stopped / n) * 100.
-                  << std::endl;
+        std::cout << "Stats gen " << g.generation << " " << stats << " in "
+                  << elapsed_seconds.count() << std::endl;
 
-        if (last_save > SAVE_RATE) {
-            std::ofstream out;
-            auto backup_fname = POPNAME(gen);
-            out.open(backup_fname);
-
-            pop->write(out);
-            out.close();
+		g.saveArbre("arbreDeVie.json");
+        if (g.generation % SAVE_RATE == 0 && g.generation > 0) {
+            auto backup_fname = POPNAME(g.generation);
+            g.save(backup_fname);
 
             fs::remove("pops/latest-backup");
             fs::create_hard_link(backup_fname, "pops/latest-backup");
-            last_save = 0;
         }
     }
 
-    std::ofstream out;
-    auto outFName = POPNAME(gen);
-    out.open(outFName);
-
-    pop->write(out);
-    out.close();
-    statsFile.close();
+    auto fn = POPNAME(g.generation);
+    g.save(fn);
     fs::remove("pops/latest");
-    fs::create_hard_link(outFName, "pops/latest");
+    fs::create_hard_link(fn, "pops/latest");
 }
 
 void play_match(const char *fileC1, const char *fileC2) {

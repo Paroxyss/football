@@ -3,6 +3,7 @@
 #include "Chromosome.hpp"
 #include "Game.hpp"
 #include <utility>
+#include "Generation.hpp"
 
 class Population {
   public:
@@ -14,7 +15,7 @@ class Population {
     ~Population();
 
     void initialize();
-    gameStatistics next(int n_thread, bool save = false);
+    gameStatistics next(int n_thread, bool save = false, Generation *parent = NULL);
 
     std::tuple<Chromosome *, Chromosome *, gameStatistics>
     tournament(int k, bool save);
@@ -25,3 +26,4 @@ class Population {
 Chromosome *cloneChromosome(Chromosome *original);
 void update_statistics(gameStatistics &tourn_stats, gameStatistics *tournResult,
                        int count);
+

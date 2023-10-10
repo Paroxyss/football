@@ -1,18 +1,20 @@
 #pragma once
 
 #include "Game.hpp"
+#include "Genealogy.hpp"
 #include "Matrix.h"
 #include "config.h"
 #include <fstream>
 
 typedef struct chromosomeStats {
     unsigned short instanceGoals;
-	int instanceAge;
+    int instanceAge;
 } chromosomeStats;
 
 class Chromosome {
   public:
     chromosomeStats stats = {.instanceGoals = 0, .instanceAge = 0};
+	unsigned long id;
 
     Matrix *matrix[EQUIPE_SIZE][NETWORK_SIZE - 1];
 
@@ -40,4 +42,5 @@ void mutate(Chromosome &c);
 Chromosome *crossover(Chromosome &a, Chromosome &b);
 double mmn(double x, double min, double max);
 void normalize_inputs(Matrix &inputs, int i);
-void writeInputs(player &target,player *equipeAlliee, player *equipeAdverse, ball *b, bool team);
+void writeInputs(player &target, player *equipeAlliee, player *equipeAdverse,
+                 ball *b, bool team);

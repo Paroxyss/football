@@ -32,3 +32,21 @@ bool likelyness(double v);
 
 std::ostream &operator<<(std::ostream &out, gameStatistics stats);
 std::ostream &operator<<(std::ostream &out, gameInformations stats);
+
+#define WRITE_EXPL(vname, file) file.write((char *)&vname, sizeof(vname))
+#define WRITE(vname) WRITE_EXPL(vname, file)
+
+#define READ_EXPL(vname, file) file.read((char *)&vname, sizeof(vname))
+#define READ(vname) READ_EXPL(vname, file)
+
+#define FILE_METHOD(method, constructor)                                       \
+    void method(std::constructor &file);                                       \
+    void method(std::string filename) {                                        \
+        std::constructor file;                                                 \
+        file.open(filename);                                                   \
+        method(file);                                                          \
+        file.close();                                                          \
+    };
+
+#define INFILE_METHOD(method) FILE_METHOD(method, ifstream)
+#define OUTFILE_METHOD(method) FILE_METHOD(method, ofstream)

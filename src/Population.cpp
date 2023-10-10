@@ -9,6 +9,7 @@
 
 #include "Chromosome.hpp"
 #include "Game.hpp"
+#include "Genealogy.hpp"
 #include "Population.hpp"
 #include "SafeQueue.hpp"
 #include "config.h"
@@ -47,7 +48,7 @@ void update_statistics(gameStatistics &tourn_stats,
     tourn_stats.stopped += tournResult.stopped;
 }
 
-gameStatistics Population::next(int n_thread, bool save) {
+gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
     for (int i = 0; i < this->size; i++) {
         this->pop[i]->stats.instanceAge++;
     }
@@ -55,6 +56,7 @@ gameStatistics Population::next(int n_thread, bool save) {
     SafeQueue<Chromosome *> nextPop;
     SafeQueue<gameStatistics> statsTournois;
     SafeQueue<std::tuple<int, int>> attributions;
+    SafeQueue<carteIdentite> liens;
 
     int expected = (double)this->size * ((double)1 - (double)NEW_BLOOD);
 
@@ -69,19 +71,24 @@ gameStatistics Population::next(int n_thread, bool save) {
     // on fait les tournois
     for (int i = 0; i < n_thread; i++) {
         threads[i] = std::thread([this, &nextPop, &expected, &statsTournois, i,
-                                  &attributions]() {
+                                  &attributions, &liens]() {
             while (nextPop.reserve() < expected) {
                 int tourn_size = random_power(this->size / 2);
                 auto outcome = this->tournament(tourn_size, false);
 
                 Chromosome *mutedWinner;
                 if (likelyness(CROSSOVER_PROBABILITY)) {
-                    mutedWinner =
-                        crossover(*std::get<0>(outcome), *std::get<1>(outcome));
+                    auto c1 = std::get<0>(outcome);
+                    auto c2 = std::get<1>(outcome);
+                    mutedWinner = crossover(*c1, *c2);
+                    liens.push((carteIdentite){
+                        .id = mutedWinner->id, .p1 = c1->id, .p2 = c2->id});
                 } else {
                     Chromosome *c = likelyness(0.8) ? std::get<0>(outcome)
                                                     : std::get<1>(outcome);
                     mutedWinner = cloneChromosome(c);
+                    liens.push((carteIdentite){
+                        .id = mutedWinner->id, .p1 = c->id, .p2 = 0});
                 }
 
                 mutate(*mutedWinner);
@@ -105,6 +112,7 @@ gameStatistics Population::next(int n_thread, bool save) {
         Chromosome *c = new Chromosome();
         c->initialize();
         nextPop.push(c);
+        liens.push({.id = c->id, .p1 = 0, .p2 = 0});
     }
 
     if (nextPop.size() != this->size) {
@@ -133,6 +141,15 @@ gameStatistics Population::next(int n_thread, bool save) {
         gameStatistics s;
         statsTournois.pop(s);
         update_statistics(tourn_stats, s);
+    }
+
+    if (parent) {
+        parent->arbre.ajouteCouche();
+        while (liens.size()) {
+            carteIdentite c;
+            liens.pop(c);
+            parent->arbre.pushId(c.id, c.p1, c.p2);
+        }
     }
 
     return tourn_stats;

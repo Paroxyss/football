@@ -159,16 +159,16 @@ std::tuple<Chromosome *, Chromosome *, gameStatistics>
 Population::tournament(int tourn_size, bool save) {
     std::vector<Chromosome *> contestants(tourn_size);
 
-    bool *selected = (bool *)calloc(tourn_size, sizeof(bool));
+    bool *selected = (bool *)calloc(this->size, sizeof(bool));
 
     for (int i = 0; i < tourn_size; i++) {
         // TODO: Apparemment rand() n'est pas thread-safe.
-        int k = thrand(0, tourn_size - 1);
+        int k = thrand(0, this->size-1);
 
         while (selected[k]) {
             k++;
 
-            if (k == tourn_size) {
+            if (k == this->size) {
                 k = 0;
             }
         }

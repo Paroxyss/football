@@ -73,7 +73,7 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
         threads[i] = std::thread([this, &nextPop, &expected, &statsTournois, i,
                                   &attributions, &liens]() {
             while (nextPop.reserve() < expected) {
-                int tourn_size = random_power(this->size / 2);
+                int tourn_size = random_power(this->size / 4);
                 auto outcome = this->tournament(tourn_size, false);
 
                 Chromosome *mutedWinner;

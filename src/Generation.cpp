@@ -1,11 +1,12 @@
 #include "Generation.hpp"
 #include "util.hpp"
 
-Generation::Generation(unsigned int nthread){
-	this->nthread = nthread;
+Generation::Generation(unsigned int nthread) {
+    this->nthread = nthread;
+    statsFile.open("stats.csv", std::ios::app);
 }
-Generation::~Generation(){
-	delete this->currentPop;
+Generation::~Generation() {
+    delete this->currentPop;
 }
 
 void Generation::createPopulation(unsigned int size) {
@@ -14,19 +15,25 @@ void Generation::createPopulation(unsigned int size) {
     delete this->currentPop;
     this->currentPop = pop;
     this->arbre.couchesSize = currentPop->size;
-	arbre.ajouteCouche();
-	for(int i = 0; i < size; i++){
-		arbre.pushId(this->currentPop->pop[i]->id, 0, 0);
-	}
+    arbre.ajouteCouche();
+    for (int i = 0; i < size; i++) {
+        arbre.pushId(this->currentPop->pop[i]->id, 0, 0);
+    }
+}
+
+void pushStatsToFile(std::ofstream &f, gameStatistics g, int generation) {
+    f << "[" << generation << ", " << (double)g.totalCollisions / g.n << ", "
+      << (double)g.total_ball_collisions / g.n << ", "
+      << (double)g.totalGoals / g.n << ", " << ((double)g.stopped / g.n) * 100.
+      << "]";
 }
 
 void Generation::appendStatsFile(gameStatistics g, int forceGen) {
     if (forceGen == -1) {
         forceGen = generation;
     }
-    statsFile << forceGen << ", " << g.totalCollisions / g.n << ", "
-              << g.total_ball_collisions / g.n << ", " << g.totalGoals / g.n
-              << ", " << ((double)g.stopped / g.n) * 100. << std::endl;
+    pushStatsToFile(statsFile, g, forceGen);
+    statsFile << std::endl;
 }
 
 void Generation::rewriteStats() {
@@ -34,7 +41,7 @@ void Generation::rewriteStats() {
         statsFile.close();
     }
 
-	// vider le fichier
+    // vider le fichier
     statsFile.open("stats.csv", std::ofstream::out | std::ofstream::trunc);
     statsFile.close();
 
@@ -66,13 +73,13 @@ void Generation::save(std ::ofstream &file) {
 }
 void Generation::load(std ::ifstream &file) {
     READ(generation);
-	
+
     delete this->currentPop;
     currentPop = Population::read(file);
     ArbreGenealogique::read(file, &this->arbre);
     unsigned int statsSize;
     READ(statsSize);
-	
+
     for (int i = 0; i < statsSize; i++) {
         gameStatistics s;
         READ(s);
@@ -80,6 +87,17 @@ void Generation::load(std ::ifstream &file) {
     }
     this->arbre.couchesSize = currentPop->size;
 }
-void Generation::saveArbre(std ::ofstream &file) {
-	arbre.writeJson(file);
+void Generation::saveJson(std ::ofstream &file) {
+    file << "{\"genealogy\":";
+    arbre.writeJson(file);
+    file << ", \"stats\":[";
+    int i = 0;
+    for (auto &stat : stats) {
+        pushStatsToFile(file, stat, i++);
+		std::cout << i << " " << generation << std::endl;
+        if (i != generation) {
+            file << ",";
+        }
+    }
+    file << "]}";
 }

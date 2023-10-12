@@ -32,8 +32,7 @@ class Generation {
     INFILE_METHOD(load)
     // INFILE_METHOD(loadPopulation)
     OUTFILE_METHOD(save)
-    OUTFILE_METHOD(saveArbre)
-    // OUTFILE_METHOD(saveStats)
+    OUTFILE_METHOD(saveJson)
 };
 
 #include "Population.hpp"

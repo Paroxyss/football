@@ -44,6 +44,8 @@ std::ostream &operator<<(std::ostream &out, gameInformations stats);
     void method(std::string filename) {                                        \
         std::constructor file;                                                 \
         file.open(filename);                                                   \
+        if (!file.is_open())                                                  \
+            throw std::invalid_argument("File not found");                     \
         method(file);                                                          \
         file.close();                                                          \
     };

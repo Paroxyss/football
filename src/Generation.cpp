@@ -34,11 +34,10 @@ void Generation::rewriteStats() {
         statsFile.close();
     }
 
-    std::ofstream ofs;
-    ofs.open("stats.csv", std::ofstream::out | std::ofstream::trunc);
-    ofs.close();
+	// vider le fichier
+    statsFile.open("stats.csv", std::ofstream::out | std::ofstream::trunc);
+    statsFile.close();
 
-    // opening file using ofstream
     statsFile.open("stats.csv", std::ios::app);
     int i = 0;
     for (auto &s : stats) {

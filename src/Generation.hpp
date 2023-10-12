@@ -19,6 +19,7 @@ class Generation {
   public:
     std::ofstream statsFile;
     Generation(unsigned int nthread);
+	~Generation();
 
     void createPopulation(unsigned int size);
 

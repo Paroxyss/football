@@ -4,6 +4,9 @@
 Generation::Generation(unsigned int nthread){
 	this->nthread = nthread;
 }
+Generation::~Generation(){
+	delete this->currentPop;
+}
 
 void Generation::createPopulation(unsigned int size) {
     Population *pop = new Population(size);

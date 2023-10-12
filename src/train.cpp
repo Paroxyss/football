@@ -1,6 +1,10 @@
 #include <filesystem>
 #include <stdexcept>
+#ifdef __MACH__
 namespace fs = std::__fs::filesystem;
+#else
+namespace fs = std::filesystem;
+#endif
 
 #include "Chromosome.hpp"
 #include "Generation.hpp"

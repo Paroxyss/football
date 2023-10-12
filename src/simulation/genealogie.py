@@ -1,31 +1,28 @@
 import pygame as pg
+import numpy as np
 import json
 import random
 import colorsys
 from math import fmod
 import random
 
-
-
 def read_json():
-    name = "arbreDeVie.json"
+    name = "stats.json"
     with open(name) as json_file:
         data = json.load(json_file)
         return data
 
-
 def random_color():
     return random.random(), 0.5 + 0*random.random(), 0.5 #random.random()
 
-
 def mutate(color):
     while(color[0] < 0):
-        color[0]+=1
+        color = (color[0]+1, color[1], color[2])
     return color
     return (
         fmod(color[0] + random.random() * 0.05 - 0.025, 1),
-        min(color[1] + random.random() * 0.05 - 0.025, 1),
-        min(color[2] + random.random() * 0.05 - 0.025, 1),
+        color[1],#min(color[1] + random.random() * 0.05 - 0.025, 1),
+        color[2],#min(color[2] + random.random() * 0.05 - 0.025, 1),
     )
 
 
@@ -52,10 +49,30 @@ def draw_couche_genealogique(data, j):
         converted = colorsys.hls_to_rgb(color[0], color[1], color[2])
         converted = (converted[0] * 255, converted[1] * 255, converted[2] * 255)
         #print(color, converted)
-        pg.draw.rect(screen, converted, (j * r, r * i, r+1, r+1))
-        pg.draw.rect(screen, converted, (j * r, r * (i + len(colors)), r+1, r+1))
+        pg.draw.rect(screen, converted, (j * largeur, hauteur * i, largeur+1, hauteur+1))
         i += 1
 
+def getCol(i):
+    return lambda x: x[i]
+
+def verticalGet(d,i):
+    return np.fromiter(map(getCol(i), d), float)
+
+def draw_stats(data):
+    maxes = [
+        np.max(verticalGet(data, 0)),
+        np.max(verticalGet(data, 1)),
+        np.max(verticalGet(data, 2)),
+        np.max(verticalGet(data, 3)),
+        np.max(verticalGet(data, 4)),
+    ]    
+    colors = [(0,0,0),(0,255,0),(255,0,0),(255,255,0),(0,255,255)]
+    for i in range(len(data)-1):
+        for d in range(len(data[i])):
+            def getDataAt(i):
+                return (2-data[i][d]/maxes[d])*(screen_height/2)
+            pg.draw.line(screen, colors[d], ((i+1)*largeur, getDataAt(i)), ((i+2)*largeur, getDataAt(i+1)), 2)
+    
 def circularDistance(a, b):
     return abs(fmod(abs(b-a), 1))
 # moyenne circulaire pour un cercle entre 0 et 1
@@ -73,21 +90,24 @@ def average_color(color1, color2):
         (color1[2] + color2[2]) / 2
     )
 
-
 file_content = read_json()
+
+genes=file_content["genealogy"]
 
 pg.init()
 running = True
-population_size = max(700, len(file_content))
+n_gen = len(genes)
+population_size = len(genes[0])
 screen_width = 1400
-screen_height = 850
-r = screen_width / population_size
+screen_height = 650
+hauteur = screen_height/population_size/2
+largeur = screen_width/n_gen
 red = (255, 255, 255)
 screen = pg.display.set_mode((screen_width, screen_height))
 ids = {}
-for i in range(len(file_content)):
-    draw_couche_genealogique(file_content[i], i)
-
+for i in range(len(genes)):
+    draw_couche_genealogique(genes[i], i)
+draw_stats(file_content["stats"])
 
 pg.display.flip()
 

@@ -2,6 +2,7 @@
 tests/*
 *.pyc
 *.csv
+*.json
 *.bin
 *.o
 

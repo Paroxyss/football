@@ -78,7 +78,7 @@ file_content = read_json()
 
 pg.init()
 running = True
-population_size = 700 #2*len(file_content)
+population_size = max(700, len(file_content))
 screen_width = 1400
 screen_height = 850
 r = screen_width / population_size

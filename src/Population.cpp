@@ -73,7 +73,7 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
         threads[i] = std::thread([this, &nextPop, &expected, &statsTournois, i,
                                   &attributions, &liens]() {
             while (nextPop.reserve() < expected) {
-                int tourn_size = random_power(this->size / 4);
+                int tourn_size = thrand(4, this->size / 4);
                 auto outcome = this->tournament(tourn_size, false);
 
                 Chromosome *mutedWinner;
@@ -157,13 +157,13 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
 
 std::tuple<Chromosome *, Chromosome *, gameStatistics>
 Population::tournament(int tourn_size, bool save) {
-    std::vector<Chromosome *> contestants(tourn_size);
+    std::queue<Chromosome *> contestants;
 
     bool *selected = (bool *)calloc(this->size, sizeof(bool));
 
     for (int i = 0; i < tourn_size; i++) {
         // TODO: Apparemment rand() n'est pas thread-safe.
-        int k = thrand(0, this->size-1);
+        int k = thrand(0, this->size - 1);
 
         while (selected[k]) {
             k++;
@@ -173,7 +173,7 @@ Population::tournament(int tourn_size, bool save) {
             }
         }
 
-        contestants[i] = this->pop[k];
+        contestants.push(this->pop[k]);
         selected[k] = true;
     }
 
@@ -187,33 +187,50 @@ Population::tournament(int tourn_size, bool save) {
         .stopped = 0,
     };
 
-    while (tourn_size > 2) {
-        int pool_size = tourn_size / 2;
-        std::vector<Chromosome *> pool(pool_size);
+    while (contestants.size() > 2) {
+        auto c1 = contestants.front();
+        contestants.pop();
+        auto c2 = contestants.front();
+        contestants.pop();
+        auto match_results = play_match(c1, c2, save);
 
-        for (int i = 0; i < pool_size; i++) {
-            auto match_results =
-                play_match(contestants[i * 2], contestants[i * 2 + 1], save);
-
-            if (match_results.score > 0) {
-                pool[i] = contestants[i * 2];
-            } else {
-                pool[i] = contestants[i * 2 + 1];
-            }
-
-            // statistiques
-            gameStats.totalCollisions += match_results.collisions;
-            gameStats.totalGoals += match_results.goals;
-            gameStats.total_ball_collisions += match_results.ball_collisions;
-            gameStats.stopped += match_results.stopped ? 1 : 0;
-            gameStats.n++;
+        if (match_results.score > 0) {
+            contestants.push(c1);
+        } else {
+            contestants.push(c2);
         }
 
-        tourn_size = pool_size;
-        contestants = pool;
+        // statistiques
+        gameStats.totalCollisions += match_results.collisions;
+        gameStats.totalGoals += match_results.goals;
+        gameStats.total_ball_collisions += match_results.ball_collisions;
+        gameStats.stopped += match_results.stopped ? 1 : 0;
+        gameStats.n++;
     }
 
-    return std::make_tuple(contestants[0], contestants[1], gameStats);
+	auto w1 = contestants.front();
+	auto w2 = contestants.back();
+
+	auto final_result = play_match(w1, w2);
+
+	Chromosome* winner;
+	Chromosome* second;
+
+	if (final_result.score > 0) {
+		winner = w1;
+		second = w2;
+	} else {
+		winner = w2;
+		second = w1;
+	}
+	
+	gameStats.totalCollisions += final_result.collisions;
+	gameStats.totalGoals += final_result.goals;
+	gameStats.total_ball_collisions += final_result.ball_collisions;
+	gameStats.stopped += final_result.stopped ? 1 : 0;
+	gameStats.n++;
+	
+    return std::make_tuple(winner, second, gameStats);
 }
 
 Chromosome *cloneChromosome(Chromosome *original) {

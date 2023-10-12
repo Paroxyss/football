@@ -1,5 +1,6 @@
 #include "Chromosome.hpp"
 #include "Game.hpp"
+#include "Generation.hpp"
 #include "Matrix.h"
 #include "Simulation.hpp"
 #include "config.h"
@@ -71,20 +72,13 @@ int main(int argc, char *argv[]) {
         else
             train(n_gen, pop_size, n_thread);
 
-    } else if (strcmp(argv[1], "play") == 0) {
+    } else if (strcmp(argv[1], "genArbre") == 0) {
         if (argc < 3) {
             throw std::invalid_argument("Missing argument popFile");
         }
-        simulate_and_save(argv[2]);
-    } else if (strcmp(argv[1], "map") == 0) {
-        if (argc < 3) {
-            throw std::invalid_argument("Missing argument popFile");
-        }
-        if (argc > 3) {
-            saveMap(argv[2], argv[3]);
-        } else {
-            saveMap(argv[2]);
-        }
+		Generation g(0);
+		g.load(argv[2]);
+		g.saveArbre("arbreDeVie.json");
     } else if (strcmp(argv[1], "random") == 0) {
         play_random_match(argv[2]);
     } else if (strcmp(argv[1], "seegoal") == 0) {

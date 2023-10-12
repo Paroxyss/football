@@ -38,6 +38,9 @@ const int PLAYER_LAYERS[NETWORK_SIZE] = {
 
 #define POPULATION_SIZE 1000
 
+// entre 0 et 1, configure la taille maximum des tournois en proportion de
+// population, 1 pour tous, 0 pour personne
+#define PRESSION_SELECTIVE 0.33
 // entre 0.6 et 0.9
 #define CROSSOVER_PROBABILITY 0.9
 

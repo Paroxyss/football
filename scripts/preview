@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+python3 src/simulation/recordGame.py $1
+scripts/img2gif output.avi
+scripts/imgcat -W 30% output.avi.gif
+
+rm output.avi
+rm output.avi.gif

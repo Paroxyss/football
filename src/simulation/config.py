@@ -1,5 +1,5 @@
 import pygame as pg
-
+import os
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 119 * 10, 75 * 10
 PLAYER_SIZE = 2 * 10
@@ -27,5 +27,10 @@ PLAYER_FROTTEMENT = 1 / 20
 MASS_PLAYER = 100
 MASS_BALL = 40
 
+if not ("SCREEN_FACTOR" in os.environ.keys()):
+    global SCREEN_FACTOR
+    SCREEN_FACTOR = 1
+else:
+    SCREEN_FACTOR = float(os.environ["SCREEN_FACTOR"])
 
-screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pg.display.set_mode((SCREEN_WIDTH*SCREEN_FACTOR, SCREEN_HEIGHT*SCREEN_FACTOR))

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+INPUT=$1
+
+echo "Generate a palette:"
+ffmpeg -y -i $INPUT -vf fps=15,scale=300:-1:flags=lanczos,palettegen palette.png
+
+echo "Output the GIF using the palette:"
+ffmpeg -y -i $INPUT -threads 3 -i palette.png -filter_complex "fps=30,scale=300:-1:flags=lanczos[x];[x][1:v]paletteuse" $INPUT.gif
+
+rm palette.png

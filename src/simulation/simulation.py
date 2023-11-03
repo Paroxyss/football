@@ -19,6 +19,12 @@ if len(sys.argv) >= 2:
 data = read(filename)
 
 nb_joueurs = int(data[0][1] * 2)
+walls = []
+wallData = data[0][6:]
+
+for i in range(len(wallData)//4):
+    walls.append(wallData[4*i:4*i+4])
+
 running = True
 parsed = []
 show = [False for _ in range(nb_joueurs)]
@@ -31,6 +37,7 @@ for i in range(0, len(data)):
 while running:
     for i in range(0, len(parsed)):
         draw_field()
+        drawWalls(walls)
         draw_goal()
         progression_bar(i, len(parsed))
 

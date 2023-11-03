@@ -102,6 +102,15 @@ def show_data(infos, k, nb_joueurs):
     pg.draw.line( screen, PURPLE, (x * SCREEN_FACTOR, y * SCREEN_FACTOR), ep, 2 * SCREEN_FACTOR)
 
 
+def drawWalls(walls):
+    for i in range(len(walls)):
+        pg.draw.line(
+            screen,
+            WHITE,
+            (walls[i][0]*SCREEN_FACTOR, walls[i][1]*SCREEN_FACTOR),
+            ((walls[i][0]+ walls[i][2])*SCREEN_FACTOR, (walls[i][1]+ walls[i][3])*SCREEN_FACTOR),
+            2*SCREEN_FACTOR
+        )
 def draw_goal():
     pg.draw.rect(
         screen,

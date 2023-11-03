@@ -55,6 +55,7 @@ class Game {
 
     unsigned int wallNumber;
     wall *walls;
+	struct ball *wallsBouts;
     wall *goals;
 
     gameInformations infos = {.collisions = 0,

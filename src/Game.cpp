@@ -1,3 +1,4 @@
+#include <cfloat>
 #include <cmath>
 #include <cstdio>
 #include <ctime>
@@ -17,12 +18,21 @@
 #include "util.hpp"
 
 std::ofstream csvOutputFile;
+#define SETWALLBOUT(id, px, py)                                                \
+    this->wallsBouts[id].pos.x = px;                                           \
+    this->wallsBouts[id].pos.y = py;                                           \
+    this->wallsBouts[id].vitesse.x = 0;                                        \
+    this->wallsBouts[id].vitesse.y = 0;                                        \
+    this->wallsBouts[id].mass = 10e100;                                        \
+    this->wallsBouts[id].size = 0;
 
 #define SETWALL(id, px, py, dx, dy)                                            \
     this->walls[id].pos.x = px;                                                \
     this->walls[id].pos.y = py;                                                \
     this->walls[id].vitesse.x = dx;                                            \
-    this->walls[id].vitesse.y = dy;
+    this->walls[id].vitesse.y = dy;                                            \
+    SETWALLBOUT(2 * id, px, py);                                               \
+    SETWALLBOUT(2 * id + 1, px + dx, py + dy);
 
 #define SETGOAL(id, px, py, dx, dy, s)                                         \
     this->goals[id].pos.x = px;                                                \
@@ -33,24 +43,49 @@ std::ofstream csvOutputFile;
 
 Game::Game(int playerNumber, bool logToFile) {
     this->logToFile = logToFile;
-    if (this->logToFile) {
-        csvOutputFile.open("game.csv");
-        csvOutputFile << "STARTGAME, " << playerNumber / 2 << "," << MAP_HEIGHT
-                      << "," << MAP_LENGTH << "," << BALL_SIZE << ","
-                      << PLAYER_SIZE << std::endl;
-    }
+
     this->playerNumber = playerNumber;
     this->players = new player[playerNumber];
 
-    this->wallNumber = 4;
+    this->wallNumber = 16;
     this->walls = new wall[this->wallNumber];
+    // debuts et fins des murs
+    this->wallsBouts = new struct ball[2 * this->wallNumber];
 
     this->goals = new wall[2];
 
-    SETWALL(0, 0, 0, 1, 0);
-    SETWALL(1, 0, 0, 0, 1);
-    SETWALL(2, MAP_LENGTH, MAP_HEIGHT, 1, 0);
-    SETWALL(3, MAP_LENGTH, MAP_HEIGHT, 0, 1);
+    SETWALL(0, 0, 0, MAP_LENGTH, 0);
+    SETWALL(1, 0, 0, 0, MAP_HEIGHT);
+    SETWALL(2, 0, MAP_HEIGHT, MAP_LENGTH, 0);
+    SETWALL(3, MAP_LENGTH, MAP_HEIGHT, 0, -MAP_HEIGHT);
+
+    SETWALL(4, 0, (MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POTEAU_WIDTH,
+            POTEAU_LENGTH, 0);
+    SETWALL(5, 0, (MAP_HEIGHT - (double)GOAL_HEIGHT) / 2, POTEAU_LENGTH, 0);
+    SETWALL(6, 0, (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2 + POTEAU_WIDTH,
+            POTEAU_LENGTH, 0);
+    SETWALL(7, 0, (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2, POTEAU_LENGTH, 0);
+    SETWALL(8, POTEAU_LENGTH,
+            (MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POTEAU_WIDTH, 0,
+            POTEAU_WIDTH);
+    SETWALL(9, POTEAU_LENGTH, (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2, 0,
+            POTEAU_WIDTH);
+
+    SETWALL(10, MAP_LENGTH,
+            (MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POTEAU_WIDTH,
+            -POTEAU_LENGTH, 0);
+    SETWALL(11, MAP_LENGTH, (MAP_HEIGHT - (double)GOAL_HEIGHT) / 2,
+            -POTEAU_LENGTH, 0);
+    SETWALL(12, MAP_LENGTH,
+            (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2 + POTEAU_WIDTH,
+            -POTEAU_LENGTH, 0);
+    SETWALL(13, MAP_LENGTH, (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2,
+            -POTEAU_LENGTH, 0);
+    SETWALL(14, MAP_LENGTH - POTEAU_LENGTH,
+            (MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POTEAU_WIDTH, 0,
+            POTEAU_WIDTH);
+    SETWALL(15, MAP_LENGTH - POTEAU_LENGTH,
+            (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2, 0, POTEAU_WIDTH);
 
     SETGOAL(0, 0,
             static_cast<float>(MAP_HEIGHT) / 2 -
@@ -65,6 +100,18 @@ Game::Game(int playerNumber, bool logToFile) {
     for (int i = 0; i < playerNumber; i++) {
         setPlayer(i, {.x = 0, .y = 0}, {.x = 0, .y = 0}, 0, PLAYER_SIZE);
         players[i].inputs = new Matrix(NETWORK_INPUT_SIZE, 1);
+    }
+    if (this->logToFile) {
+        csvOutputFile.open("game.csv");
+        csvOutputFile << "STARTGAME, " << playerNumber / 2 << "," << MAP_HEIGHT
+                      << "," << MAP_LENGTH << "," << BALL_SIZE << ","
+                      << PLAYER_SIZE;
+        for (int i = 0; i < wallNumber; i++) {
+            csvOutputFile << "," << walls[i].pos.x << "," << walls[i].pos.y
+                          << "," << walls[i].vitesse.x << ","
+                          << walls[i].vitesse.y;
+        }
+        csvOutputFile << std::endl;
     }
 }
 
@@ -125,7 +172,6 @@ void Game::set_players(const int conf[], int n) {
             // symétrie.
             this->players[c].orientation =
                 this->players[c - s].orientation + M_PI;
-
             c++;
         }
     }
@@ -196,10 +242,27 @@ collisionList *Game::getObjectCollisionList(int objId,
         // on regarde la distance au mur, si elle est inférieure au rayon de
         // la balle, c'est que la balle est en collision
         vector normal = {.x = -w.vitesse.y, .y = w.vitesse.x};
+        double longueurDuMur = norme(w.vitesse);
         double d = dotProduct(selected->pos - w.pos, normal) / norme(normal);
-        if (abs(d) <
-            selected->size) { // la balle est trop près du mur, il y a collision
+
+        double pRelat = dotProduct(selected->pos - w.pos, w.vitesse) /
+                        (longueurDuMur * longueurDuMur);
+
+        if (!(abs(d) < selected->size)) {
+            // le joueur n'est pas dans la droite du mur
+            continue;
+        }
+        if (abs(d) < selected->size && 0 < pRelat && 1 > pRelat) {
+            // la balle est trop près du mur, il y a collision
             listToAppend = insert(listToAppend, selected, &w, WALL);
+        }
+    }
+
+    for (int i = 0; i < 2 * wallNumber; i++) {
+        if (distancecarre(*selected, this->wallsBouts[i]) <
+            pow(selected->size, 2)) {
+            listToAppend =
+                insert(listToAppend, selected, &this->wallsBouts[i], CIRCLE);
         }
     }
 
@@ -278,10 +341,13 @@ collisionList *findFirstCollision(collisionList *list) {
     }
 
     auto nextBest = findFirstCollision(list->next);
-    if (nextBest && nextBest->time < list->time) {
+    if (nextBest && nextBest->time < list->time && list->time > 0) {
         return nextBest;
     }
-    return list;
+    if (list->time >= -10000) {
+        return list;
+    }
+    return NULL;
 }
 
 // Libere la liste chainée
@@ -338,10 +404,15 @@ void Game::tick(double timeToAdvance, bool root, bool clearAccels,
 
         // On regarde à quel instant est survenu la première collision
         collisionList *firstCollision = findFirstCollision(c);
+        if (!firstCollision || firstCollision->time < -10000) {
+            // très rare cas, si un objet à une trajéctoire parfaitement
+            // parallèle à un mur
+            freeCollisionList(c);
+            return;
+        }
 
         // On avance à cet instant précis
         moveAllObj(firstCollision->time);
-
         // On effectue la collision
         switch (firstCollision->type) {
         case CIRCLE:

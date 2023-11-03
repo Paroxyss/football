@@ -24,6 +24,8 @@ const int PLAYER_LAYERS[NETWORK_SIZE] = {
 #define MAP_LENGTH (119 * 10)
 #define MAP_HEIGHT (75 * 10)
 #define GOAL_HEIGHT (15 * 12)
+#define POTEAU_LENGTH 20
+#define POTEAU_WIDTH 20
 
 #define PLAYER_MASS 100
 #define PLAYER_SIZE (2 * 10)

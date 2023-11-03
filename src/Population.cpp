@@ -53,7 +53,7 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
         this->pop[i]->stats.instanceAge++;
     }
 
-    SafeQueue<Chromosome *> nextPop;
+    SafeQueue<Chromosome *> nextPop(n_thread);
     SafeQueue<gameStatistics> statsTournois;
     SafeQueue<std::tuple<int, int>> attributions;
     SafeQueue<carteIdentite> liens;
@@ -69,10 +69,11 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
                                   .stopped = 0};
 
     // on fait les tournois
-    for (int i = 0; i < n_thread; i++) {
-        threads[i] = std::thread([this, &nextPop, &expected, &statsTournois, i,
-                                  &attributions, &liens]() {
-            while (nextPop.reserve() < expected) {
+    for (int threadId = 0; threadId < n_thread; threadId++) {
+        threads[threadId] = std::thread([this, &nextPop, &expected,
+                                         &statsTournois, threadId,
+                                         &attributions, &liens]() {
+            while (nextPop.reserve(threadId) < expected) {
                 int tourn_size = thrand(4, this->size * PRESSION_SELECTIVE);
                 auto outcome = this->tournament(tourn_size, false);
 
@@ -92,9 +93,19 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
                 }
 
                 mutate(*mutedWinner);
-                nextPop.pushReserved(mutedWinner);
+                nextPop.pushReserved(mutedWinner, threadId);
                 statsTournois.push(std::get<2>(outcome));
-                attributions.push(std::tuple(i, std::get<2>(outcome).n));
+                attributions.push(std::tuple(threadId, std::get<2>(outcome).n));
+            }
+            nextPop.cancelRes(threadId);
+
+            // On introduit des individus complètement nouveau pour explorer le
+            // plus de solutions possible.
+            while (nextPop.reserve(threadId) <= this->size) {
+                Chromosome *c = new Chromosome();
+                c->initialize();
+                nextPop.pushReserved(c, threadId);
+                liens.push({.id = c->id, .p1 = 0, .p2 = 0});
             }
         });
     }
@@ -104,18 +115,8 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
     }
     nextPop.clearReservations();
 
-    // update_statistics(tourn_stats, &tournResult, matchs_count[i]);
-
-    // On introduit des individus complètement nouveau pour explorer le plus
-    // de solutions possible.
-    while (nextPop.size() < this->size) {
-        Chromosome *c = new Chromosome();
-        c->initialize();
-        nextPop.push(c);
-        liens.push({.id = c->id, .p1 = 0, .p2 = 0});
-    }
-
     if (nextPop.size() != this->size) {
+		std::cout << nextPop.size() << "≠" << this->size << std::endl;
         throw std::logic_error("Incohérence entre la population actuelle et la "
                                "population suivante");
     }
@@ -208,28 +209,28 @@ Population::tournament(int tourn_size, bool save) {
         gameStats.n++;
     }
 
-	auto w1 = contestants.front();
-	auto w2 = contestants.back();
+    auto w1 = contestants.front();
+    auto w2 = contestants.back();
 
-	auto final_result = play_match(w1, w2);
+    auto final_result = play_match(w1, w2);
 
-	Chromosome* winner;
-	Chromosome* second;
+    Chromosome *winner;
+    Chromosome *second;
 
-	if (final_result.score > 0) {
-		winner = w1;
-		second = w2;
-	} else {
-		winner = w2;
-		second = w1;
-	}
-	
-	gameStats.totalCollisions += final_result.collisions;
-	gameStats.totalGoals += final_result.goals;
-	gameStats.total_ball_collisions += final_result.ball_collisions;
-	gameStats.stopped += final_result.stopped ? 1 : 0;
-	gameStats.n++;
-	
+    if (final_result.score > 0) {
+        winner = w1;
+        second = w2;
+    } else {
+        winner = w2;
+        second = w1;
+    }
+
+    gameStats.totalCollisions += final_result.collisions;
+    gameStats.totalGoals += final_result.goals;
+    gameStats.total_ball_collisions += final_result.ball_collisions;
+    gameStats.stopped += final_result.stopped ? 1 : 0;
+    gameStats.n++;
+
     return std::make_tuple(winner, second, gameStats);
 }
 

@@ -12,6 +12,7 @@
 #include "Genealogy.hpp"
 #include "Population.hpp"
 #include "SafeQueue.hpp"
+#include "TasTronque.hpp"
 #include "config.h"
 #include "util.hpp"
 
@@ -68,55 +69,55 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
                                   .total_ball_collisions = 0,
                                   .stopped = 0};
 
-    // on fait les tournois
-    for (int threadId = 0; threadId < n_thread; threadId++) {
-        threads[threadId] = std::thread([this, &nextPop, &expected,
-                                         &statsTournois, threadId,
-                                         &attributions, &liens]() {
-            while (nextPop.reserve(threadId) < expected) {
-                int tourn_size = thrand(4, this->size * PRESSION_SELECTIVE);
-                auto outcome = this->tournament(tourn_size, false);
+    // on crée l'arbre
+    TasSelection tas(5);
 
-                Chromosome *mutedWinner;
-                if (likelyness(CROSSOVER_PROBABILITY)) {
-                    auto c1 = std::get<0>(outcome);
-                    auto c2 = std::get<1>(outcome);
-                    mutedWinner = crossover(*c1, *c2);
-                    liens.push((carteIdentite){
-                        .id = mutedWinner->id, .p1 = c1->id, .p2 = c2->id});
-                } else {
-                    Chromosome *c = likelyness(0.8) ? std::get<0>(outcome)
-                                                    : std::get<1>(outcome);
-                    mutedWinner = cloneChromosome(c);
-                    liens.push((carteIdentite){
-                        .id = mutedWinner->id, .p1 = c->id, .p2 = 0});
-                }
-
-                mutate(*mutedWinner);
-                nextPop.pushReserved(mutedWinner, threadId);
-                statsTournois.push(std::get<2>(outcome));
-                attributions.push(std::tuple(threadId, std::get<2>(outcome).n));
-            }
-            nextPop.cancelRes(threadId);
-
-            // On introduit des individus complètement nouveau pour explorer le
-            // plus de solutions possible.
-            while (nextPop.reserve(threadId) <= this->size) {
-                Chromosome *c = new Chromosome();
-                c->initialize();
-                nextPop.pushReserved(c, threadId);
-                liens.push({.id = c->id, .p1 = 0, .p2 = 0});
-            }
-        });
+    for (int i = 0; i < this->size; i++) {
+        tas.insere(pop[i]);
     }
-    // on attends la fin des tournois
-    for (int i = 0; i < n_thread; i++) {
-        threads[i].join();
+
+	Chromosome*gagnants[32];
+    for (int i = 0; i < 32; i++) {
+        gagnants[i] = tas.extraire();
+    }
+
+    while (nextPop.reserve(0) < expected) {
+		int id1 = binomialRestreint(0.7, 31);
+		int id2 = binomialRestreint(0.7, 31);
+
+        Chromosome *mutedWinner;
+        if (likelyness(CROSSOVER_PROBABILITY)) {
+            auto c1 = gagnants[id1];
+            auto c2 = gagnants[id2];
+            mutedWinner = crossover(*c1, *c2);
+            liens.push((carteIdentite){
+                .id = mutedWinner->id, .p1 = c1->id, .p2 = c2->id});
+        } else {
+            Chromosome *c =gagnants[id1];
+            mutedWinner = cloneChromosome(c);
+            liens.push(
+                (carteIdentite){.id = mutedWinner->id, .p1 = c->id, .p2 = 0});
+        }
+
+        mutate(*mutedWinner);
+        nextPop.pushReserved(mutedWinner, 0);
+        //statsTournois.push(std::get<2>(outcome));
+        //attributions.push(std::tuple(0, std::get<2>(outcome).n));
+    }
+    nextPop.cancelRes(0);
+
+    // On introduit des individus complètement nouveau pour explorer le
+    // plus de solutions possible.
+    while (nextPop.reserve(0) <= this->size) {
+        Chromosome *c = new Chromosome();
+        c->initialize();
+        nextPop.pushReserved(c, 0);
+        liens.push({.id = c->id, .p1 = 0, .p2 = 0});
     }
     nextPop.clearReservations();
 
     if (nextPop.size() != this->size) {
-		std::cout << nextPop.size() << "≠" << this->size << std::endl;
+        std::cout << nextPop.size() << "≠" << this->size << std::endl;
         throw std::logic_error("Incohérence entre la population actuelle et la "
                                "population suivante");
     }

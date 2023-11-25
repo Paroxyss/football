@@ -29,6 +29,7 @@ int previous_power(int n);
 int random_power(int n);
 double angleRounded(double input);
 bool likelyness(double v);
+double binomialRestreint(double p, double maxi);
 
 std::ostream &operator<<(std::ostream &out, gameStatistics stats);
 std::ostream &operator<<(std::ostream &out, gameInformations stats);

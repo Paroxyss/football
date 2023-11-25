@@ -22,6 +22,12 @@ double randomDouble() {
     return randomDouble(-1.77, 1.77);
 }
 
+// loi binomiale avec restriction
+double binomialRestreint(double p, double maxi) {
+    double tirage = randomDouble(pow(p, maxi), 1);
+    return log(tirage) / log(p);
+}
+
 int previous_power(int n) {
     while (n & n - 1) {
         n = n & n - 1;

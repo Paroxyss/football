@@ -5,6 +5,7 @@ tests/*
 *.json
 *.bin
 *.o
+*.dSYM
 
 bin
 

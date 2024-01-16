@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
             auto start = std::chrono::high_resolution_clock::now();
 
             for (int i = 0; i < matchPerIter; i++) {
-                play_match(&c[i % chromosomeCount], &c[i / chromosomeCount]);
+                auto stats = play_match(&c[i % chromosomeCount], &c[i / chromosomeCount]);
             }
 
             auto end = std::chrono::high_resolution_clock::now();

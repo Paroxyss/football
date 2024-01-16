@@ -1,17 +1,16 @@
 #include "Chromosome.hpp"
 #include "Activation.hpp"
 #include "Crossover.hpp"
-
 #include "Game.hpp"
 #include "Matrix.h"
 #include "Vector.hpp"
 #include "config.h"
 #include "util.hpp"
 
-#include <array>
 #include <cmath>
 #include <iostream>
 #include <ostream>
+#include <stdexcept>
 
 // Opérations couteuses donc mises en statiques, elles sont utilisées
 // pour la normalisation min-max.
@@ -24,15 +23,19 @@ static const double vjmax = PLAYER_ACCELERATION / PLAYER_FROTTEMENT;
 // Vitesse maximum de la balle
 static const double vbmax = vjmax * sqrt(PLAYER_MASS / BALL_MASS);
 
-static const double vrjmax = PLAYER_ROTATION_ACCELERATION / PLAYER_ROTATION_FROTTEMENT;
+static const double vrjmax =
+    PLAYER_ROTATION_ACCELERATION / PLAYER_ROTATION_FROTTEMENT;
 
 Chromosome::Chromosome() {
-	this->id = uid();
+    this->id = uid();
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             this->matrix[i][j] =
                 new Matrix(PLAYER_LAYERS[j + 1], PLAYER_LAYERS[j]);
         }
+    }
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        this->didier[i] = new Matrix(DIDIER_LAYERS[i + 1], DIDIER_LAYERS[i]);
     }
 }
 
@@ -41,6 +44,9 @@ Chromosome::~Chromosome() {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             delete this->matrix[i][j];
         }
+    }
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        delete this->didier[i];
     }
 }
 
@@ -51,6 +57,10 @@ void Chromosome::print() {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
             this->matrix[i][j]->print();
         }
+    }
+    std::cout << "Didier: " << std::endl;
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        this->didier[i]->print();
     }
 }
 
@@ -69,6 +79,9 @@ void Chromosome::initialize() {
             this->matrix[i][j]->initialize();
         }
     }
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        this->didier[i]->initialize();
+    }
 }
 
 /*
@@ -84,12 +97,10 @@ void Chromosome::initialize() {
    tandis qu'ici les joueurs sont représentés sur les colonnes.
 
     A bien noter que chaque joueur possède autant de hidden layer et de même
-   dimensions dans le bute d'éviter les "inégalités"
+   dimensions dans le but d'éviter les "inégalités"
 */
 
-Matrix *Chromosome::apply(player *equipeAlliee) {
-    Matrix *outputs = new Matrix(NETWORK_OUTPUT_SIZE, EQUIPE_SIZE);
-
+void Chromosome::apply(player *equipeAlliee) {
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         player &selected = equipeAlliee[i];
 
@@ -113,23 +124,27 @@ Matrix *Chromosome::apply(player *equipeAlliee) {
         output_layer_activation(mcalcul);
 
         for (int j = 0; j < NETWORK_OUTPUT_SIZE; j++) {
-            outputs->set(j, i, mcalcul.get(j, 0));
+            selected.outputs->set(j, i, mcalcul.get(j, 0));
         }
     }
-
-    return outputs;
 }
 
 /*
-    Didier est toujours évalué avant les joueurs. Lors de ce premier
-    appel, inputs == NULL et il est alors évalués sur des 0.
-    Sinon, inputs est une matrice colonne de taille COM_SIZE * EQUIPE_SIZE où
-    les coefficients (inputs_i, ..., inputs_{i + COM_SIZE}) correspond aux
-   sorties du canal de communication du joueur i lors de l'évaluation
-   précédente.
+    Didier est toujours évalué avant les joueurs.
+    Chaque joueur contient les outputs qu'il a donné à la fin du tick précédent.
+   On les passe en entrée pour didier, en sortie, didier écrit lets inputs
+   destinés aux joueurs dans leurs champ output
 */
 
-/*void Chromosome::apply_didier(Matrix &inputs) {
+void Chromosome::apply_didier(player *equipeAlliee) {
+    Matrix inputs = Matrix(COM_SIZE * EQUIPE_SIZE, 1);
+
+    for (int i = 0; i < EQUIPE_SIZE; i++) {
+        for (int j = 0; j < COM_SIZE; j++) {
+            inputs.set(i * COM_SIZE + j, 1, equipeAlliee[i].outputs->get(NETWORK_OUTPUT_SIZE - COM_SIZE - 1 + j, 0));
+        }
+    }
+
     inputs.mult_inv(*this->didier[0]);
     input_layer_activation(inputs);
 
@@ -140,7 +155,13 @@ Matrix *Chromosome::apply(player *equipeAlliee) {
 
     inputs.mult_inv(*this->didier[DIDIER_NETWORK_SIZE - 2]);
     output_layer_activation(inputs);
-}*/
+
+    for (int i = 0; i < EQUIPE_SIZE; i++) {
+        for (int j = 0; j < COM_SIZE; j++) {
+            equipeAlliee[i].inputs->set(NETWORK_INPUT_SIZE - COM_SIZE - 1 + j, 0, inputs.get(i * COM_SIZE + j, 0));
+        }
+    }
+}
 
 /**
  * @brief min-max normalization: Retranche la valeur donnée entre 0 et 1.
@@ -222,7 +243,12 @@ void writeInputs(player &viewer, player *equipeAlliee, player *equipeAdverse,
                  ball *b, bool team) {
     Matrix &mat = *viewer.inputs;
     uint indice = 0;
-	writeValn(mat, viewer.rvitesse, indice, -vrjmax, vrjmax);
+	
+    for (int i = 0; i < COM_SIZE; i++) {
+        writeValRaw(mat, viewer.inputs->get(i, 0), indice);
+    }
+	
+    writeValn(mat, viewer.rvitesse, indice, -vrjmax, vrjmax);
     // vitesse du joueur
     writeVector(mat, viewer, viewer.vitesse, indice, vjmax);
 
@@ -247,20 +273,23 @@ void writeInputs(player &viewer, player *equipeAlliee, player *equipeAdverse,
     writeNearestPlayer(mat, viewer, equipeAlliee, indice);
     writeNearestPlayer(mat, viewer, equipeAdverse, indice);
 
+	if(indice > NETWORK_INPUT_SIZE){
+		std::cout << indice << std::endl;
+		throw std::logic_error("Trop d'inputs (?)");
+	}
 }
 
-Matrix *Chromosome::collect_and_apply(player *equipeAlliee,
+void Chromosome::collect_and_apply(player *equipeAlliee,
                                       player *equipeAdverse, ball *b,
                                       bool team) {
+	apply_didier(equipeAlliee);
     // On sauvegarde les inputs dans les joueurs
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         writeInputs(equipeAlliee[i], equipeAlliee, equipeAdverse, b, team);
     }
 
     // Evaluation du réseau de neurones de chaque joueurs.
-    Matrix *outputs = this->apply(equipeAlliee);
-
-    return outputs;
+    this->apply(equipeAlliee);
 }
 
 /*
@@ -282,7 +311,7 @@ void mutate(Chromosome &c) {
     }
 }
 
-Chromosome *crossover(Chromosome &a, Chromosome &b) {
+Chromosome *classicCrossover(Chromosome &a, Chromosome &b) {
     Chromosome *child = new Chromosome();
 
     for (int k = 0; k < EQUIPE_SIZE; k++) {
@@ -301,6 +330,24 @@ Chromosome *crossover(Chromosome &a, Chromosome &b) {
     }
 
     return child;
+}
+
+Chromosome *swapPlayerCrossover(Chromosome &a, Chromosome &b){
+    Chromosome *child = new Chromosome();
+    for (int k = 0; k < EQUIPE_SIZE; k++) {
+		Chromosome &source = likelyness(0.5) ? a : b;
+        for (int i = 0; i < NETWORK_SIZE - 1; i++) {
+			Matrix::clone(source.matrix[k][i], child->matrix[k][i]);
+        }
+    }
+	return child;
+}
+
+Chromosome *crossover(Chromosome &a, Chromosome &b) {
+	if(likelyness(SWAP_CROSSOVER_PROBA)){
+		return swapPlayerCrossover(a, b);
+	}
+	return classicCrossover(a, b);
 }
 
 void Chromosome::write(std::ofstream &file) {

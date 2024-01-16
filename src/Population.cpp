@@ -1,7 +1,10 @@
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <queue>
+#include <stdexcept>
 #include <thread>
 #include <tuple>
 #include <utility>
@@ -69,44 +72,54 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
                                   .stopped = 0};
 
     // on fait les tournois
+    std::cout << "Debut multithreading" << std::endl;
     for (int threadId = 0; threadId < n_thread; threadId++) {
         threads[threadId] = std::thread([this, &nextPop, &expected,
                                          &statsTournois, threadId,
                                          &attributions, &liens]() {
-            while (nextPop.reserve(threadId) < expected) {
-                int tourn_size = thrand(4, this->size * PRESSION_SELECTIVE);
-                auto outcome = this->tournament(tourn_size, false);
+            while (nextPop.reserve(threadId, NB_PAR_TOURNOI) < expected) {
+                int tourn_size = thrand(4+NB_PAR_TOURNOI, this->size * PRESSION_SELECTIVE);
+                auto outcome =
+                    this->tournament(tourn_size, NB_PAR_TOURNOI, false);
 
-                Chromosome *mutedWinner;
-                if (likelyness(CROSSOVER_PROBABILITY)) {
-                    auto c1 = std::get<0>(outcome);
-                    auto c2 = std::get<1>(outcome);
-                    mutedWinner = crossover(*c1, *c2);
-                    liens.push((carteIdentite){
-                        .id = mutedWinner->id, .p1 = c1->id, .p2 = c2->id});
-                } else {
-                    Chromosome *c = likelyness(0.8) ? std::get<0>(outcome)
-                                                    : std::get<1>(outcome);
-                    mutedWinner = cloneChromosome(c);
-                    liens.push((carteIdentite){
-                        .id = mutedWinner->id, .p1 = c->id, .p2 = 0});
+                auto q = std::get<0>(outcome);
+                std::vector<Chromosome *> vainqueurs;
+                while (!q.empty()) {
+                    vainqueurs.push_back(q.front());
+                    q.pop();
                 }
+                for (int i = 0; i < vainqueurs.size(); i++) {
+                    Chromosome *mutedWinner;
+					auto c1 = vainqueurs[i];
+					auto c2 = vainqueurs[(i+1)%vainqueurs.size()];
+                    if (likelyness(CROSSOVER_PROBABILITY)) {
+                        mutedWinner = crossover(*c1, *c2);
+                        liens.push((carteIdentite){
+                            .id = mutedWinner->id, .p1 = c1->id, .p2 = c2->id});
+                    } else {
+                        mutedWinner = cloneChromosome(c1);
+                        liens.push((carteIdentite){
+                            .id = mutedWinner->id, .p1 = c1->id, .p2 = 0});
+                    }
 
-                mutate(*mutedWinner);
-                nextPop.pushReserved(mutedWinner, threadId);
-                statsTournois.push(std::get<2>(outcome));
-                attributions.push(std::tuple(threadId, std::get<2>(outcome).n));
+                    mutate(*mutedWinner);
+                    nextPop.pushReserved(mutedWinner, threadId);
+                    statsTournois.push(std::get<1>(outcome));
+                    attributions.push(
+                        std::tuple(threadId, std::get<1>(outcome).n));
+                }
             }
             nextPop.cancelRes(threadId);
 
             // On introduit des individus complètement nouveau pour explorer le
             // plus de solutions possible.
-            while (nextPop.reserve(threadId) <= this->size) {
+            while (nextPop.reserve(threadId, 1) <= this->size) {
                 Chromosome *c = new Chromosome();
                 c->initialize();
                 nextPop.pushReserved(c, threadId);
                 liens.push({.id = c->id, .p1 = 0, .p2 = 0});
             }
+            std::cout << "w " << threadId << ";" << std::endl;
         });
     }
     // on attends la fin des tournois
@@ -115,8 +128,9 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
     }
     nextPop.clearReservations();
 
+    std::cout << "Debut monothreading" << std::endl;
     if (nextPop.size() != this->size) {
-		std::cout << nextPop.size() << "≠" << this->size << std::endl;
+        std::cout << nextPop.size() << "≠" << this->size << std::endl;
         throw std::logic_error("Incohérence entre la population actuelle et la "
                                "population suivante");
     }
@@ -153,11 +167,16 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
         }
     }
 
+    std::cout << "fin pop next" << std::endl;
     return tourn_stats;
 }
 
-std::tuple<Chromosome *, Chromosome *, gameStatistics>
-Population::tournament(int tourn_size, bool save) {
+std::tuple<std::queue<Chromosome *>, gameStatistics>
+Population::tournament(int tourn_size, int maxSize, bool save) {
+	if(tourn_size < maxSize){
+		std::cout << tourn_size << " " << maxSize << std::endl;
+		throw std::logic_error("tourn_size < maxSize");
+	};
     std::queue<Chromosome *> contestants;
 
     bool *selected = (bool *)calloc(this->size, sizeof(bool));
@@ -188,7 +207,7 @@ Population::tournament(int tourn_size, bool save) {
         .stopped = 0,
     };
 
-    while (contestants.size() > 2) {
+    while (contestants.size() > maxSize) {
         auto c1 = contestants.front();
         contestants.pop();
         auto c2 = contestants.front();
@@ -209,29 +228,7 @@ Population::tournament(int tourn_size, bool save) {
         gameStats.n++;
     }
 
-    auto w1 = contestants.front();
-    auto w2 = contestants.back();
-
-    auto final_result = play_match(w1, w2);
-
-    Chromosome *winner;
-    Chromosome *second;
-
-    if (final_result.score > 0) {
-        winner = w1;
-        second = w2;
-    } else {
-        winner = w2;
-        second = w1;
-    }
-
-    gameStats.totalCollisions += final_result.collisions;
-    gameStats.totalGoals += final_result.goals;
-    gameStats.total_ball_collisions += final_result.ball_collisions;
-    gameStats.stopped += final_result.stopped ? 1 : 0;
-    gameStats.n++;
-
-    return std::make_tuple(winner, second, gameStats);
+    return std::make_tuple(contestants, gameStats);
 }
 
 Chromosome *cloneChromosome(Chromosome *original) {

@@ -1,7 +1,7 @@
 #pragma once
 #include <fstream>
 
-#define MATRIX_SIZE 30*30
+#define MATRIX_SIZE 30 * 30
 
 class Matrix {
   private:
@@ -21,6 +21,7 @@ class Matrix {
     void initialize();
     void write(std::ofstream &file);
     static Matrix *read(std::ifstream &file);
+    static void clone(Matrix *source, Matrix *dest);
 };
 
 void mutation(Matrix &m);

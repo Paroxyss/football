@@ -67,9 +67,15 @@ def readPositionnalVector(state):
         "y": readValue(state)
     }
 
+def readArray(readFunc, size, state):
+    tab = []
+    for i in range(size):
+        tab.append(readFunc(state))
+    return tab
+
 def readPlayer(state):
     # NE PAS CHANGER L'ORDRE, c'est l'ordre de lecture
-    return {
+    obj = {
                 "orientation": readValue(state),
                 "pos": readPositionnalVector(state),
                 "vrotation": readValue(state),
@@ -78,8 +84,15 @@ def readPlayer(state):
                 "h": readValue(state),
                 "balle": readObject(state),
                 "joueurAllie": readObject(state),
-                "joueurAdverse": readObject(state)
+                "joueurAdverse": readObject(state),
+                "incom": readArray(readValue, COM_SIZE, state),
+                "outputs": {
+                    "rota": readValue(state),
+                    "accel": readValue(state),
+                },
+                "outcom": readArray(readValue, COM_SIZE, state)
             }
+    return obj
     
 def parse_normalized(line, nb_joueurs):
     data = []
@@ -107,4 +120,5 @@ def denormalize_player(player):
 def parse(line, nb_joueurs):
     players = parse_normalized(line, nb_joueurs)
     for player in players: denormalize_player(player)
+    #print(players[3]["pos"])
     return players 

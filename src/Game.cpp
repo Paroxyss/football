@@ -1,4 +1,3 @@
-#include <cfloat>
 #include <cmath>
 #include <cstdio>
 #include <ctime>
@@ -99,7 +98,12 @@ Game::Game(int playerNumber, bool logToFile) {
     setBall({.x = 0, .y = 0}, {.x = 0, .y = 0}, BALL_SIZE);
     for (int i = 0; i < playerNumber; i++) {
         setPlayer(i, {.x = 0, .y = 0}, {.x = 0, .y = 0}, 0, PLAYER_SIZE);
+        players[i].outputs = new Matrix(NETWORK_INPUT_SIZE, 1);
         players[i].inputs = new Matrix(NETWORK_INPUT_SIZE, 1);
+		for(int j = 0; j < NETWORK_INPUT_SIZE; j++){
+			players[i].outputs->set(j, 0, 0);
+			players[i].inputs->set(j, 0, 0);
+		}
     }
     if (this->logToFile) {
         csvOutputFile.open("game.csv");
@@ -121,9 +125,11 @@ Game::~Game() {
     }
 
     for (int i = 0; i < this->playerNumber; i++) {
+        delete this->players[i].outputs;
         delete this->players[i].inputs;
     }
 
+    delete[] wallsBouts;
     delete[] players;
     delete[] walls;
     delete[] goals;
@@ -312,8 +318,8 @@ void computeCollisionCircle(ball *obj1, ball *obj2) {
                (dotProduct(v2 - v1, x2 - x1) / normeCarre(x2 - x1)) *
                ((double)(2 * m1) / (m1 + m2));
 
-    v1 = v1 - dv1;
-    v2 = v2 - dv2;
+    v1 = v1 - dv1*COLLISION_CONS;
+    v2 = v2 - dv2*COLLISION_CONS;
 }
 
 // Comme au dessus, mais avec un mur
@@ -447,6 +453,10 @@ void Game::writePlayers() {
             csvOutputFile << (double)(this->players[i].inputs->get(j, 0))
                           << ",";
         }
+        for (int j = 0; j < NETWORK_OUTPUT_SIZE; j++) {
+            csvOutputFile << (double)(this->players[i].outputs->get(j, 0))
+                          << ",";
+        }
     }
     csvOutputFile << std::endl;
 }
@@ -455,7 +465,6 @@ void Game::writePlayers() {
 // et/ou d'accélérer)
 void Game::setAccelerations(unsigned int id, double rotation,
                             double acceleration) {
-
     players[id].raccel = rotation * PLAYER_ROTATION_ACCELERATION;
     players[id].acceleration = acceleration * PLAYER_ACCELERATION;
 };
@@ -536,30 +545,23 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     g.set_players(c, GAMECONFIGLENGTH);
 
     int to_touch = MAX_TOUCH_DURATION;
+    unsigned int deltaTouchedBall = 0;
 
     for (int k = 0; k < MAX_GAME_DURATION; k++, to_touch--) {
-
-        auto r1 = c1->collect_and_apply(g.players, g.players + EQUIPE_SIZE,
+        c1->collect_and_apply(g.players, g.players + EQUIPE_SIZE,
                                         &g.ball, false);
-        auto r2 = c2->collect_and_apply(g.players + EQUIPE_SIZE, g.players,
+        c2->collect_and_apply(g.players + EQUIPE_SIZE, g.players,
                                         &g.ball, true);
 
-        for (int a = 0; a < 2; a++) {
-            for (int i = 0; i < EQUIPE_SIZE; i++) {
-                Matrix *r = (a == 0) ? r1 : r2;
+        for (int a = 0; a < 2*EQUIPE_SIZE; a++) {
+			double rotation = g.players[a].outputs->get(0, 0);
+			double acceleration = g.players[a].outputs->get(1, 0);
 
-                double rotation = r->get(0, i);
-                double acceleration = r->get(1, i);
+			if (acceleration < 0)
+				acceleration = 0;
 
-                if (acceleration < 0)
-                    acceleration = 0;
-
-                g.setAccelerations(i + a * EQUIPE_SIZE, rotation, acceleration);
-            }
+			g.setAccelerations(a, rotation, acceleration);
         }
-
-        delete r1;
-        delete r2;
 
         // on tick 10 fois pour beaucoup plus de précisions
         g.tick(0.1, true, false, true);
@@ -589,10 +591,11 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
         }
 
         if (to_touch == 0) {
-            if (g.infos.ball_collisions == 0) {
+            if (g.infos.ball_collisions - deltaTouchedBall == 0) {
                 g.infos.stopped = true;
                 break;
             }
+            deltaTouchedBall = g.infos.ball_collisions;
 
             to_touch = MAX_TOUCH_DURATION;
         }

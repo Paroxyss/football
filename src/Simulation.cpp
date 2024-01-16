@@ -14,9 +14,9 @@ void simulate_and_save(const char *filename) {
 
     auto tourn_size = previous_power(g.currentPop->size);
 
-    auto tourn = g.currentPop->tournament(tourn_size, 0);
+    auto tourn = g.currentPop->tournament(tourn_size, 0, 2);
 
-    play_match(std::get<0>(tourn), std::get<1>(tourn), 1);
+    play_match(std::get<0>(tourn).front(), std::get<0>(tourn).back(), 1);
 }
 
 /**

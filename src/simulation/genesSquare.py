@@ -119,8 +119,8 @@ pg.init()
 clock = pg.time.Clock()
 
 
-dx = 41
-dy = 30
+dx = 20
+dy = 5 
 npersquare = 1
 sqSize = screen.get_width()/dx
 

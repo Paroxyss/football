@@ -3,10 +3,9 @@
 #include "config.h"
 #include "util.hpp"
 
-#include <cmath>
+#include <cstring>
 #include <fstream>
 #include <iostream>
-#include <random>
 #include <stdexcept>
 
 /**
@@ -19,6 +18,7 @@ Matrix::Matrix(int ligne, int col) {
     this->ligne = ligne;
     this->col = col;
     this->t = new double[MATRIX_SIZE];
+	memset(t, 0, sizeof(double));
     this->ct = new double[MATRIX_SIZE];
 }
 
@@ -175,4 +175,15 @@ Matrix *Matrix::read(std::ifstream &file) {
     }
 
     return m;
+}
+
+void Matrix::clone(Matrix *source, Matrix *dest){
+	if(source->col != dest->col || source->ligne != dest->ligne){
+		throw std::logic_error("clone de matrices de mauvaise taille");
+	}
+    for (int i = 0; i < source->ligne; i++) {
+        for (int j = 0; j < source->col; j++) {
+			dest->set(i, j, source->get(i,j));
+        }
+    }
 }

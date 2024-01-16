@@ -10,7 +10,7 @@ template <class T> class SafeQueue {
   public:
     SafeQueue(unsigned int threadNumber = 0) {
         reservedIds.resize(threadNumber);
-        std::fill(reservedIds.begin(), reservedIds.end(), false);
+        std::fill(reservedIds.begin(), reservedIds.end(), 0);
     }
     void push(const T &val) {
         std::lock_guard<std::mutex> lock(_m);
@@ -23,7 +23,7 @@ template <class T> class SafeQueue {
                 "Tentative de résolution d'un id non réservé");
         } else {
             reserved--;
-            reservedIds[id] = false;
+            reservedIds[id]--;
         }
         _q.push(val);
     }
@@ -42,7 +42,7 @@ template <class T> class SafeQueue {
         std::lock_guard<std::mutex> lock(_m);
         return _q.size() + reserved;
     }
-    int reserve(int id) {
+    int reserve(int id, int n) {
         std::lock_guard<std::mutex> lock(_m);
         if (id < 0 || id > reservedIds.size() - 1) {
             throw std::logic_error(
@@ -52,31 +52,31 @@ template <class T> class SafeQueue {
             throw std::logic_error(
                 "Tentative de reservation d'un id déjà réservé");
         } else {
-            reserved++;
-            reservedIds[id] = true;
+            reserved += n;
+            reservedIds[id] += n;
         }
         return _q.size() + reserved;
     }
     void clearReservations() {
         std::lock_guard<std::mutex> lock(_m);
         reserved = 0;
-		std::fill(reservedIds.begin(), reservedIds.end(), false);
+        std::fill(reservedIds.begin(), reservedIds.end(), 0);
     }
-	void cancelRes(int id){
+    void cancelRes(int id) {
         if (id < 0 || id > reservedIds.size() - 1) {
             throw std::logic_error(
                 "Tentative de réservation d'un id trop grand");
         }
-		std::lock_guard<std::mutex> lock(_m);
-		if(reservedIds[id]){
-			reservedIds[id] = false;
-			reserved--;
-		}
-	}
+        std::lock_guard<std::mutex> lock(_m);
+        if (reservedIds[id]) {
+            reserved-=reservedIds[id];
+            reservedIds[id] = 0;
+        }
+    }
 
   private:
     std::mutex _m;
     std::queue<T> _q;
     int reserved = 0;
-    std::vector<bool> reservedIds;
+    std::vector<int> reservedIds;
 };

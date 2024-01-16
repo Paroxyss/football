@@ -13,7 +13,7 @@ def read_and_parse():
     n = len(data)
 
     for i in range(n):
-        data[i] = [float(x) for x in data[i]]
+        data[i] = [float(x.replace("[", "").replace("]", "")) for x in data[i]]
 
     return data
 

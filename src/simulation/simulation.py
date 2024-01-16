@@ -35,7 +35,8 @@ for i in range(0, len(data)):
     parsed.append(parse(data[i][3:], nb_joueurs))
 
 while running:
-    for i in range(0, len(parsed)):
+    i = 0
+    while i < len(parsed):
         draw_field()
         drawWalls(walls)
         draw_goal()
@@ -96,7 +97,13 @@ while running:
                     elif event.key in [pg.K_1, pg.K_2, pg.K_3, pg.K_4, pg.K_5, pg.K_6]:
                         show[event.key - pg.K_1] = not show[event.key - pg.K_1]
 
+        keys=pg.key.get_pressed()
+        if(keys[pg.K_LEFT]):
+            i-=3 + 5*keys[pg.K_LSHIFT]
+        if(keys[pg.K_RIGHT]):
+            i+=2 + 5*keys[pg.K_LSHIFT]
         pg.display.flip()
         screen.fill(FIELD_GREEN)
-
+        i+=1
+        
 pg.quit()

@@ -2,8 +2,9 @@
 
 #include "Chromosome.hpp"
 #include "Game.hpp"
-#include <utility>
 #include "Generation.hpp"
+#include <queue>
+#include <utility>
 
 class Population {
   public:
@@ -15,10 +16,11 @@ class Population {
     ~Population();
 
     void initialize();
-    gameStatistics next(int n_thread, bool save = false, Generation *parent = NULL);
+    gameStatistics next(int n_thread, bool save = false,
+                        Generation *parent = NULL);
 
-    std::tuple<Chromosome *, Chromosome *, gameStatistics>
-    tournament(int k, bool save);
+    std::tuple<std::queue<Chromosome *>, gameStatistics>
+    tournament(int tourn_size, int maxSize, bool save);
 
     void write(std::ofstream &file);
     static Population *read(std::ifstream &file);
@@ -26,4 +28,3 @@ class Population {
 Chromosome *cloneChromosome(Chromosome *original);
 void update_statistics(gameStatistics &tourn_stats, gameStatistics *tournResult,
                        int count);
-

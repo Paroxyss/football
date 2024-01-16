@@ -15,6 +15,9 @@ struct player : ball {
     // raccel en rad.s-2, rvitesse en rad.s-1, orientation en radian,
     // acceleration en m.s-2
     double raccel, rvitesse, orientation, acceleration;
+	// Contient les cannaux de communiactions des joueurs pour didier pour le tick suivant. Au début de la partie, ils valent 0;
+    Matrix *outputs;
+	// Contient les inputs que didier définit au début de l'évaluation, ils valent par défaut 0
     Matrix *inputs;
 };
 
@@ -26,7 +29,7 @@ class Chromosome;
 
 // alors oui c'est absolument honteux, mais le polymorphisme c'est la méga fête.
 // pos est le points d'origine, vitesse le vecteur directeur, et size pourra
-// déterminer la longueur (non prise en compte pour le moment)
+// déterminer la longueur
 struct wall : ball {};
 
 enum CollisionType { WALL, CIRCLE };

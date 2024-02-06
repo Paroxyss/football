@@ -1,7 +1,6 @@
 #include "Chromosome.hpp"
 #include "Game.hpp"
 #include "Generation.hpp"
-#include "Matrix.h"
 #include "Simulation.hpp"
 #include "config.h"
 #include "train.hpp"
@@ -96,6 +95,13 @@ int main(int argc, char *argv[]) {
         }
 
         see_ball(argv[2], n_ball);
+    } else if (strcmp(argv[1], "rm") == 0) {
+		Chromosome c1;
+		Chromosome c2;
+		c1.initialize();
+		c2.initialize();
+
+		play_match(&c1, &c2, true);
     } else if (strcmp(argv[1], "benchmarkMatch") == 0) {
         int matchPerIter = 100;
         int chromosomeCount = 20;

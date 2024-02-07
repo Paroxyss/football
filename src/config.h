@@ -1,7 +1,8 @@
 #pragma once
 
+#include <cmath>
 #define NETWORK_SIZE 7
-#define DIDIER_NETWORK_SIZE 5
+#define DIDIER_NETWORK_SIZE 2
 
 // pour l'instant le réseau ne prend pas l'accélération en entrée
 // pour pouvoir évoluer plus facilement.
@@ -23,15 +24,18 @@ const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {
 	COM_SIZE * EQUIPE_SIZE
 };
 
+// GAME CONFIG
 #define MAX_GAME_DURATION (40 * 60)
 #define MAX_TOUCH_DURATION (10 * 60)
 
+// MAP CONFIG
 #define MAP_LENGTH (119 * 7)
 #define MAP_HEIGHT (75 * 7)
 #define GOAL_HEIGHT (15 * 12)
 #define POTEAU_LENGTH 20
 #define POTEAU_WIDTH 20
 
+// PLAYER CONFIG
 #define PLAYER_MASS 100
 #define PLAYER_SIZE (2 * 10)
 #define PLAYER_ACCELERATION 0.30
@@ -39,6 +43,16 @@ const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {
 #define PLAYER_ROTATION_ACCELERATION 0.10
 #define PLAYER_ROTATION_FROTTEMENT (1 / 3.)
 #define COLLISION_CONS 1
+
+// SENSOR CONFIG
+#define PLAYER_SENSOR_NUMBER 3
+const double PLAYER_SENSOR_ANGLES[PLAYER_SENSOR_NUMBER] = {
+	-45.*M_PI/180.,
+	  0.*M_PI/180.,
+	45.*M_PI/180.
+};
+#define PLAYER_SENSOR_DISTANCE 4*PLAYER_SIZE
+#define PLAYER_SENSOR_RANGE 8*PLAYER_SIZE
 
 #define BALL_MASS 10
 #define BALL_SIZE 10
@@ -62,4 +76,6 @@ const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {
 // nombre de générations
 #define N 10
 // intervalle (en génération) des sauvegardes
-#define SAVE_RATE 10
+#define SAVE_RATE 5
+
+//#define MATRIXDEBUG

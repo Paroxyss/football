@@ -17,6 +17,7 @@
 #include "SafeQueue.hpp"
 #include "config.h"
 #include "util.hpp"
+#include "ProgressBar.hpp"
 
 Population::Population(int size) {
     this->size = size;
@@ -71,12 +72,12 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
                                   .total_ball_collisions = 0,
                                   .stopped = 0};
 
+	ProgressBar pbar(this->size);
     // on fait les tournois
-    std::cout << "Debut multithreading" << std::endl;
     for (int threadId = 0; threadId < n_thread; threadId++) {
         threads[threadId] = std::thread([this, &nextPop, &expected,
                                          &statsTournois, threadId,
-                                         &attributions, &liens]() {
+                                         &attributions, &liens, &pbar]() {
             while (nextPop.reserve(threadId, NB_PAR_TOURNOI) < expected) {
                 int tourn_size = thrand(4+NB_PAR_TOURNOI, this->size * PRESSION_SELECTIVE);
                 auto outcome =
@@ -103,6 +104,7 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
                     }
 
                     mutate(*mutedWinner);
+					pbar.step(1, threadId);
                     nextPop.pushReserved(mutedWinner, threadId);
                     statsTournois.push(std::get<1>(outcome));
                     attributions.push(
@@ -116,10 +118,10 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
             while (nextPop.reserve(threadId, 1) <= this->size) {
                 Chromosome *c = new Chromosome();
                 c->initialize();
+				pbar.step(1, threadId);
                 nextPop.pushReserved(c, threadId);
                 liens.push({.id = c->id, .p1 = 0, .p2 = 0});
             }
-            std::cout << "w " << threadId << ";" << std::endl;
         });
     }
     // on attends la fin des tournois
@@ -128,7 +130,6 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
     }
     nextPop.clearReservations();
 
-    std::cout << "Debut monothreading" << std::endl;
     if (nextPop.size() != this->size) {
         std::cout << nextPop.size() << "≠" << this->size << std::endl;
         throw std::logic_error("Incohérence entre la population actuelle et la "
@@ -148,10 +149,6 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
     while (attributions.pop(tstats)) {
         perfs[std::get<0>(tstats)] += std::get<1>(tstats);
     }
-    for (int i : perfs) {
-        std::cout << i << " ";
-    }
-    std::cout << std::endl;
     while (statsTournois.size()) {
         gameStatistics s;
         statsTournois.pop(s);
@@ -167,7 +164,6 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
         }
     }
 
-    std::cout << "fin pop next" << std::endl;
     return tourn_stats;
 }
 
@@ -236,15 +232,14 @@ Chromosome *cloneChromosome(Chromosome *original) {
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
-
-            for (int k = 0; k < original->matrix[i][j]->ligne; k++) {
-                for (int l = 0; l < original->matrix[i][j]->col; l++) {
-                    clone->matrix[i][j]->set(k, l,
-                                             original->matrix[i][j]->get(k, l));
-                }
-            }
+			Matrix::clone(original->matrix[i][j], clone->matrix[i][j]);
         }
     }
+
+	for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++){
+		Matrix::clone(original->didier[i], clone->didier[i]);
+	}
+
     clone->stats.instanceGoals = original->stats.instanceGoals;
     clone->stats.instanceAge = original->stats.instanceAge;
 

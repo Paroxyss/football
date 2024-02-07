@@ -98,12 +98,14 @@ Game::Game(int playerNumber, bool logToFile) {
     setBall({.x = 0, .y = 0}, {.x = 0, .y = 0}, BALL_SIZE);
     for (int i = 0; i < playerNumber; i++) {
         setPlayer(i, {.x = 0, .y = 0}, {.x = 0, .y = 0}, 0, PLAYER_SIZE);
-        players[i].outputs = new Matrix(NETWORK_INPUT_SIZE, 1);
+        players[i].outputs = new Matrix(NETWORK_OUTPUT_SIZE, 1);
         players[i].inputs = new Matrix(NETWORK_INPUT_SIZE, 1);
-		for(int j = 0; j < NETWORK_INPUT_SIZE; j++){
-			players[i].outputs->set(j, 0, 0);
-			players[i].inputs->set(j, 0, 0);
-		}
+        for (int j = 0; j < NETWORK_INPUT_SIZE; j++) {
+            players[i].inputs->set(j, 0, 0);
+        }
+        for (int j = 0; j < NETWORK_OUTPUT_SIZE; j++) {
+            players[i].outputs->set(j, 0, 0);
+        }
     }
     if (this->logToFile) {
         csvOutputFile.open("game.csv");
@@ -318,8 +320,8 @@ void computeCollisionCircle(ball *obj1, ball *obj2) {
                (dotProduct(v2 - v1, x2 - x1) / normeCarre(x2 - x1)) *
                ((double)(2 * m1) / (m1 + m2));
 
-    v1 = v1 - dv1*COLLISION_CONS;
-    v2 = v2 - dv2*COLLISION_CONS;
+    v1 = v1 - dv1 * COLLISION_CONS;
+    v2 = v2 - dv2 * COLLISION_CONS;
 }
 
 // Comme au dessus, mais avec un mur
@@ -414,6 +416,12 @@ void Game::tick(double timeToAdvance, bool root, bool clearAccels,
             // très rare cas, si un objet à une trajéctoire parfaitement
             // parallèle à un mur
             freeCollisionList(c);
+            return;
+        }
+
+        if (firstCollision->time == 0) {
+            std::cout << "game cassée" << std::endl;
+            this->cassee = true;
             return;
         }
 
@@ -548,19 +556,22 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     unsigned int deltaTouchedBall = 0;
 
     for (int k = 0; k < MAX_GAME_DURATION; k++, to_touch--) {
-        c1->collect_and_apply(g.players, g.players + EQUIPE_SIZE,
-                                        &g.ball, false);
-        c2->collect_and_apply(g.players + EQUIPE_SIZE, g.players,
-                                        &g.ball, true);
+        c1->collect_and_apply(g.players, g.players + EQUIPE_SIZE, &g.ball,
+                              false);
+        c2->collect_and_apply(g.players + EQUIPE_SIZE, g.players, &g.ball,
+                              true);
+        // std::cout << "INPUTS J1: " << g.players[0].inputs->get(0, 0) << ";"
+        // << g.players[0].inputs->get(1, 0) << std::endl; std::cout << "OUTPUTS
+        // j1:"; g.players[0].outputs->print(); std::cout << std::endl;
 
-        for (int a = 0; a < 2*EQUIPE_SIZE; a++) {
-			double rotation = g.players[a].outputs->get(0, 0);
-			double acceleration = g.players[a].outputs->get(1, 0);
+        for (int a = 0; a < 2 * EQUIPE_SIZE; a++) {
+            double rotation = g.players[a].outputs->get(0, 0);
+            double acceleration = g.players[a].outputs->get(1, 0);
 
-			if (acceleration < 0)
-				acceleration = 0;
+            if (acceleration < 0)
+                acceleration = 0;
 
-			g.setAccelerations(a, rotation, acceleration);
+            g.setAccelerations(a, rotation, acceleration);
         }
 
         // on tick 10 fois pour beaucoup plus de précisions
@@ -569,6 +580,15 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
             g.tick(0.1, true, false, false);
         }
         g.tick(0.1, true, true, false);
+
+        if (g.cassee) {
+            if (likelyness(0.5)) {
+                g.infos.score = 1;
+                return g.infos;
+            }
+            g.infos.score = -1;
+            return g.infos;
+        }
 
         bool bc1 = g.checkGoal(0);
         bool bc2 = g.checkGoal(1);
@@ -605,6 +625,8 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
             break;
         }
     }
+    if (g.logToFile)
+        exit(1);
 
     if (g.infos.score == 0) {
         // le biais modifie la probabilité qu'une équipe soit sélectionnée en

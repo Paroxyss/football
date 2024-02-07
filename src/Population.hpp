@@ -4,7 +4,6 @@
 #include "Game.hpp"
 #include "Generation.hpp"
 #include <queue>
-#include <utility>
 
 class Population {
   public:

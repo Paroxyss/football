@@ -49,6 +49,7 @@ extern std::ofstream csvOutputFile;
 
 class Game {
   public:
+	bool cassee = false;
     bool logToFile;
     double timeSinceLastSave = 1;
 

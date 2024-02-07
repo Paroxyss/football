@@ -34,6 +34,7 @@ Matrix::~Matrix() {
  * @brief Affiche une matrice.
  */
 void Matrix::print() {
+	std::cout << "m: "<< this->ligne << " x " << this->col << std::endl;
     for (int i = 0; i < this->ligne; i++) {
         for (int j = 0; j < this->col; j++) {
             std::cout << this->get(i, j) << " ";
@@ -65,9 +66,11 @@ void Matrix::initialize() {
  * @return Valeur de la matrice à la ligne `i` et colonne `j`
  */
 double Matrix::get(int i, int j) {
-    /*if (i >= this->ligne || j >= this->col) {
+	#ifdef MATRIXDEBUG
+    if (i >= this->ligne || j >= this->col) {
         throw std::invalid_argument("Bad matrice get: ");
-    }*/
+    }
+	#endif
 
     return this->t[i * this->col + j];
 }
@@ -80,9 +83,11 @@ double Matrix::get(int i, int j) {
  * @param x Valeur
  */
 void Matrix::set(int i, int j, double x) {
-    /*if (i >= this->ligne || j >= this->col) {
+	#ifdef MATRIXDEBUG
+    if (i >= this->ligne || j >= this->col) {
         throw std::invalid_argument("Bad matrice set");
-    }*/
+    }
+	#endif
 
     this->t[i * this->col + j] = x;
 }

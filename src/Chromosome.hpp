@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Game.hpp"
-#include "Genealogy.hpp"
 #include "Matrix.h"
 #include "config.h"
 #include <fstream>
@@ -42,7 +41,3 @@ class Chromosome {
 
 void mutate(Chromosome &c);
 Chromosome *crossover(Chromosome &a, Chromosome &b);
-double mmn(double x, double min, double max);
-void normalize_inputs(Matrix &inputs, int i);
-void writeInputs(player &target, player *equipeAlliee, player *equipeAdverse,
-                 ball *b, bool team);

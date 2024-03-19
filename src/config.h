@@ -10,19 +10,18 @@
 // cage, distance abverse + proche, angle adverse + proche, com1, .. ,
 // com{COM_SIZE}
 #define COM_SIZE 2
-#define NETWORK_OUTPUT_SIZE 2+COM_SIZE
-#define NETWORK_INPUT_SIZE 26+COM_SIZE
+#define NETWORK_OUTPUT_SIZE 2 + COM_SIZE
+#define NETWORK_INPUT_SIZE 26 + COM_SIZE
 
 #define EQUIPE_SIZE 3
-#define GAMECONFIG {1, 2}
+#define GAMECONFIG                                                             \
+    { 1, 2 }
 #define GAMECONFIGLENGTH 2
 
-const int PLAYER_LAYERS[NETWORK_SIZE] = {
-    NETWORK_INPUT_SIZE, 28, 20, 16, 10, 6, NETWORK_OUTPUT_SIZE};
-const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {
-	COM_SIZE * EQUIPE_SIZE,
-	COM_SIZE * EQUIPE_SIZE
-};
+const int PLAYER_LAYERS[NETWORK_SIZE] = {NETWORK_INPUT_SIZE, 28, 20, 16, 10, 6,
+                                         NETWORK_OUTPUT_SIZE};
+const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {COM_SIZE * EQUIPE_SIZE,
+                                                COM_SIZE *EQUIPE_SIZE};
 
 // GAME CONFIG
 #define MAX_GAME_DURATION (40 * 60)
@@ -47,12 +46,9 @@ const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {
 // SENSOR CONFIG
 #define PLAYER_SENSOR_NUMBER 3
 const double PLAYER_SENSOR_ANGLES[PLAYER_SENSOR_NUMBER] = {
-	-45.*M_PI/180.,
-	  0.*M_PI/180.,
-	45.*M_PI/180.
-};
-#define PLAYER_SENSOR_DISTANCE 4*PLAYER_SIZE
-#define PLAYER_SENSOR_RANGE 8*PLAYER_SIZE
+    -45. * M_PI / 180., 0. * M_PI / 180., 45. * M_PI / 180.};
+#define PLAYER_SENSOR_DISTANCE 4 * PLAYER_SIZE
+#define PLAYER_SENSOR_RANGE 8 * PLAYER_SIZE
 
 #define BALL_MASS 10
 #define BALL_SIZE 10
@@ -66,10 +62,12 @@ const double PLAYER_SENSOR_ANGLES[PLAYER_SENSOR_NUMBER] = {
 #define NB_PAR_TOURNOI 2
 // entre 0.6 et 0.9
 #define CROSSOVER_PROBABILITY 0.9
-#define SWAP_CROSSOVER_PROBA 0.25
+#define SWAP_MUTATION_PROBA 0.025
 
 // entre 0.001 et 0.1
 #define MUTATION_PROBABILITY 0.001
+
+#define SWAP_CROSSOVER_PROBA 0.25
 
 #define NEW_BLOOD 0.1
 
@@ -78,4 +76,4 @@ const double PLAYER_SENSOR_ANGLES[PLAYER_SENSOR_NUMBER] = {
 // intervalle (en génération) des sauvegardes
 #define SAVE_RATE 5
 
-//#define MATRIXDEBUG
+// #define MATRIXDEBUG

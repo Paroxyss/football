@@ -15,9 +15,11 @@ struct player : ball {
     // raccel en rad.s-2, rvitesse en rad.s-1, orientation en radian,
     // acceleration en m.s-2
     double raccel, rvitesse, orientation, acceleration;
-	// Contient les cannaux de communiactions des joueurs pour didier pour le tick suivant. Au début de la partie, ils valent 0;
+    // Contient les cannaux de communiactions des joueurs pour didier pour le
+    // tick suivant. Au début de la partie, ils valent 0;
     Matrix *outputs;
-	// Contient les inputs que didier définit au début de l'évaluation, ils valent par défaut 0
+    // Contient les inputs que didier définit au début de l'évaluation, ils
+    // valent par défaut 0
     Matrix *inputs;
 };
 
@@ -49,7 +51,7 @@ extern std::ofstream csvOutputFile;
 
 class Game {
   public:
-	bool cassee = false;
+    bool cassee = false;
     bool logToFile;
     double timeSinceLastSave = 1;
 
@@ -59,7 +61,7 @@ class Game {
 
     unsigned int wallNumber;
     wall *walls;
-	struct ball *wallsBouts;
+    struct ball *wallsBouts;
     wall *goals;
 
     gameInformations infos = {.collisions = 0,

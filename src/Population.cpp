@@ -19,12 +19,13 @@
 #include "util.hpp"
 #include "ProgressBar.hpp"
 
-Population::Population(int size) {
+Population::Population(int size, double proportionDidier) {
     this->size = size;
     this->pop = new Chromosome *[size];
 
     for (int i = 0; i < size; i++) {
         this->pop[i] = new Chromosome();
+		this->pop[i]->hasDidier = likelyness(proportionDidier);
     }
 }
 
@@ -32,7 +33,6 @@ Population::~Population() {
     for (int i = 0; i < size; i++) {
         delete this->pop[i];
     }
-
     delete[] this->pop;
 }
 

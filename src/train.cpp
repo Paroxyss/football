@@ -32,13 +32,20 @@ void trainFromFile(const char *inputFile, int n_gen, int population_size,
     trainPop(g, n_gen, n_thread);
 }
 
-void trainPop(Generation &g, int n_gen,  int n_thread) {
+void trainPop(Generation &g, int n_gen, int n_thread) {
     std::cout << "Starting a train of " << n_gen << " generations with "
               << g.currentPop->size << " chromosomes on " << n_thread
               << " threads." << std::endl;
 
     int last_save = 0;
     g.rewriteStats();
+
+    uint proportionDidier = 0;
+    for (int i = 0; i < g.currentPop->size; i++) {
+        proportionDidier += g.currentPop->pop[i]->hasDidier;
+    }
+    std::cout << " prop didier initiale: "
+              << (double)proportionDidier / g.currentPop->size << std::endl;
 
     unsigned int initialGeneration = g.generation;
     while (g.generation - initialGeneration < n_gen) {
@@ -55,8 +62,14 @@ void trainPop(Generation &g, int n_gen,  int n_thread) {
         auto stats = g.stats.back();
         double n = (double)stats.n;
 
+        uint proportionDidier = 0;
+        for (int i = 0; i < g.currentPop->size; i++) {
+            proportionDidier += g.currentPop->pop[i]->hasDidier;
+        }
+
         std::cout << "Stats gen " << g.generation << " " << stats << " in "
-                  << elapsed_seconds.count() << std::endl;
+                  << elapsed_seconds.count() << " prop didier: "
+                  << (double)proportionDidier / g.currentPop->size << std::endl;
 
         if (g.generation % SAVE_RATE == 0 && g.generation > 0) {
             auto backup_fname = POPNAME(g.generation);

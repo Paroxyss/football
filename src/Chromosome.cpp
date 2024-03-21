@@ -67,6 +67,7 @@ void Chromosome::initialize() {
             this->matrix[i][j]->initialize();
         }
     }
+	this->hasDidier = likelyness(0.5);
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
         this->didier[i]->initialize();
     }
@@ -127,8 +128,9 @@ void Chromosome::apply(player *equipeAlliee) {
 void Chromosome::apply_didier(player *equipeAlliee) {
     Matrix inputs = Matrix(COM_SIZE * EQUIPE_SIZE, 1);
 
-	//std::cout << "Didier reçoit pour le joueur 1 : ";equipeAlliee[0].outputs->print();
-	
+    // std::cout << "Didier reçoit pour le joueur 1 :
+    // ";equipeAlliee[0].outputs->print();
+
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < COM_SIZE; j++) {
             inputs.set(i * COM_SIZE + j, 0,
@@ -137,25 +139,24 @@ void Chromosome::apply_didier(player *equipeAlliee) {
         }
     }
 
-	
-	//std::cout << "INputs remplis:" << std::endl;
-    //inputs.print();
-    //inputs.mult_inv(*this->didier[0]);
-	//std::cout << "firstLayer" << std::endl;
-    //inputs.print();
-    //input_layer_activation(inputs);
-	/*std::cout << "INPUTS DIDIER" << std::endl;
-	inputs.print();
-	std::cout << "MULTIPLICATION AVEC CE RÉSEAU:" << std::endl;
-	this->didier[0]->print();
+    // std::cout << "INputs remplis:" << std::endl;
+    // inputs.print();
+    // inputs.mult_inv(*this->didier[0]);
+    // std::cout << "firstLayer" << std::endl;
+    // inputs.print();
+    // input_layer_activation(inputs);
+    /*std::cout << "INPUTS DIDIER" << std::endl;
+    inputs.print();
+    std::cout << "MULTIPLICATION AVEC CE RÉSEAU:" << std::endl;
+    this->didier[0]->print();
 */
     for (int i = 1; i < DIDIER_NETWORK_SIZE - 2; i++) {
         inputs.mult_inv(*this->didier[i]);
-		//std::cout << "layer "<< i << std::endl;
-        //inputs.print();
+        // std::cout << "layer "<< i << std::endl;
+        // inputs.print();
         hidden_layer_activation(inputs);
-		//std::cout << "hidden" << std::endl;
-		//inputs.print();
+        // std::cout << "hidden" << std::endl;
+        // inputs.print();
     }
 
     inputs.mult_inv(*this->didier[DIDIER_NETWORK_SIZE - 2]);
@@ -173,7 +174,15 @@ void Chromosome::apply_didier(player *equipeAlliee) {
 
 void Chromosome::collect_and_apply(player *equipeAlliee, player *equipeAdverse,
                                    ball *b, bool team) {
-    apply_didier(equipeAlliee);
+    if (this->hasDidier) {
+        apply_didier(equipeAlliee);
+    } else {
+        for (int i = 0; i < EQUIPE_SIZE; i++) {
+            for (int j = 0; j < COM_SIZE; j++) {
+                equipeAlliee[i].inputs->set(j, 0, 0);
+            }
+        }
+    }
     // On sauvegarde les inputs dans les joueurs
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         writeInputs(equipeAlliee[i], equipeAlliee, equipeAdverse, b, team);
@@ -200,10 +209,14 @@ void mutate(Chromosome &c) {
             mutation(*c.matrix[i][j]);
         }
     }
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        mutation(*c.didier[i]);
+    }
 }
 
 Chromosome *classicCrossover(Chromosome &a, Chromosome &b) {
     Chromosome *child = new Chromosome();
+    child->hasDidier = likelyness(0.5 * (a.hasDidier + b.hasDidier));
 
     for (int k = 0; k < EQUIPE_SIZE; k++) {
         for (int i = 0; i < NETWORK_SIZE - 1; i++) {
@@ -220,11 +233,41 @@ Chromosome *classicCrossover(Chromosome &a, Chromosome &b) {
         }
     }
 
+    int nDidier = a.hasDidier + b.hasDidier;
+
+    switch (nDidier) {
+    case 0:
+        break;
+    case 2:
+        for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+            Matrix *m = uniform_crossover(*a.didier[i], *b.didier[i]);
+
+            for (int j = 0; j < m->ligne; j++) {
+                for (int l = 0; l < m->col; l++) {
+                    child->didier[i]->set(j, l, m->get(j, l));
+                }
+            }
+        }
+        break;
+    case 1:
+        Matrix **source = b.didier;
+        if (a.hasDidier) {
+            source = a.didier;
+        }
+        for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+            Matrix::clone(source[i], child->didier[i]);
+        }
+        break;
+    }
+
     return child;
 }
 
 Chromosome *swapPlayerCrossover(Chromosome &a, Chromosome &b) {
     Chromosome *child = new Chromosome();
+
+    child->hasDidier = likelyness(0.5 * (a.hasDidier + b.hasDidier));
+
     for (int k = 0; k < EQUIPE_SIZE; k++) {
         Chromosome &source = likelyness(0.5) ? a : b;
         for (int i = 0; i < NETWORK_SIZE - 1; i++) {
@@ -244,7 +287,7 @@ Chromosome *crossover(Chromosome &a, Chromosome &b) {
 void Chromosome::write(std::ofstream &file) {
     int equipeSize = EQUIPE_SIZE;
     int nSize = NETWORK_SIZE;
-	int didierSize = DIDIER_NETWORK_SIZE;
+    int didierSize = DIDIER_NETWORK_SIZE;
 
     // Par sécurité
     file.write((char *)&equipeSize, sizeof(int));
@@ -268,23 +311,26 @@ void Chromosome::write(std::ofstream &file) {
             this->matrix[i][j]->write(file);
         }
     }
-	for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-		this->didier[i]->write(file);
-	}
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        this->didier[i]->write(file);
+    }
 }
 
 Chromosome *Chromosome::read(std::ifstream &file) {
     int equipeSize;
     int nSize;
-	int didierSize;
+    int didierSize;
 
     // Par sécurité
     file.read((char *)&equipeSize, sizeof(int));
     file.read((char *)&nSize, sizeof(int));
     file.read((char *)&didierSize, sizeof(int));
 
-    if (equipeSize != EQUIPE_SIZE || nSize != NETWORK_SIZE || didierSize != DIDIER_NETWORK_SIZE) {
-		std::cout << equipeSize << "≠" << EQUIPE_SIZE << " || " << nSize << "≠" << NETWORK_SIZE << " || " << didierSize << "≠" << DIDIER_NETWORK_SIZE << std::endl;
+    if (equipeSize != EQUIPE_SIZE || nSize != NETWORK_SIZE ||
+        didierSize != DIDIER_NETWORK_SIZE) {
+        std::cout << equipeSize << "≠" << EQUIPE_SIZE << " || " << nSize << "≠"
+                  << NETWORK_SIZE << " || " << didierSize << "≠"
+                  << DIDIER_NETWORK_SIZE << std::endl;
         throw std::invalid_argument(
             "Misconfigured Chromosome file (bad constants)");
     }
@@ -304,7 +350,8 @@ Chromosome *Chromosome::read(std::ifstream &file) {
     for (int i = 0; i < DIDIER_NETWORK_SIZE; i++) {
         file.read((char *)&pDidierLayers[i], sizeof(int));
         if (pDidierLayers[i] != DIDIER_LAYERS[i]) {
-            std::cout << i << ":" << pDidierLayers[i] << " ≠ " << DIDIER_LAYERS[i];
+            std::cout << i << ":" << pDidierLayers[i] << " ≠ "
+                      << DIDIER_LAYERS[i];
             throw std::invalid_argument(
                 "Misconfigured Chromosome file (bad didier layers)");
         }
@@ -322,11 +369,11 @@ Chromosome *Chromosome::read(std::ifstream &file) {
             c->matrix[i][j] = Matrix::read(file);
         }
     }
-	
-	for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-		delete c->didier[i];
-		c->didier[i] = Matrix::read(file);
-	}
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        delete c->didier[i];
+        c->didier[i] = Matrix::read(file);
+    }
 
     return c;
 }

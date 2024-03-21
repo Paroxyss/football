@@ -625,8 +625,6 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
             break;
         }
     }
-    if (g.logToFile)
-        exit(1);
 
     if (g.infos.score == 0) {
         // le biais modifie la probabilité qu'une équipe soit sélectionnée en

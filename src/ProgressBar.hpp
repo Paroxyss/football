@@ -37,7 +37,7 @@ class ProgressBar{
 		float futureDisplay = ((float)progression)/(float)max*(float)displayWidth;
 		for(int i = 0; i < floor(futureDisplay - displayed); i++){
 			printf("\033[38;5;%dm", color+1); 
-			std::cout <<"█";
+			std::cout <<"_";
 			displayed++;
 		}
 		fflush(stdout);

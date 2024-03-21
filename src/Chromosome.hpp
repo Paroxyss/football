@@ -14,6 +14,7 @@ class Chromosome {
   public:
     chromosomeStats stats = {.instanceGoals = 0, .instanceAge = 0};
 	unsigned long id;
+	bool hasDidier = false;
 
     Matrix *matrix[EQUIPE_SIZE][NETWORK_SIZE - 1];
 	Matrix *didier[DIDIER_NETWORK_SIZE - 1];

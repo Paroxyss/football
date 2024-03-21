@@ -11,7 +11,7 @@ class Population {
     Chromosome **pop;
 
   public:
-    Population(int size);
+    Population(int size, double proportionDidier = 0.5);
     ~Population();
 
     void initialize();

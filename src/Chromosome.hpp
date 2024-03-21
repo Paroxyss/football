@@ -17,7 +17,7 @@ class Chromosome {
 	bool hasDidier = false;
 
     Matrix *matrix[EQUIPE_SIZE][NETWORK_SIZE - 1];
-	Matrix *didier[DIDIER_NETWORK_SIZE - 1];
+    Matrix *didier[DIDIER_NETWORK_SIZE - 1];
 
     Chromosome();
     ~Chromosome();
@@ -26,11 +26,11 @@ class Chromosome {
 
     void initialize();
 
-    void collect_and_apply(player *equipeAlliee, player *equipeAdverse,
-                              ball *b, bool team);
+    void collect_and_apply(player *equipeAlliee, player *equipeAdverse, ball *b,
+                           bool team);
 
     void apply(player *equipeAlliee);
-	void apply_didier(player *equipeAlliee);
+    void apply_didier(player *equipeAlliee);
 
     void write(std::ofstream &file);
     static Chromosome *read(std::ifstream &file);

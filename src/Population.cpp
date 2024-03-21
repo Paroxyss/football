@@ -1,5 +1,3 @@
-#include <algorithm>
-#include <cstdio>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -14,10 +12,10 @@
 #include "Game.hpp"
 #include "Genealogy.hpp"
 #include "Population.hpp"
+#include "ProgressBar.hpp"
 #include "SafeQueue.hpp"
 #include "config.h"
 #include "util.hpp"
-#include "ProgressBar.hpp"
 
 Population::Population(int size, double proportionDidier) {
     this->size = size;
@@ -72,14 +70,15 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
                                   .total_ball_collisions = 0,
                                   .stopped = 0};
 
-	ProgressBar pbar(this->size);
+    ProgressBar pbar(this->size);
     // on fait les tournois
     for (int threadId = 0; threadId < n_thread; threadId++) {
         threads[threadId] = std::thread([this, &nextPop, &expected,
                                          &statsTournois, threadId,
                                          &attributions, &liens, &pbar]() {
             while (nextPop.reserve(threadId, NB_PAR_TOURNOI) < expected) {
-                int tourn_size = thrand(4+NB_PAR_TOURNOI, this->size * PRESSION_SELECTIVE);
+                int tourn_size =
+                    thrand(4 + NB_PAR_TOURNOI, this->size * PRESSION_SELECTIVE);
                 auto outcome =
                     this->tournament(tourn_size, NB_PAR_TOURNOI, false);
 
@@ -91,8 +90,8 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
                 }
                 for (int i = 0; i < vainqueurs.size(); i++) {
                     Chromosome *mutedWinner;
-					auto c1 = vainqueurs[i];
-					auto c2 = vainqueurs[(i+1)%vainqueurs.size()];
+                    auto c1 = vainqueurs[i];
+                    auto c2 = vainqueurs[(i + 1) % vainqueurs.size()];
                     if (likelyness(CROSSOVER_PROBABILITY)) {
                         mutedWinner = crossover(*c1, *c2);
                         liens.push((carteIdentite){
@@ -104,7 +103,7 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
                     }
 
                     mutate(*mutedWinner);
-					pbar.step(1, threadId);
+                    pbar.step(1, threadId);
                     nextPop.pushReserved(mutedWinner, threadId);
                     statsTournois.push(std::get<1>(outcome));
                     attributions.push(
@@ -118,7 +117,7 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
             while (nextPop.reserve(threadId, 1) <= this->size) {
                 Chromosome *c = new Chromosome();
                 c->initialize();
-				pbar.step(1, threadId);
+                pbar.step(1, threadId);
                 nextPop.pushReserved(c, threadId);
                 liens.push({.id = c->id, .p1 = 0, .p2 = 0});
             }
@@ -169,10 +168,10 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
 
 std::tuple<std::queue<Chromosome *>, gameStatistics>
 Population::tournament(int tourn_size, int maxSize, bool save) {
-	if(tourn_size < maxSize){
-		std::cout << tourn_size << " " << maxSize << std::endl;
-		throw std::logic_error("tourn_size < maxSize");
-	};
+    if (tourn_size < maxSize) {
+        std::cout << tourn_size << " " << maxSize << std::endl;
+        throw std::logic_error("tourn_size < maxSize");
+    };
     std::queue<Chromosome *> contestants;
 
     bool *selected = (bool *)calloc(this->size, sizeof(bool));
@@ -232,13 +231,13 @@ Chromosome *cloneChromosome(Chromosome *original) {
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
-			Matrix::clone(original->matrix[i][j], clone->matrix[i][j]);
+            Matrix::clone(original->matrix[i][j], clone->matrix[i][j]);
         }
     }
 
-	for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++){
-		Matrix::clone(original->didier[i], clone->didier[i]);
-	}
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        Matrix::clone(original->didier[i], clone->didier[i]);
+    }
 
     clone->stats.instanceGoals = original->stats.instanceGoals;
     clone->stats.instanceAge = original->stats.instanceAge;

@@ -1,5 +1,4 @@
 #include <cmath>
-#include <cstdlib>
 
 #include "Game.hpp"
 #include "Inputs.hpp"
@@ -93,7 +92,6 @@ inline void writeNearestPlayer(Matrix &mat, player &viewer, player *&equipe,
     writeObject(mat, viewer, *nearest, i, 2 * vjmax);
 }
 
-
 /*
     team == false -> gauche
     team == true -> droite
@@ -132,10 +130,10 @@ void writeInputs(player &viewer, player *equipeAlliee, player *equipeAdverse,
     writeNearestPlayer(mat, viewer, equipeAlliee, indice);
     writeNearestPlayer(mat, viewer, equipeAdverse, indice);
 
-	#ifdef MATRIX_DEBUG
+#ifdef MATRIX_DEBUG
     if (indice != NETWORK_INPUT_SIZE) {
         std::cout << indice << std::endl;
         throw std::logic_error("mauvais nombre d'inputs??");
     }
-	#endif
+#endif
 }

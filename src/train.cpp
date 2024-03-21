@@ -11,7 +11,6 @@ namespace fs = std::filesystem;
 #include "Population.hpp"
 #include "config.h"
 #include "train.hpp"
-#include "util.hpp"
 
 #define POPNAME(gen)                                                           \
     "pops/pop-gen" + std::to_string(gen) + "-at-" + std::to_string(time(NULL))
@@ -37,7 +36,6 @@ void trainPop(Generation &g, int n_gen, int n_thread) {
               << g.currentPop->size << " chromosomes on " << n_thread
               << " threads." << std::endl;
 
-    int last_save = 0;
     g.rewriteStats();
 
     uint proportionDidier = 0;
@@ -57,10 +55,7 @@ void trainPop(Generation &g, int n_gen, int n_thread) {
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start;
 
-        last_save += 1;
-
         auto stats = g.stats.back();
-        double n = (double)stats.n;
 
         uint proportionDidier = 0;
         for (int i = 0; i < g.currentPop->size; i++) {

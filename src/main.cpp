@@ -106,26 +106,26 @@ int main(int argc, char *argv[]) {
         play_match(&c1, &c2, true);
     } else if (strcmp(argv[1], "testSave") == 0) {
         Chromosome c1;
-		c1.initialize();
-		std::ofstream file;
-		file.open("testpop.pop");
-		c1.write(file);
-		file.close();
-		
-		std::ifstream file2;
-		file2.open("testpop.pop");
-		auto c2 = Chromosome::read(file2);
-		file2.close();
+        c1.initialize();
+        std::ofstream file;
+        file.open("testpop.pop");
+        c1.write(file);
+        file.close();
 
-		std::cout << "#############" << std::endl;
-		c1.print();
-		std::cout << "#############" << std::endl;
-		c2->print();
-		std::cout << "#############" << std::endl;
-		delete c2;
-		
+        std::ifstream file2;
+        file2.open("testpop.pop");
+        auto c2 = Chromosome::read(file2);
+        file2.close();
+
+        std::cout << "#############" << std::endl;
+        c1.print();
+        std::cout << "#############" << std::endl;
+        c2->print();
+        std::cout << "#############" << std::endl;
+        delete c2;
+
     } else if (strcmp(argv[1], "rm2") == 0) {
-		std::cout << "simulation random" << std::endl;
+        std::cout << "simulation random" << std::endl;
         auto g = Game(2 * EQUIPE_SIZE, true);
         g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
         g.ball.vitesse = {.x = 0, .y = 0};
@@ -134,14 +134,12 @@ int main(int argc, char *argv[]) {
         g.set_players(c, GAMECONFIGLENGTH);
 
         int to_touch = MAX_TOUCH_DURATION;
-        unsigned int deltaTouchedBall = 0;
-
 
         for (int k = 0; k < 300; k++, to_touch--) {
-			writeInputs(g.players[0], g.players, g.players + 3, &g.ball, true);
-			g.players->orientation += 1/10. * (k<150);
-			g.players->vitesse.x = cos(k/10.)*5;
-			g.players->vitesse.y = sin(k/10.)*5;
+            writeInputs(g.players[0], g.players, g.players + 3, &g.ball, true);
+            g.players->orientation += 1 / 10. * (k < 150);
+            g.players->vitesse.x = cos(k / 10.) * 5;
+            g.players->vitesse.y = sin(k / 10.) * 5;
             // on tick 10 fois pour beaucoup plus de précisions
             g.tick(0.1, true, false, true);
             for (int i = 0; i < 8; i++) {
@@ -166,8 +164,7 @@ int main(int argc, char *argv[]) {
             auto start = std::chrono::high_resolution_clock::now();
 
             for (int i = 0; i < matchPerIter; i++) {
-                auto stats = play_match(&c[i % chromosomeCount],
-                                        &c[i / chromosomeCount]);
+                play_match(&c[i % chromosomeCount], &c[i / chromosomeCount]);
             }
 
             auto end = std::chrono::high_resolution_clock::now();

@@ -18,6 +18,7 @@
     { 1, 0, 2 }
 #define GAMECONFIGLENGTH 3
 
+// Configurations des réseaux de neurones
 const int PLAYER_LAYERS[NETWORK_SIZE] = {NETWORK_INPUT_SIZE, 28, 20, 16, 10, 6,
                                          NETWORK_OUTPUT_SIZE};
 const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {COM_SIZE * EQUIPE_SIZE,
@@ -43,10 +44,13 @@ const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {COM_SIZE * EQUIPE_SIZE,
 
 #define PLAYER_ROTATION_ACCELERATION 0.10
 #define PLAYER_ROTATION_FROTTEMENT (1 / 3.)
-
+// configuration des tirs 
+// force du tir
 #define SHOOTSTRENGTH 50
+// temps entre chaque tir
 #define SHOOTCOOLDOWN 10 // en seconde
  
+// Coefficient de restitution (collisions elastiques
 #define COLLISION_CONS 0.9
 
 // BALL CONFIG
@@ -55,9 +59,9 @@ const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {COM_SIZE * EQUIPE_SIZE,
 #define BALL_FROTTEMENT (1 / 35.)
 
 // SENSOR CONFIG
-// Tests d'une autre methode de communication: les capteurs, 
+// Tests d'une autre méthode de communication: les capteurs, 
 // pour conserver la continuité des entrées 
-// (abandonnee car trop complexe a apprendre)
+// (abandonnée car trop complexe à apprendre)
 #define PLAYER_SENSOR_NUMBER 3
 const double PLAYER_SENSOR_ANGLES[PLAYER_SENSOR_NUMBER] = {
     -45. * M_PI / 180., 0. * M_PI / 180., 45. * M_PI / 180.};
@@ -73,16 +77,16 @@ const double PLAYER_SENSOR_ANGLES[PLAYER_SENSOR_NUMBER] = {
 // Nombre de joueurs créés par tournois
 #define NB_PAR_TOURNOI 2
 
-// Probabilite de crossover classique (moyenne)
+// Probabilité de crossover classique (moyenne)
 #define CROSSOVER_PROBABILITY 0.2 // 0.9
-// Probabilite de crossover mixte (mixe les deux équipes)
+// Probabilité de crossover mixte (mixe les deux équipes)
 #define SWAP_CROSSOVER_PROBA 0.25
 
 // Probabilite de faire varier les poids d'un joueur
 // entre 0.001 et 0.1
 #define MUTATION_PROBABILITY 0.04
 
-// Probablite d'echanger des poids entre les joueurs, au sein d'une meme equipe
+// Probablité d'échanger des poids entre les joueurs, au sein d'une même équipe
 #define SWAP_MUTATION_PROBA 0.025
 
 // Proportion de joueurs aléatoires par générations
@@ -91,5 +95,5 @@ const double PLAYER_SENSOR_ANGLES[PLAYER_SENSOR_NUMBER] = {
 // intervalle (en génération) des sauvegardes
 #define SAVE_RATE 5
 
-// Active les tests lors de l'accession aux matrices (tres couteux en ressources)
+// Active les tests lors de l'accession aux matrices (très couteux en ressources)
 // #define MATRIXDEBUG

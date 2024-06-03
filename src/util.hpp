@@ -1,17 +1,18 @@
 #pragma once
 
-#include <cmath>
 #include <iostream>
 #include <ostream>
-#include <random>
-#include <thread>
 
 struct gameInformations {
     unsigned int collisions;
     unsigned int goals;
     int ball_collisions;
-    double score;
+    double scoreRouge;
+    double scoreBleu;
     bool stopped;
+	double touchMean;
+	double bonusRouge;
+	double bonusBleu;
 };
 
 struct gameStatistics {
@@ -20,6 +21,8 @@ struct gameStatistics {
     unsigned int totalGoals;
     int total_ball_collisions;
     int stopped;
+	double scoreRouge;
+	double scoreBleu;
 };
 
 double randomDouble(double min, double max);

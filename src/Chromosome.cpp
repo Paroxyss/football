@@ -67,7 +67,7 @@ void Chromosome::initialize() {
             this->matrix[i][j]->initialize();
         }
     }
-	this->hasDidier = likelyness(0.5);
+    this->hasDidier = likelyness(0.5);
     for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
         this->didier[i]->initialize();
     }
@@ -322,6 +322,7 @@ void Chromosome::write(std::ofstream &file) {
     // Stats
     file.write((char *)&this->stats.instanceAge, sizeof(int));
     file.write((char *)&this->stats.instanceGoals, sizeof(int));
+    file.write((char *)&this->hasDidier, sizeof(bool));
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {
@@ -379,6 +380,7 @@ Chromosome *Chromosome::read(std::ifstream &file) {
     // Stats
     file.read((char *)&c->stats.instanceAge, sizeof(int));
     file.read((char *)&c->stats.instanceGoals, sizeof(int));
+    file.read((char *)&c->hasDidier, sizeof(bool));
 
     for (int i = 0; i < EQUIPE_SIZE; i++) {
         for (int j = 0; j < NETWORK_SIZE - 1; j++) {

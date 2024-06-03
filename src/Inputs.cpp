@@ -130,6 +130,8 @@ void writeInputs(player &viewer, player *equipeAlliee, player *equipeAdverse,
     writeNearestPlayer(mat, viewer, equipeAlliee, indice);
     writeNearestPlayer(mat, viewer, equipeAdverse, indice);
 
+    writeValRaw(mat, viewer.shootCooldown / (double)SHOOTCOOLDOWN, indice);
+
 #ifdef MATRIX_DEBUG
     if (indice != NETWORK_INPUT_SIZE) {
         std::cout << indice << std::endl;

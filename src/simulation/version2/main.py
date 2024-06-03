@@ -80,11 +80,13 @@ def load(restart = True):
     rootApp.addApp(SeparatorApp, largeurTerrain, 0, 1400, 5, (255,255,255))
     for i in range(3):
         output = list(zip(*map(genGetOutputs(team,i),frames)))
-        input = list(zip(*map(genGetInputs(team,i),frames)))
-        output = [GraphData("Out1", output[0]), GraphData("Out2", output[1]),
-                  GraphData("In1", input[0]), GraphData("In2", input[1]),
+        #input = list(zip(*map(genGetInputs(team,i),frames)))
+        output = [#GraphData("Out1", output[0]), GraphData("Out2", output[1]),
+                  #GraphData("shoot", input[0]), #GraphData("In2", input[1]),
+                  gOut(frames, team, i, "shootCooldown"),
                   gOut(frames, team, i, "outputRota"),
                   gOut(frames, team, i, "outputAccel"),
+                  gOut(frames, team, i, "outputShoot"),
                   ]
         rootApp.addApp(GraphApp, largeurTerrain, 205*i+5, 1400-200, 205*(i+1), output)
         rootApp.addApp(ZoomedFootApp, 1400-200, 205*i+5, 1400, 205*(i+1), (team, i, frames), 90+180*team)

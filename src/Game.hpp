@@ -21,6 +21,8 @@ struct player : ball {
     // Contient les inputs que didier définit au début de l'évaluation, ils
     // valent par défaut 0
     Matrix *inputs;
+    // Capacité d'un joueur à tirer
+	int shootCooldown = 0;
 };
 
 // faut la mettre ici sinon ça compile pas (mdr)
@@ -40,8 +42,10 @@ struct collisionList {
     // temps auquel la collision arrive (en s)
     double time;
     // Acteur de la collision
+    int id1;
     ball *actor;
     // Objet la subissant
+    int id2;
     ball *secondary;
     CollisionType type;
     collisionList *next;
@@ -67,8 +71,12 @@ class Game {
     gameInformations infos = {.collisions = 0,
                               .goals = 0,
                               .ball_collisions = 0,
-                              .score = 0,
-                              .stopped = false};
+                              .scoreRouge = 0,
+                              .scoreBleu = 0,
+                              .stopped = false,
+                              .touchMean = 0,
+                              .bonusRouge = 0,
+                              .bonusBleu = 0};
 
     void set_players(const int conf[], int n);
 

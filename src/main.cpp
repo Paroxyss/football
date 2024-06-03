@@ -14,6 +14,7 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <thread>

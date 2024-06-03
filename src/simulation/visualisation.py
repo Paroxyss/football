@@ -59,7 +59,7 @@ def animate(i):
     ax3.plot(xs[WADV : WADV + len(mean)], mean)
     ax3.set_title("Nombre moyen de buts")
     ax3.set_xlabel("Générations")
-    ax3.set_ylabel("Butes / Nombre de matches")
+    ax3.set_ylabel("Buts / Nombre de matches")
     ax3.grid(axis="y")
 
     ys_4 = [x[4] for x in graph_data]
@@ -67,9 +67,9 @@ def animate(i):
     ax4.clear()
     ax4.plot(xs, ys_4)
     ax4.plot(xs[WADV : WADV + len(mean)], mean)
-    ax4.set_title("Pourcentage de matchs arrêtés")
+    ax4.set_title("Proportion de didiers")
     ax4.set_xlabel("Générations")
-    ax4.set_ylabel("Matches")
+    ax4.set_ylabel("Proportion")
     ax4.grid(axis="y")
 
 

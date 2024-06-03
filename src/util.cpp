@@ -1,5 +1,6 @@
 #include "util.hpp"
 #include "Rand.h"
+#include <iomanip>
 
 /**
  * @brief Apparemment la fonction rand() n'est pas "thread-safe" et peut
@@ -54,20 +55,21 @@ bool likelyness(double v) {
     return randomDouble(0, 1) < v;
 }
 
+#define DIVN(name) stats.name / (double)stats.n
+#define DIVLN(name) stats.name / std::log2((double)stats.n)
 std::ostream &operator<<(std::ostream &out, gameStatistics stats) {
-    out << "Stats{ collisions : "
-        << "matches : " << stats.n << ", collisions : " << stats.totalCollisions
-        << " | " << stats.totalCollisions / (double)(stats.n)
-        << ", ball collisions : " << stats.total_ball_collisions << " | "
-        << stats.total_ball_collisions / (double)(stats.n)
-        << ", goals : " << stats.totalGoals << " | "
-        << stats.totalGoals / (double)(stats.n) << " }";
-
+    out << std::setprecision(3) << std::setfill(' ') << "S(" << stats.n
+        << "){c: " << std::setw(8) << DIVN(totalCollisions) << " | "
+        << std::setw(8) << DIVN(total_ball_collisions)
+        << "; g: " << std::setw(8) << DIVN(totalGoals)
+        << "; s: " << std::setw(8) << (DIVN(scoreBleu) + DIVN(scoreRouge)) / 2
+        << "}";
     return out;
 }
 
 std::ostream &operator<<(std::ostream &out, gameInformations stats) {
     out << "Stats{ collisions : " << stats.collisions
-        << ", goals : " << stats.goals << ", score : " << stats.score << " }";
+        << ", goals : " << stats.goals << ", score : " << stats.scoreBleu
+        << " | " << stats.scoreRouge << " }";
     return out;
 }

@@ -18,7 +18,7 @@ class Population {
     gameStatistics next(int n_thread, bool save = false,
                         Generation *parent = NULL);
 
-    std::tuple<std::queue<Chromosome *>, gameStatistics>
+    std::tuple<std::queue<std::pair<Chromosome *, double>>, gameStatistics>
     tournament(int tourn_size, int maxSize, bool save);
 
     void write(std::ofstream &file);

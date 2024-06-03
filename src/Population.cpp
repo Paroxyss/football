@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -23,7 +24,7 @@ Population::Population(int size, double proportionDidier) {
 
     for (int i = 0; i < size; i++) {
         this->pop[i] = new Chromosome();
-		this->pop[i]->hasDidier = likelyness(proportionDidier);
+        this->pop[i]->hasDidier = likelyness(proportionDidier);
     }
 }
 
@@ -48,6 +49,8 @@ void update_statistics(gameStatistics &tourn_stats,
     tourn_stats.n += tournResult.n;
     tourn_stats.total_ball_collisions += tournResult.total_ball_collisions;
     tourn_stats.stopped += tournResult.stopped;
+	tourn_stats.scoreRouge += tournResult.scoreRouge;
+	tourn_stats.scoreBleu += tournResult.scoreBleu;
 }
 
 gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
@@ -84,15 +87,22 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
 
                 auto q = std::get<0>(outcome);
                 std::vector<Chromosome *> vainqueurs;
+                std::vector<double> scores;
                 while (!q.empty()) {
-                    vainqueurs.push_back(q.front());
+                    vainqueurs.push_back(q.front().first);
+                    scores.push_back(q.front().second);
                     q.pop();
                 }
                 for (int i = 0; i < vainqueurs.size(); i++) {
                     Chromosome *mutedWinner;
                     auto c1 = vainqueurs[i];
                     auto c2 = vainqueurs[(i + 1) % vainqueurs.size()];
-                    if (likelyness(CROSSOVER_PROBABILITY)) {
+                    if (scores[i] / std::log2(std::get<1>(outcome).n) <= 0) {
+                        // trop nul, on génère un nouvel individu
+                        Chromosome *c = new Chromosome();
+                        c->initialize();
+                        mutedWinner = c;
+                    } else if (likelyness(CROSSOVER_PROBABILITY)) {
                         mutedWinner = crossover(*c1, *c2);
                         liens.push((carteIdentite){
                             .id = mutedWinner->id, .p1 = c1->id, .p2 = c2->id});
@@ -166,13 +176,13 @@ gameStatistics Population::next(int n_thread, bool save, Generation *parent) {
     return tourn_stats;
 }
 
-std::tuple<std::queue<Chromosome *>, gameStatistics>
+std::tuple<std::queue<std::pair<Chromosome *, double>>, gameStatistics>
 Population::tournament(int tourn_size, int maxSize, bool save) {
     if (tourn_size < maxSize) {
         std::cout << tourn_size << " " << maxSize << std::endl;
         throw std::logic_error("tourn_size < maxSize");
     };
-    std::queue<Chromosome *> contestants;
+    std::queue<std::pair<Chromosome *, double>> contestants;
 
     bool *selected = (bool *)calloc(this->size, sizeof(bool));
 
@@ -188,30 +198,32 @@ Population::tournament(int tourn_size, int maxSize, bool save) {
             }
         }
 
-        contestants.push(this->pop[k]);
+        contestants.push(std::make_pair(this->pop[k], 0));
         selected[k] = true;
     }
 
     free(selected);
 
-    gameStatistics gameStats = {
-        .n = 0,
-        .totalCollisions = 0,
-        .totalGoals = 0,
-        .total_ball_collisions = 0,
-        .stopped = 0,
-    };
+    gameStatistics gameStats = {.n = 0,
+                                .totalCollisions = 0,
+                                .totalGoals = 0,
+                                .total_ball_collisions = 0,
+                                .stopped = 0,
+                                .scoreRouge = 0,
+                                .scoreBleu = 0};
 
     while (contestants.size() > maxSize) {
         auto c1 = contestants.front();
         contestants.pop();
         auto c2 = contestants.front();
         contestants.pop();
-        auto match_results = play_match(c1, c2, save);
+        auto match_results = play_match(c1.first, c2.first, save);
 
-        if (match_results.score > 0) {
+        if (match_results.scoreBleu - match_results.scoreRouge > 0) {
+            c1.second += match_results.scoreBleu;
             contestants.push(c1);
         } else {
+            c1.second += match_results.scoreRouge;
             contestants.push(c2);
         }
 
@@ -220,6 +232,8 @@ Population::tournament(int tourn_size, int maxSize, bool save) {
         gameStats.totalGoals += match_results.goals;
         gameStats.total_ball_collisions += match_results.ball_collisions;
         gameStats.stopped += match_results.stopped ? 1 : 0;
+		gameStats.scoreRouge += match_results.scoreRouge;
+		gameStats.scoreBleu += match_results.scoreBleu;
         gameStats.n++;
     }
 
@@ -241,6 +255,8 @@ Chromosome *cloneChromosome(Chromosome *original) {
 
     clone->stats.instanceGoals = original->stats.instanceGoals;
     clone->stats.instanceAge = original->stats.instanceAge;
+
+	clone->hasDidier = original->hasDidier;
 
     return clone;
 }

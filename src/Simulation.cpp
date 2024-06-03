@@ -16,7 +16,7 @@ void simulate_and_save(const char *filename) {
 
     auto tourn = g.currentPop->tournament(tourn_size, 0, 2);
 
-    play_match(std::get<0>(tourn).front(), std::get<0>(tourn).back(), 1);
+    //play_match(std::get<0>(tourn).front(), std::get<0>(tourn).back(), 1);
 }
 
 /**
@@ -33,7 +33,11 @@ void play_random_match(const char *filename) {
     Chromosome *c2 =
         cloneChromosome(g.currentPop->pop[thrand(0, g.currentPop->size - 1)]);
 
-    play_match(c1, c2, 1);
+    auto info = play_match(c1, c2, 1);
+	while(info.ball_collisions == 0){
+		info = play_match(c1, c2, 1);
+		std::cout << info << std::endl;
+	}
 }
 
 void see_goal(const char *filename, int nGoal) {

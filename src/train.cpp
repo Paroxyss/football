@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <iomanip>
 #include <stdexcept>
 #ifdef __MACH__
 namespace fs = std::__fs::filesystem;
@@ -62,7 +63,7 @@ void trainPop(Generation &g, int n_gen, int n_thread) {
             proportionDidier += g.currentPop->pop[i]->hasDidier;
         }
 
-        std::cout << "Stats gen " << g.generation << " " << stats << " in "
+        std::cout << "Stats gen " << std::setw(5) << g.generation << " " << stats << " in "
                   << elapsed_seconds.count() << " prop didier: "
                   << (double)proportionDidier / g.currentPop->size << std::endl;
 

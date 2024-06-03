@@ -91,8 +91,10 @@ class Player():
     balle: Ball
     joueurAllie: Ball
     joueurAdverse: Ball
+    shootCooldown: float
     outputRota: float
     outputAccel: float
+    outputShoot: float
     outcom: List[float]
     def denormalize(self, mapWidth: int, mapHeight: int, 
                     vmax: float, vballmax: float):
@@ -119,8 +121,10 @@ class Player():
             balle= Ball.deserialize(state),
             joueurAllie= Ball.deserialize(state),
             joueurAdverse= Ball.deserialize(state),
+            shootCooldown= state.readValue(),
             outputRota= state.readValue(),
             outputAccel= state.readValue(),
+            outputShoot = state.readValue(),
             outcom= state.readValArray(COM_SIZE)
         )
 

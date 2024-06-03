@@ -183,6 +183,14 @@ void Game::set_players(const int conf[], int n) {
             c++;
         }
     }
+
+    for (int i = 0; i < playerNumber; i++) {
+        players[i].shootCooldown = 0;
+    }
+
+    /*this->ball.pos.x = this->players[1].pos.x;
+    this->ball.pos.y = this->players[1].pos.y;
+    this->ball.pos.x += ((float)PLAYER_SIZE + BALL_SIZE) / 2 + 30;*/
 }
 
 inline double distancecarre(ball &p, const ball &b) {
@@ -190,13 +198,16 @@ inline double distancecarre(ball &p, const ball &b) {
 }
 
 inline collisionList *insert(collisionList *list, ball *actor, ball *secondary,
-                             CollisionType type, double time = INFINITY) {
+                             int id1, int id2, CollisionType type,
+                             double time = INFINITY) {
     collisionList *l = new collisionList;
     l->actor = actor;
     l->secondary = secondary;
     l->time = time;
     l->type = type;
     l->next = list;
+    l->id1 = id1;
+    l->id2 = id2;
     return l;
 }
 // Retourne le temps avant lequel un objet va rencontrer un mur, si le temps est
@@ -262,15 +273,15 @@ collisionList *Game::getObjectCollisionList(int objId,
         }
         if (abs(d) < selected->size && 0 < pRelat && 1 > pRelat) {
             // la balle est trop près du mur, il y a collision
-            listToAppend = insert(listToAppend, selected, &w, WALL);
+            listToAppend = insert(listToAppend, selected, &w, objId, i, WALL);
         }
     }
 
     for (int i = 0; i < 2 * wallNumber; i++) {
         if (distancecarre(*selected, this->wallsBouts[i]) <
             pow(selected->size, 2)) {
-            listToAppend =
-                insert(listToAppend, selected, &this->wallsBouts[i], CIRCLE);
+            listToAppend = insert(listToAppend, selected, &this->wallsBouts[i],
+                                  objId, i + EQUIPE_SIZE * 2, CIRCLE);
         }
     }
 
@@ -278,8 +289,8 @@ collisionList *Game::getObjectCollisionList(int objId,
     for (int i = objId + 1; i < playerNumber; i++) {
         if (distancecarre(*selected, this->players[i]) <
             pow(selected->size + PLAYER_SIZE, 2)) {
-            listToAppend =
-                insert(listToAppend, selected, &this->players[i], CIRCLE);
+            listToAppend = insert(listToAppend, selected, &this->players[i],
+                                  objId, i, CIRCLE);
         }
     }
 
@@ -430,16 +441,56 @@ void Game::tick(double timeToAdvance, bool root, bool clearAccels,
         // On effectue la collision
         switch (firstCollision->type) {
         case CIRCLE:
+            if (firstCollision->id1 == -1 &&
+                firstCollision->id2 < 2 * EQUIPE_SIZE) {
+                this->infos.touchMean /= 2;
+                if (firstCollision->id2 < EQUIPE_SIZE) {
+					this->infos.bonusBleu += (0.5-this->infos.bonusBleu)/3;
+                    this->infos.touchMean += 0.5;
+                } else {
+					this->infos.bonusRouge += (0.5-this->infos.bonusRouge)/3;
+                    this->infos.touchMean -= 0.5;
+                }
+            }
+
             computeCollisionCircle(firstCollision->actor,
                                    firstCollision->secondary);
-            if ((firstCollision->actor->size == BALL_SIZE ||
-                 firstCollision->secondary->size == BALL_SIZE)) {
+
+            if (firstCollision->id1 == -1) {
                 this->infos.ball_collisions += 1;
             }
             break;
         case WALL:
             computeCollisionWall(*firstCollision->actor,
                                  firstCollision->secondary);
+            if (firstCollision->id1 == -1) {
+                if (firstCollision->id2 == 0) {
+                    this->ball.vitesse.y = 5;
+                    this->ball.vitesse.x = 0;
+                } else if (firstCollision->id2 == 2) {
+                    this->ball.vitesse.y = -5;
+                    this->ball.vitesse.x = 0;
+                }
+
+                /*for (int i = 0; i < this->playerNumber; i++) {
+                    auto explo = (this->players[i].pos - this->ball.pos);
+                    double d = norme(explo);
+                    // vecteur unitaire de direction de projection
+                    explo /= d;
+                    // on obient la norme de ∆v causée par l'explosion
+                    explo *= fmax(200 - d, 0) / 10.;
+
+                    this->players[i].vitesse += explo;
+                }*/
+
+                /*if (infos.touchMean < 0) {
+                    infos.bonusRouge -= 0.05;
+                }
+                if (infos.touchMean > 0) {
+                    infos.bonusBleu -= 0.05;
+                }*/
+            }
+            break;
         }
         // On fait de nouveau un tick, pour compléter le temps restant
         tick(timeToAdvance - firstCollision->time, false);
@@ -555,23 +606,46 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
     int to_touch = MAX_TOUCH_DURATION;
     unsigned int deltaTouchedBall = 0;
 
-    for (int k = 0; k < MAX_GAME_DURATION; k++, to_touch--) {
+    int k;
+    for (k = 0; k < MAX_GAME_DURATION; k++, to_touch--) {
         c1->collect_and_apply(g.players, g.players + EQUIPE_SIZE, &g.ball,
                               false);
         c2->collect_and_apply(g.players + EQUIPE_SIZE, g.players, &g.ball,
                               true);
-        // std::cout << "INPUTS J1: " << g.players[0].inputs->get(0, 0) << ";"
-        // << g.players[0].inputs->get(1, 0) << std::endl; std::cout << "OUTPUTS
-        // j1:"; g.players[0].outputs->print(); std::cout << std::endl;
+        // std::cout << "INPUTS J1: " << g.players[0].inputs->get(0, 0) <<
+        // ";"
+        // << g.players[0].inputs->get(1, 0) << std::endl; std::cout <<
+        // "OUTPUTS j1:"; g.players[0].outputs->print(); std::cout <<
+        // std::endl;
 
         for (int a = 0; a < 2 * EQUIPE_SIZE; a++) {
             double rotation = g.players[a].outputs->get(0, 0);
             double acceleration = g.players[a].outputs->get(1, 0);
+            double shoot = g.players[a].outputs->get(2, 0);
 
             if (acceleration < 0)
                 acceleration = 0;
 
             g.setAccelerations(a, rotation, acceleration);
+
+            if ((shoot >= 0) && (g.players[a].shootCooldown == 0)) {
+                g.players[a].shootCooldown = SHOOTCOOLDOWN;
+
+                auto explo = (g.ball.pos - g.players[a].pos);
+                double d = norme(explo);
+                // vecteur unitaire de direction de projection
+                explo /= d;
+                // on obient la norme de ∆v causée par l'explosion
+                double dmax = PLAYER_SIZE + 2 * BALL_SIZE;
+                explo *= fmax(dmax - d, 0) / dmax * 60;
+
+                g.ball.vitesse += explo;
+            }
+            if (shoot < 0) {
+                g.players[a].shootCooldown =
+                    fmax(g.players[a].shootCooldown - 1, 0);
+                // g.players[a].shootCooldown -= 1;
+            }
         }
 
         // on tick 10 fois pour beaucoup plus de précisions
@@ -582,11 +656,6 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
         g.tick(0.1, true, true, false);
 
         if (g.cassee) {
-            if (likelyness(0.5)) {
-                g.infos.score = 1;
-                return g.infos;
-            }
-            g.infos.score = -1;
             return g.infos;
         }
 
@@ -595,10 +664,19 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
         if (bc1 || bc2) {
             if (bc1) {
                 c2->stats.instanceGoals += 1;
-                g.infos.score -= 1;
+                // but contre leur camp des bleus
+                if (g.infos.touchMean > 0.75) {
+                    g.infos.scoreBleu -= 1;
+                } else {
+                    g.infos.scoreRouge += 1;
+                }
             } else {
                 c1->stats.instanceGoals += 1;
-                g.infos.score += 1;
+                if (-g.infos.touchMean > 0.75) {
+                    g.infos.scoreRouge -= 1;
+                } else {
+                    g.infos.scoreBleu += 1;
+                }
             }
             g.infos.goals += 1;
 
@@ -619,20 +697,22 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
 
             to_touch = MAX_TOUCH_DURATION;
         }
-
-        // 2-0, on arrête
-        if ((abs(g.infos.score) >= 2 && !save)) {
-            break;
-        }
     }
 
-    if (g.infos.score == 0) {
-        if (likelyness(0.5)) {
-            g.infos.score = 1;
-        } else {
-            g.infos.score = -1;
-        }
-    }
+    vector centreCageBleu = {.x = static_cast<double>(0),
+                             .y = (double)MAP_HEIGHT / 2};
+    vector centreCageRouge = {.x = static_cast<double>(MAP_LENGTH),
+                              .y = (double)MAP_HEIGHT / 2};
+    // bonus de position
+    double diffPosBalle = norme(centreCageBleu - g.ball.pos) -
+                          norme(centreCageRouge - g.ball.pos);
+
+    g.infos.scoreBleu += fmax(diffPosBalle / MAP_LENGTH, 0);
+    g.infos.scoreRouge += fmax(-diffPosBalle / MAP_LENGTH, 0);
+    g.infos.scoreBleu += g.infos.bonusBleu;
+    g.infos.scoreRouge += g.infos.bonusRouge;
+
+	
 
     return g.infos;
 };

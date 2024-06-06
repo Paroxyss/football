@@ -9,6 +9,13 @@ tests/*
 
 bin
 
+Doxyfile
+doxygen/
+images/
+include/
+lib/
+pyvenv.cfg
+
 todo.txt
 .DS_Store
 .idea

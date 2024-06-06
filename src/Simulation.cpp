@@ -15,10 +15,10 @@ void play_random_match(const char *filename) {
 	Generation g(0);
 	g.load(filename);
 
-	Chromosome *c1 = cloneChromosome(
-		g.currentPop->pop[thrand(0, g.currentPop->size - 1)]);
-	Chromosome *c2 = cloneChromosome(
-		g.currentPop->pop[thrand(0, g.currentPop->size - 1)]);
+	Chromosome *c1 = clone_chromosome(
+            g.currentPop->pop[thrand(0, g.currentPop->size - 1)]);
+	Chromosome *c2 = clone_chromosome(
+            g.currentPop->pop[thrand(0, g.currentPop->size - 1)]);
 
 	auto info = play_match(c1, c2, 1);
 	while (info.ball_collisions == 0) {
@@ -34,8 +34,8 @@ void see_goal(const char *filename, int nGoal) {
 
     gameInformations info;
     do {
-		Chromosome *c1 = cloneChromosome(p->pop[thrand(0, p->size - 1)]);
-		Chromosome *c2 = cloneChromosome(p->pop[thrand(0, p->size - 1)]);
+		Chromosome *c1 = clone_chromosome(p->pop[thrand(0, p->size - 1)]);
+		Chromosome *c2 = clone_chromosome(p->pop[thrand(0, p->size - 1)]);
 
 		info = play_match(c1, c2, 1);
 
@@ -51,8 +51,8 @@ void see_ball(const char *filename, int n_ball) {
 
     gameInformations info;
 	do {
-		Chromosome *c1 = cloneChromosome(p->pop[thrand(0, p->size - 1)]);
-		Chromosome *c2 = cloneChromosome(p->pop[thrand(0, p->size - 1)]);
+		Chromosome *c1 = clone_chromosome(p->pop[thrand(0, p->size - 1)]);
+		Chromosome *c2 = clone_chromosome(p->pop[thrand(0, p->size - 1)]);
 
 		info = play_match(c1, c2, 1);
 

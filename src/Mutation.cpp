@@ -7,11 +7,11 @@
 #include "util.hpp"
 
 double replacement() {
-	return randomDouble();
+	return random_double();
 }
 
 double perturbation(double x) {
-	return x + randomDouble(-x / 10., x / 10.);
+	return x + random_double(-x / 10., x / 10.);
 }
 
 double balance(double x) {
@@ -38,15 +38,15 @@ void mutate(Chromosome &c) {
 	// on mute le chromosome donc il perd en capacité, donc ses buts
 	// précédents doivent être moins prépondérants
 	c.stats.instanceGoals = (double)c.stats.instanceGoals / 2.;
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
+	for (int i = 0; i < TEAM_SIZE; i++) {
 		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
 			mutation(*c.matrix[i][j]);
 		}
 	}
 
 	if (likelyness(SWAP_MUTATION_PROBA)) {
-		int a = thrand(0, EQUIPE_SIZE - 1);
-		int b = thrand(0, EQUIPE_SIZE - 2);
+		int a = thrand(0, TEAM_SIZE - 1);
+		int b = thrand(0, TEAM_SIZE - 2);
 		if (a == b)
 			b++;
 

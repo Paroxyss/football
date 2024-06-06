@@ -42,11 +42,11 @@ Matrix *uniform_crossover(Matrix &a, Matrix &b) {
 	return c;
 }
 
-Chromosome *classicCrossover(Chromosome &a, Chromosome &b) {
+Chromosome *classic_crossover(Chromosome &a, Chromosome &b) {
 	Chromosome *child = new Chromosome();
 	child->hasDidier = likelyness(0.5 * (a.hasDidier + b.hasDidier));
 
-	for (int k = 0; k < EQUIPE_SIZE; k++) {
+	for (int k = 0; k < TEAM_SIZE; k++) {
 		for (int i = 0; i < NETWORK_SIZE - 1; i++) {
 
 			Matrix *m = uniform_crossover(*a.matrix[k][i], *b.matrix[k][i]);
@@ -91,12 +91,12 @@ Chromosome *classicCrossover(Chromosome &a, Chromosome &b) {
 	return child;
 }
 
-Chromosome *swapPlayerCrossover(Chromosome &a, Chromosome &b) {
+Chromosome *swap_player_crossover(Chromosome &a, Chromosome &b) {
 	Chromosome *child = new Chromosome();
 
 	child->hasDidier = likelyness(0.5 * (a.hasDidier + b.hasDidier));
 
-	for (int k = 0; k < EQUIPE_SIZE; k++) {
+	for (int k = 0; k < TEAM_SIZE; k++) {
 		Chromosome &source = likelyness(0.5) ? a : b;
 		for (int i = 0; i < NETWORK_SIZE - 1; i++) {
 			Matrix::clone(source.matrix[k][i], child->matrix[k][i]);
@@ -107,7 +107,8 @@ Chromosome *swapPlayerCrossover(Chromosome &a, Chromosome &b) {
 
 Chromosome *crossover(Chromosome &a, Chromosome &b) {
     if (likelyness(SWAP_CROSSOVER_PROBA)) {
-        return swapPlayerCrossover(a, b);
+        return swap_player_crossover(a, b);
     }
-    return classicCrossover(a, b);
+    return classic_crossover(a, b);
 }
+

@@ -7,5 +7,5 @@
 double mmn(double x, double min, double max);
 
 // Ecrit les entrées d'un joueur normalisées
-void writeInputs(player &target, player *equipeAlliee,
-				 player *equipeAdverse, ball *b, bool team);
+void write_inputs(player &viewer, player *equipeAlliee,
+                  player *equipeAdverse, ball *b, bool team);

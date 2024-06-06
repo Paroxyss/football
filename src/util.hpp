@@ -25,7 +25,7 @@ struct gameStatistics {
 	double scoreBleu;
 };
 
-double angleRounded(double input);
+double angle_rounded(double input);
 
 // Retourne la puissance de 2 précédente
 int previous_power(int n);

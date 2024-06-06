@@ -9,26 +9,26 @@ Generation::~Generation() {
 	delete this->currentPop;
 }
 
-void Generation::createPopulation(unsigned int size) {
+void Generation::create_population(unsigned int size) {
 	Population *pop = new Population(size);
 	pop->initialize();
 	delete this->currentPop;
 	this->currentPop = pop;
 	this->arbre.couchesSize = currentPop->size;
-	arbre.ajouteCouche();
+    arbre.ajoute_couche();
 	for (int i = 0; i < size; i++) {
-		arbre.pushId(this->currentPop->pop[i]->id, 0, 0);
+        arbre.push_id(this->currentPop->pop[i]->id, 0, 0);
 	}
 }
 
-void pushStatsToFile(std::ofstream &f, gameStatistics g, int generation,
-					 double propDidier) {
+void push_stats_to_file(std::ofstream &f, gameStatistics g, int generation,
+                        double propDidier) {
 	f << "[" << generation << ", " << (double)g.totalCollisions / g.n
 	  << ", " << (double)g.total_ball_collisions / g.n << ", "
 	  << (double)g.totalGoals / g.n << ", " << propDidier << "]";
 }
 
-void Generation::appendStatsFile(gameStatistics g, int forceGen) {
+void Generation::append_stats_file(gameStatistics g, int forceGen) {
 	if (forceGen == -1) {
 		forceGen = generation;
 	}
@@ -38,12 +38,12 @@ void Generation::appendStatsFile(gameStatistics g, int forceGen) {
 		proportionDidier += currentPop->pop[i]->hasDidier;
 	}
 
-	pushStatsToFile(statsFile, g, forceGen,
-					(double)proportionDidier / currentPop->size);
+    push_stats_to_file(statsFile, g, forceGen,
+                       (double) proportionDidier / currentPop->size);
 	statsFile << std::endl;
 }
 
-void Generation::rewriteStats() {
+void Generation::rewrite_stats() {
 	if (statsFile.is_open()) {
 		statsFile.close();
 	}
@@ -55,14 +55,14 @@ void Generation::rewriteStats() {
 	statsFile.open("stats.csv", std::ios::app);
 	int i = 0;
 	for (auto &s : stats) {
-		appendStatsFile(s, i++);
+        append_stats_file(s, i++);
 	}
 }
 
 void Generation::step() {
 	gameStatistics genStats = this->currentPop->next(nthread, false, this);
 	stats.push_back(genStats);
-	appendStatsFile(genStats);
+    append_stats_file(genStats);
 	generation += 1;
 }
 
@@ -101,7 +101,7 @@ void Generation::saveJson(std ::ofstream &file) {
 	int i = 0;
 
 	for (auto &stat : stats) {
-		pushStatsToFile(file, stat, i++, 0);
+        push_stats_to_file(file, stat, i++, 0);
 		std::cout << i << " " << generation << std::endl;
 		if (i != generation) {
 			file << ",";

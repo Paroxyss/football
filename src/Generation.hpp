@@ -19,11 +19,11 @@ class Generation {
 	Generation(unsigned int nthread);
 	~Generation();
 
-	void createPopulation(unsigned int size);
+	void create_population(unsigned int size);
 
 	void step();
-	void appendStatsFile(gameStatistics g, int forceGen = -1);
-	void rewriteStats();
+	void append_stats_file(gameStatistics g, int forceGen = -1);
+	void rewrite_stats();
 
 	// à la différence des autres classes, ici on peut charger et
 	// sauvegarder les données au sein d'une même instance

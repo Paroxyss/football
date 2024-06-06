@@ -18,15 +18,15 @@ int thrand(int min, int max) {
     return distribution(rng);
 }
 
-double randomDouble(double min, double max) {
+double random_double(double min, double max) {
     std::uniform_real_distribution<double> distribution(min, max);
     return distribution(rng);
 }
 
-double randomDouble() {
-    return randomDouble(-1, 1);
+double random_double() {
+    return random_double(-1, 1);
 }
 
 bool likelyness(double v) {
-    return randomDouble(0, 1) < v;
+    return random_double(0, 1) < v;
 }

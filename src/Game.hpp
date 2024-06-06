@@ -80,7 +80,7 @@ class Game {
 							  .bonusBleu = 0};
 
     // Postionne les joueurs en position d'engagement
-	void set_players(const int conf[], int n);
+	void setup_kickoff(const int conf[], int n);
 
 	Game(int playerNumber, bool logToFile = false);
 	~Game();
@@ -90,36 +90,36 @@ class Game {
 			  bool clearAccels = true, bool canSave = true);
 
     // Appliquer les accélérations liées aux décisions du joueur
-	void setAccelerations(unsigned int id, double rotation,
-						  double acceleration);
+	void set_accelerations(unsigned int id, double rotation,
+                           double acceleration);
 	// Ces fonctions dépendent du temps car les accélérations sont en x.s-2,
 	// on doit donc par exemple les doubler si on veut appliquer
 	// l'équivalent de leurs effets sur 2 secondes
-	void executePlayerActions(double time, bool clearAccels);
+	void execute_player_actions(double time, bool clearAccels);
 
     // Applique les accélérations liées aux forces de friction pour un temps donné
-    void applyFriction(double time);
+    void apply_friction(double time);
 
 	// Définit les attributs de la balle
-    void setBall(vector pos, vector vitesse = {.x = 0, .y = 0},
-				 double size = BALL_SIZE, double mass = BALL_MASS);
+    void set_ball(vector pos, vector vitesse = {.x = 0, .y = 0},
+                  double size = BALL_SIZE, double mass = BALL_MASS);
 
 	// liste les collisions futures d'un objet
 	collisionList *
-	getObjectCollisionList(int objId, collisionList *listToAppend = NULL);
+	get_object_collision_list(int objId, collisionList *listToAppend = NULL);
 
     // Regarde si la balle est dans la cage {id}, ou alors qu'elle va traverser la ligne dans la seconde suivante
-    bool checkGoal(int id);
+    bool check_goal(int id);
 
 	// Déplace tous les objets pour la durée donnée (en s)
-	void moveAllObj(double time);
+	void move_all_obj(double time);
 
     // Écrit l'état des joueurs dans le fichier csv (si la sauvegarde est activée)
-	void writePlayers();
+	void write_players();
 
     // Définit les attributs d'un joueur
-	void setPlayer(int id, vector pos, vector speed, double orientation,
-				   double size = PLAYER_SIZE, double mass = PLAYER_MASS);
+	void set_player(int id, vector pos, vector speed, double orientation,
+                    double size = PLAYER_SIZE, double mass = PLAYER_MASS);
 };
 
 gameInformations play_match(Chromosome *c1, Chromosome *c2,

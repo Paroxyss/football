@@ -38,7 +38,7 @@ void Matrix::print() {
 void Matrix::initialize() {
 	for (int i = 0; i < this->ligne; i++) {
 		for (int j = 0; j < this->col; j++) {
-			double x = randomDouble();
+			double x = random_double();
 
 			this->set(i, j, x);
 		}

@@ -25,6 +25,5 @@ class Population {
 	void write(std::ofstream &file);
 	static Population *read(std::ifstream &file);
 };
-Chromosome *cloneChromosome(Chromosome *original);
 void update_statistics(gameStatistics &tourn_stats,
 					   gameStatistics *tournResult, int count);

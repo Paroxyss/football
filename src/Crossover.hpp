@@ -17,11 +17,11 @@ Matrix *uniform_crossover(Matrix &a, Matrix &b);
 // ## CROSSOVERS ENTRE CHROMOSOMES
 
 // Réalise un uniform_crossover sur chaque matrice du chromosome
-Chromosome *classicCrossover(Chromosome &a, Chromosome &b);
+Chromosome *classic_crossover(Chromosome &a, Chromosome &b);
 
 // Forme un nouveau chromosome en prenant chaque joueur dans une des deux
 // équipe aléatoirement
-Chromosome *swapPlayerCrossover(Chromosome &a, Chromosome &b);
+Chromosome *swap_player_crossover(Chromosome &a, Chromosome &b);
 
 // Choisit aléatoirement la méthode de crossover selon les probabilités
 // spécifiées dans config

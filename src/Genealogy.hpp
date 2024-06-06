@@ -24,7 +24,7 @@ class CoucheGenealogique {
 	CoucheGenealogique(unsigned int size);
 	void resize(unsigned int size);
 
-	void pushId(cid_t targetId, cid_t p1, cid_t p2);
+	void push_id(cid_t targetId, cid_t p1, cid_t p2);
 	carteIdentite get(int index);
 
 	OUTFILE_METHOD(writeJson)
@@ -42,8 +42,8 @@ class ArbreGenealogique {
 	unsigned int size();
 
 	// ajoute une identité à la derniere couche
-	void pushId(cid_t targetId, cid_t p1, cid_t p2);
-	void ajouteCouche();
+	void push_id(cid_t targetId, cid_t p1, cid_t p2);
+	void ajoute_couche();
 
 	OUTFILE_METHOD(writeJson)
 	OUTFILE_METHOD(write)

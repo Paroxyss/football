@@ -19,7 +19,7 @@ class Chromosome {
 	bool hasDidier = false;
 
 	// Tableau des réseaux de neurones
-	Matrix *matrix[EQUIPE_SIZE][NETWORK_SIZE - 1];
+	Matrix *matrix[TEAM_SIZE][NETWORK_SIZE - 1];
 	// Réseau de communication
 	Matrix *didier[DIDIER_NETWORK_SIZE - 1];
 
@@ -40,7 +40,7 @@ class Chromosome {
 			- Ecriture des sorties dans le tableau de sortie
 	*/
 	void collect_and_apply(player *equipeAlliee, player *equipeAdverse,
-						   ball *b, bool team);
+                           ball *b, bool team);
 
 	// Evalue les réseaux des joueurs
 	void apply(player *equipeAlliee);
@@ -59,3 +59,5 @@ class Chromosome {
 	// Chargement du chromosome depuis un fichier binaire
 	static Chromosome *read(std::ifstream &file);
 };
+
+Chromosome *clone_chromosome(Chromosome *original);

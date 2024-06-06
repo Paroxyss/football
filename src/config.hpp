@@ -14,16 +14,16 @@
 #define NETWORK_OUTPUT_SIZE 3 + COM_SIZE
 #define NETWORK_INPUT_SIZE 27 + COM_SIZE
 
-#define EQUIPE_SIZE 3
-#define GAMECONFIG                                                         \
+#define TEAM_SIZE 3
+#define GAME_CONFIG                                                         \
 	{ 1, 0, 2 }
-#define GAMECONFIGLENGTH 3
+#define GAME_CONFIG_LENGTH 3
 
 // Configurations des réseaux de neurones
 const int PLAYER_LAYERS[NETWORK_SIZE] = {
 	NETWORK_INPUT_SIZE, 28, 20, 16, 10, 6, NETWORK_OUTPUT_SIZE};
-const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {COM_SIZE * EQUIPE_SIZE,
-												COM_SIZE *EQUIPE_SIZE};
+const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {COM_SIZE * TEAM_SIZE,
+                                                COM_SIZE * TEAM_SIZE};
 
 // GAME CONFIG
 #define MAX_GAME_DURATION (40 * 60)
@@ -33,23 +33,21 @@ const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {COM_SIZE * EQUIPE_SIZE,
 #define MAP_LENGTH (119 * 20)
 #define MAP_HEIGHT (75 * 20)
 #define GOAL_HEIGHT (15 * 12)
-#define POTEAU_LENGTH 20
-#define POTEAU_WIDTH 20
+#define POLE_LENGTH 20
+#define POLE_WIDTH 20
 
 // PLAYER CONFIG
 #define PLAYER_MASS 100
 #define PLAYER_SIZE (2 * 10)
 
 #define PLAYER_ACCELERATION 0.30
-#define PLAYER_FROTTEMENT (1 / 20.)
+#define PLAYER_FRICTION (1 / 20.)
 
 #define PLAYER_ROTATION_ACCELERATION 0.10
-#define PLAYER_ROTATION_FROTTEMENT (1 / 3.)
+#define PLAYER_ROTATION_FRICTION (1 / 3.)
 // configuration des tirs
-// force du tir
-#define SHOOTSTRENGTH 50
 // temps entre chaque tir
-#define SHOOTCOOLDOWN 10 // en seconde
+#define SHOOT_COOLDOWN 10 // en seconde
 
 // Coefficient de restitution (collisions elastiques
 #define COLLISION_CONS 0.9
@@ -57,7 +55,7 @@ const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {COM_SIZE * EQUIPE_SIZE,
 // BALL CONFIG
 #define BALL_MASS 10
 #define BALL_SIZE 10
-#define BALL_FROTTEMENT (1 / 35.)
+#define BALL_FRICTION (1 / 35.)
 
 // SENSOR CONFIG
 // Tests d'une autre méthode de communication: les capteurs,
@@ -76,7 +74,7 @@ const double PLAYER_SENSOR_ANGLES[PLAYER_SENSOR_NUMBER] = {
 #define PRESSION_SELECTIVE 0.5
 
 // Nombre de joueurs créés par tournois
-#define NB_PAR_TOURNOI 2
+#define TOURNAMENT_OUTCOME_SIZE 2
 
 // Probabilité de crossover classique (moyenne)
 #define CROSSOVER_PROBABILITY 0.2 // 0.9
@@ -98,4 +96,5 @@ const double PLAYER_SENSOR_ANGLES[PLAYER_SENSOR_NUMBER] = {
 #define SAVE_RATE 5
 
 // Active les tests lors de l'accession aux matrices (très couteux en
-// ressources) #define MATRIXDEBUG
+// ressources)
+// #define MATRIXDEBUG

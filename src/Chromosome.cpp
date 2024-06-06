@@ -13,7 +13,7 @@
 
 Chromosome::Chromosome() {
 	this->id = uid();
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
+	for (int i = 0; i < TEAM_SIZE; i++) {
 		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
 			this->matrix[i][j] =
 				new Matrix(PLAYER_LAYERS[j + 1], PLAYER_LAYERS[j]);
@@ -26,7 +26,7 @@ Chromosome::Chromosome() {
 }
 
 Chromosome::~Chromosome() {
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
+	for (int i = 0; i < TEAM_SIZE; i++) {
 		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
 			delete this->matrix[i][j];
 		}
@@ -37,8 +37,8 @@ Chromosome::~Chromosome() {
 }
 
 void Chromosome::print() {
-	std::cout << "Chromosome, " << EQUIPE_SIZE << " joueurs" << std::endl;
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
+	std::cout << "Chromosome, " << TEAM_SIZE << " joueurs" << std::endl;
+	for (int i = 0; i < TEAM_SIZE; i++) {
 		std::cout << "Joueur " << i << std::endl;
 		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
 			this->matrix[i][j]->print();
@@ -51,7 +51,7 @@ void Chromosome::print() {
 }
 
 void Chromosome::initialize() {
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
+	for (int i = 0; i < TEAM_SIZE; i++) {
 		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
 			this->matrix[i][j]->initialize();
 		}
@@ -63,7 +63,7 @@ void Chromosome::initialize() {
 }
 
 void Chromosome::apply(player *equipeAlliee) {
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
+	for (int i = 0; i < TEAM_SIZE; i++) {
 		player &selected = equipeAlliee[i];
 
 		// Cette matrice va servir à faire le calcul en place
@@ -92,9 +92,9 @@ void Chromosome::apply(player *equipeAlliee) {
 }
 
 void Chromosome::apply_didier(player *equipeAlliee) {
-	Matrix inputs = Matrix(COM_SIZE * EQUIPE_SIZE, 1);
+	Matrix inputs = Matrix(COM_SIZE * TEAM_SIZE, 1);
 
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
+	for (int i = 0; i < TEAM_SIZE; i++) {
 		for (int j = 0; j < COM_SIZE; j++) {
 			inputs.set(i * COM_SIZE + j, 0,
 					   equipeAlliee[i].outputs->get(
@@ -110,7 +110,7 @@ void Chromosome::apply_didier(player *equipeAlliee) {
 	inputs.mult_inv(*this->didier[DIDIER_NETWORK_SIZE - 2]);
 	output_layer_activation(inputs);
 	
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
+	for (int i = 0; i < TEAM_SIZE; i++) {
 		for (int j = 0; j < COM_SIZE; j++) {
 			equipeAlliee[i].inputs->set(j, 0,
 										inputs.get(i * COM_SIZE + j, 0));
@@ -119,20 +119,20 @@ void Chromosome::apply_didier(player *equipeAlliee) {
 }
 
 void Chromosome::collect_and_apply(player *equipeAlliee,
-								   player *equipeAdverse, ball *b,
-								   bool team) {
+                                   player *equipeAdverse, ball *b,
+                                   bool team) {
 	if (this->hasDidier) {
-		apply_didier(equipeAlliee);
+        apply_didier(equipeAlliee);
 	} else {
-		for (int i = 0; i < EQUIPE_SIZE; i++) {
+		for (int i = 0; i < TEAM_SIZE; i++) {
 			for (int j = 0; j < COM_SIZE; j++) {
 				equipeAlliee[i].inputs->set(j, 0, 0);
 			}
 		}
 	}
 	// On sauvegarde les inputs dans les joueurs
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
-		writeInputs(equipeAlliee[i], equipeAlliee, equipeAdverse, b, team);
+	for (int i = 0; i < TEAM_SIZE; i++) {
+        write_inputs(equipeAlliee[i], equipeAlliee, equipeAdverse, b, team);
 	}
 
 	// Evaluation du réseau de neurones de chaque joueurs.
@@ -140,7 +140,7 @@ void Chromosome::collect_and_apply(player *equipeAlliee,
 }
 
 void Chromosome::write(std::ofstream &file) {
-	int equipeSize = EQUIPE_SIZE;
+	int equipeSize = TEAM_SIZE;
 	int nSize = NETWORK_SIZE;
 	int didierSize = DIDIER_NETWORK_SIZE;
 
@@ -162,7 +162,7 @@ void Chromosome::write(std::ofstream &file) {
 	file.write((char *)&this->stats.instanceGoals, sizeof(int));
 	file.write((char *)&this->hasDidier, sizeof(bool));
 
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
+	for (int i = 0; i < TEAM_SIZE; i++) {
 		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
 			this->matrix[i][j]->write(file);
 		}
@@ -182,11 +182,11 @@ Chromosome *Chromosome::read(std::ifstream &file) {
 	file.read((char *)&nSize, sizeof(int));
 	file.read((char *)&didierSize, sizeof(int));
 
-	if (equipeSize != EQUIPE_SIZE || nSize != NETWORK_SIZE ||
+	if (equipeSize != TEAM_SIZE || nSize != NETWORK_SIZE ||
 		didierSize != DIDIER_NETWORK_SIZE) {
-		std::cout << equipeSize << "≠" << EQUIPE_SIZE << " || " << nSize
-				  << "≠" << NETWORK_SIZE << " || " << didierSize << "≠"
-				  << DIDIER_NETWORK_SIZE << std::endl;
+		std::cout << equipeSize << "≠" << TEAM_SIZE << " || " << nSize
+                  << "≠" << NETWORK_SIZE << " || " << didierSize << "≠"
+                  << DIDIER_NETWORK_SIZE << std::endl;
 		throw std::invalid_argument(
 			"Misconfigured Chromosome file (bad constants)");
 	}
@@ -221,7 +221,7 @@ Chromosome *Chromosome::read(std::ifstream &file) {
 	file.read((char *)&c->stats.instanceGoals, sizeof(int));
 	file.read((char *)&c->hasDidier, sizeof(bool));
 
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
+	for (int i = 0; i < TEAM_SIZE; i++) {
 		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
 			delete c->matrix[i][j];
 			c->matrix[i][j] = Matrix::read(file);
@@ -234,4 +234,25 @@ Chromosome *Chromosome::read(std::ifstream &file) {
 	}
 
 	return c;
+}
+
+Chromosome *clone_chromosome(Chromosome *original) {
+    auto clone = new Chromosome();
+
+    for (int i = 0; i < TEAM_SIZE; i++) {
+        for (int j = 0; j < NETWORK_SIZE - 1; j++) {
+            Matrix::clone(original->matrix[i][j], clone->matrix[i][j]);
+        }
+    }
+
+    for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+        Matrix::clone(original->didier[i], clone->didier[i]);
+    }
+
+    clone->stats.instanceGoals = original->stats.instanceGoals;
+    clone->stats.instanceAge = original->stats.instanceAge;
+
+    clone->hasDidier = original->hasDidier;
+
+    return clone;
 }

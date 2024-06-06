@@ -20,26 +20,26 @@ namespace fs = std::filesystem;
 
 void train(int n_gen, int population_size, int n_thread) {
 	Generation g((unsigned int)n_thread);
-	g.createPopulation(population_size);
+	g.create_population(population_size);
 	std::cout << "Nouvelle génération crée" << std::endl;
-	trainPop(g, n_gen, n_thread);
+    train_population(g, n_gen, n_thread);
 }
 
-void trainFromFile(const char *inputFile, int n_gen, int population_size,
-				   int n_thread) {
+void train_from_file(const char *inputFile, int n_gen, int population_size,
+                     int n_thread) {
 	Generation g(n_thread);
 	g.load(inputFile);
 	std::cout << "Génération " << g.generation << " chargée ("
 			  << g.currentPop->size << " individus)" << std::endl;
-	trainPop(g, n_gen, n_thread);
+    train_population(g, n_gen, n_thread);
 }
 
-void trainPop(Generation &g, int n_gen, int n_thread) {
+void train_population(Generation &g, int n_gen, int n_thread) {
 	std::cout << "Starting a train of " << n_gen << " generations with "
 			  << g.currentPop->size << " chromosomes on " << n_thread
 			  << " threads." << std::endl;
 
-	g.rewriteStats();
+    g.rewrite_stats();
 
 	uint proportionDidier = 0;
 	for (int i = 0; i < g.currentPop->size; i++) {

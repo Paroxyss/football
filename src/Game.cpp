@@ -61,34 +61,34 @@ Game::Game(int playerNumber, bool logToFile) {
 	SETWALL(3, MAP_LENGTH, MAP_HEIGHT, 0, -MAP_HEIGHT);
 
     // Cages de l'équipe de gauche
-	SETWALL(4, 0, (MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POTEAU_WIDTH,
-			POTEAU_LENGTH, 0);
-	SETWALL(5, 0, (MAP_HEIGHT - (double)GOAL_HEIGHT) / 2, POTEAU_LENGTH, 0);
-	SETWALL(6, 0, (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2 + POTEAU_WIDTH,
-			POTEAU_LENGTH, 0);
-	SETWALL(7, 0, (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2, POTEAU_LENGTH, 0);
-	SETWALL(8, POTEAU_LENGTH,
-			(MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POTEAU_WIDTH, 0,
-			POTEAU_WIDTH);
-	SETWALL(9, POTEAU_LENGTH, (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2, 0,
-			POTEAU_WIDTH);
+	SETWALL(4, 0, (MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POLE_WIDTH,
+            POLE_LENGTH, 0);
+	SETWALL(5, 0, (MAP_HEIGHT - (double)GOAL_HEIGHT) / 2, POLE_LENGTH, 0);
+	SETWALL(6, 0, (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2 + POLE_WIDTH,
+            POLE_LENGTH, 0);
+	SETWALL(7, 0, (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2, POLE_LENGTH, 0);
+	SETWALL(8, POLE_LENGTH,
+			(MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POLE_WIDTH, 0,
+            POLE_WIDTH);
+	SETWALL(9, POLE_LENGTH, (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2, 0,
+            POLE_WIDTH);
 
     // Cages de l'équipe de droite
 	SETWALL(10, MAP_LENGTH,
-			(MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POTEAU_WIDTH,
-			-POTEAU_LENGTH, 0);
+			(MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POLE_WIDTH,
+            -POLE_LENGTH, 0);
 	SETWALL(11, MAP_LENGTH, (MAP_HEIGHT - (double)GOAL_HEIGHT) / 2,
-			-POTEAU_LENGTH, 0);
+            -POLE_LENGTH, 0);
 	SETWALL(12, MAP_LENGTH,
-			(MAP_HEIGHT + (double)GOAL_HEIGHT) / 2 + POTEAU_WIDTH,
-			-POTEAU_LENGTH, 0);
+			(MAP_HEIGHT + (double)GOAL_HEIGHT) / 2 + POLE_WIDTH,
+            -POLE_LENGTH, 0);
 	SETWALL(13, MAP_LENGTH, (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2,
-			-POTEAU_LENGTH, 0);
-	SETWALL(14, MAP_LENGTH - POTEAU_LENGTH,
-			(MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POTEAU_WIDTH, 0,
-			POTEAU_WIDTH);
-	SETWALL(15, MAP_LENGTH - POTEAU_LENGTH,
-			(MAP_HEIGHT + (double)GOAL_HEIGHT) / 2, 0, POTEAU_WIDTH);
+            -POLE_LENGTH, 0);
+	SETWALL(14, MAP_LENGTH - POLE_LENGTH,
+			(MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POLE_WIDTH, 0,
+            POLE_WIDTH);
+	SETWALL(15, MAP_LENGTH - POLE_LENGTH,
+			(MAP_HEIGHT + (double)GOAL_HEIGHT) / 2, 0, POLE_WIDTH);
 
 	SETGOAL(0, 0,
 			static_cast<float>(MAP_HEIGHT) / 2 -
@@ -99,9 +99,9 @@ Game::Game(int playerNumber, bool logToFile) {
 				static_cast<float>(GOAL_HEIGHT) / 2,
 			0, 1, GOAL_HEIGHT);
 
-	setBall({.x = 0, .y = 0}, {.x = 0, .y = 0}, BALL_SIZE);
+    set_ball({.x = 0, .y = 0}, {.x = 0, .y = 0}, BALL_SIZE);
 	for (int i = 0; i < playerNumber; i++) {
-		setPlayer(i, {.x = 0, .y = 0}, {.x = 0, .y = 0}, 0, PLAYER_SIZE);
+        set_player(i, {.x = 0, .y = 0}, {.x = 0, .y = 0}, 0, PLAYER_SIZE);
 		players[i].outputs = new Matrix(NETWORK_OUTPUT_SIZE, 1);
 		players[i].inputs = new Matrix(NETWORK_INPUT_SIZE, 1);
 		for (int j = 0; j < NETWORK_INPUT_SIZE; j++) {
@@ -146,7 +146,7 @@ Game::~Game() {
 	Pour 3 joueurs, on peut par exemple avoir {2, 1}, placés comme au vrai
     foot
 */
-void Game::set_players(const int conf[], int n) {
+void Game::setup_kickoff(const int conf[], int n) {
 	int c = 0, s = 0;
 	double spx = (double)MAP_LENGTH / 2. / (double)(n + 1);
 
@@ -163,7 +163,7 @@ void Game::set_players(const int conf[], int n) {
 		for (int k = 1; k <= conf[i]; k++) {
 			this->players[c].pos = {.x = (i + 1) * spx, .y = k * spy};
 			this->players[c].vitesse = {.x = 0.01, .y = 0};
-			this->players[c].orientation = randomDouble(-M_PI, M_PI);
+			this->players[c].orientation = random_double(-M_PI, M_PI);
 
 			c++;
 		}
@@ -206,7 +206,7 @@ inline collisionList *insert(collisionList *list, ball *actor,
 	return l;
 }
 // Retourne le temps avant lequel un objet va rencontrer un mur (potentiellement négatif), ou NaN si la collision n'arrivera jamais
-double getWallCollisionTime(ball *obj, ball *wall) {
+double get_wall_collision_time(ball *obj, ball *wall) {
 	vector MO = obj->pos - wall->pos;
 
 	vector n = {
@@ -214,15 +214,15 @@ double getWallCollisionTime(ball *obj, ball *wall) {
 		.y = wall->vitesse.x,
 	};
 
-	double c = abs(dotProduct(MO, n) / norme(n));
-	double ev = abs(dotProduct(obj->vitesse, n) / norme(n));
+	double c = abs(dot_product(MO, n) / norme(n));
+	double ev = abs(dot_product(obj->vitesse, n) / norme(n));
 	double T = c - obj->size;
 
 	return T / ev;
 }
 
 // Retourne le temps avant lequel un objet va rencontrer un autre objet (potentiellement négatif), ou NaN si la collision n'arrivera jamais
-double getTwoBallCollisionTime(ball *b1, ball *b2) {
+double get_two_ball_collision_time(ball *b1, ball *b2) {
 	vector v_relative = b1->vitesse - b2->vitesse;
 	vector LM = b1->pos - b2->pos;
 	double d = b1->size + b2->size;
@@ -232,20 +232,20 @@ double getTwoBallCollisionTime(ball *b1, ball *b2) {
 		.y = v_relative.x,
 	};
 
-	double c = abs(dotProduct(LM, n) / norme(n));
-	double ev = abs(dotProduct(LM, v_relative) / norme(v_relative));
+	double c = abs(dot_product(LM, n) / norme(n));
+	double ev = abs(dot_product(LM, v_relative) / norme(v_relative));
 	double pprime = sqrt(pow(d, 2) - pow(c, 2));
 
 	return (ev - pprime) / norme(v_relative);
 }
 
-inline double distancecarre(ball &p, const ball &b) {
-    return normeCarre(p.pos - b.pos);
+inline double distance_carre(ball &p, const ball &b) {
+    return norme_carre(p.pos - b.pos);
 }
 
 // Remplit une liste chainée avec les conflits au moment où elle est appellée
-collisionList *Game::getObjectCollisionList(int objId,
-											collisionList *listToAppend) {
+collisionList *Game::get_object_collision_list(int objId,
+                                               collisionList *listToAppend) {
 	struct ball *selected;
 	if (objId == -1) {
 		selected = &ball;
@@ -260,10 +260,10 @@ collisionList *Game::getObjectCollisionList(int objId,
 		vector normal = {.x = -w.vitesse.y, .y = w.vitesse.x};
 		double longueurDuMur = norme(w.vitesse);
 		double d =
-			dotProduct(selected->pos - w.pos, normal) / norme(normal);
+                dot_product(selected->pos - w.pos, normal) / norme(normal);
 
-		double pRelat = dotProduct(selected->pos - w.pos, w.vitesse) /
-						(longueurDuMur * longueurDuMur);
+		double pRelat = dot_product(selected->pos - w.pos, w.vitesse) /
+                        (longueurDuMur * longueurDuMur);
 
 		if (!(abs(d) < selected->size)) {
 			// le joueur n'est pas dans la droite du mur
@@ -277,18 +277,18 @@ collisionList *Game::getObjectCollisionList(int objId,
 	}
 
 	for (int i = 0; i < 2 * wallNumber; i++) {
-		if (distancecarre(*selected, this->wallsBouts[i]) <
-			pow(selected->size, 2)) {
+		if (distance_carre(*selected, this->wallsBouts[i]) <
+            pow(selected->size, 2)) {
 			listToAppend =
 				insert(listToAppend, selected, &this->wallsBouts[i], objId,
-					   i + EQUIPE_SIZE * 2, CIRCLE);
+                       i + TEAM_SIZE * 2, CIRCLE);
 		}
 	}
 
 	// test de collisions triangulaire balle-joueur ou joueur-joueur
 	for (int i = objId + 1; i < playerNumber; i++) {
-		if (distancecarre(*selected, this->players[i]) <
-			pow(selected->size + PLAYER_SIZE, 2)) {
+		if (distance_carre(*selected, this->players[i]) <
+            pow(selected->size + PLAYER_SIZE, 2)) {
 			listToAppend = insert(listToAppend, selected, &this->players[i],
 								  objId, i, CIRCLE);
 		}
@@ -298,24 +298,24 @@ collisionList *Game::getObjectCollisionList(int objId,
 }
 
 // Calcule l'instant (exact) de choc pour chaque collision de la liste
-void timeCollisionList(collisionList *collision) {
+void time_collision_list(collisionList *collision) {
 	if (!collision) {
 		return;
 	}
 	if (collision->type == WALL) {
 		collision->time =
-			getWallCollisionTime(collision->actor, collision->secondary);
+                get_wall_collision_time(collision->actor, collision->secondary);
 	} else {
 		collision->time =
-			getTwoBallCollisionTime(collision->actor, collision->secondary);
+                get_two_ball_collision_time(collision->actor, collision->secondary);
 	}
-	timeCollisionList(collision->next);
+    time_collision_list(collision->next);
 }
 
 // Effectue une collision entre obj1 et obj2, modifiant ainsi leurs vitesses
 // /!\ Il ne faut appeler cette fonction qu'avec des objets se touchant, et
 // ne le faire qu'une fois sinon le comportement est indéfini
-void computeCollisionCircle(ball *obj1, ball *obj2) {
+void compute_collision_circle(ball *obj1, ball *obj2) {
 	vector x1 = obj1->pos;
 	double &m1 = obj1->mass;
 	vector &v1 = obj1->vitesse;
@@ -325,41 +325,41 @@ void computeCollisionCircle(ball *obj1, ball *obj2) {
 	double &m2 = obj2->mass;
 
 	auto dv1 = (x1 - x2) *
-			   (dotProduct(v1 - v2, x1 - x2) / normeCarre(x1 - x2)) *
-			   ((double)(2 * m2) / (m1 + m2));
+               (dot_product(v1 - v2, x1 - x2) / norme_carre(x1 - x2)) *
+               ((double)(2 * m2) / (m1 + m2));
 	auto dv2 = (x2 - x1) *
-			   (dotProduct(v2 - v1, x2 - x1) / normeCarre(x2 - x1)) *
-			   ((double)(2 * m1) / (m1 + m2));
+               (dot_product(v2 - v1, x2 - x1) / norme_carre(x2 - x1)) *
+               ((double)(2 * m1) / (m1 + m2));
 
 	v1 = v1 - dv1 * COLLISION_CONS;
 	v2 = v2 - dv2 * COLLISION_CONS;
 }
 
 // Comme au dessus, mais avec un mur
-void computeCollisionWall(ball &b, ball *w) {
+void compute_collision_wall(ball &b, ball *w) {
 	vector um = w->vitesse / norme(w->vitesse);
 	vector normal_um = {.x = um.y, .y = -um.x};
 
-	b.vitesse = dotProduct(-b.vitesse, normal_um) * normal_um +
-				dotProduct(b.vitesse, um) * um;
+	b.vitesse = dot_product(-b.vitesse, normal_um) * normal_um +
+            dot_product(b.vitesse, um) * um;
 }
 
 // Retourne un pointeur vers la premiere collision arrivant dans la liste,
 // d'un point de vue temporel
-collisionList *findFirstCollision(collisionList *list) {
+collisionList *find_first_collision(collisionList *list) {
 	if (!list)
 		return NULL;
 
 	switch (list->type) {
 	case CIRCLE:
-		list->time = getTwoBallCollisionTime(list->actor, list->secondary);
+		list->time = get_two_ball_collision_time(list->actor, list->secondary);
 		break;
 	case WALL:
-		list->time = getWallCollisionTime(list->actor, list->secondary);
+		list->time = get_wall_collision_time(list->actor, list->secondary);
 		break;
 	}
 
-	auto nextBest = findFirstCollision(list->next);
+	auto nextBest = find_first_collision(list->next);
 	if (nextBest && nextBest->time < list->time && list->time > 0) {
 		return nextBest;
 	}
@@ -367,15 +367,15 @@ collisionList *findFirstCollision(collisionList *list) {
 }
 
 // Libere la liste chainée
-void freeCollisionList(collisionList *list) {
+void free_collision_list(collisionList *list) {
 	if (list == NULL) {
 		return;
 	}
-	freeCollisionList(list->next);
+    free_collision_list(list->next);
 	delete[] list;
 }
 
-void Game::moveAllObj(double time) {
+void Game::move_all_obj(double time) {
 	ball.pos += ball.vitesse * time;
 	for (int i = 0; i < playerNumber; i++) {
 		players[i].pos += players[i].vitesse * time;
@@ -390,45 +390,45 @@ void Game::tick(double timeToAdvance, bool root, bool clearAccels,
 	if (root) {
 		if (logToFile && canSave) {
 			while (timeSinceLastSave >= 1) {
-				writePlayers();
+                write_players();
 				timeSinceLastSave -= 1;
 			}
 		}
 
 		timeSinceLastSave += timeToAdvance;
-		applyFriction(timeToAdvance);
+        apply_friction(timeToAdvance);
 
-		executePlayerActions(timeToAdvance, clearAccels);
+        execute_player_actions(timeToAdvance, clearAccels);
 	}
 	// On fait tout avancer de la durée voulue
-	moveAllObj(timeToAdvance);
+    move_all_obj(timeToAdvance);
 
 	// On obtient la liste des collisions APRÈS avoir bougé
 	collisionList *c = NULL;
 
 	for (int i = 0; i < playerNumber + 1; i++) {
-		c = getObjectCollisionList(i - 1, c);
+		c = get_object_collision_list(i - 1, c);
 	}
 	// On regarde s'il y a des collisions
 	if (c != NULL) {
 		// S'il y a des collisions, c'est qu'il faut faire du backtracking
 		// pour retrouver la réalité, donc on commence par retourner en
 		// arrière
-		moveAllObj(-timeToAdvance);
+        move_all_obj(-timeToAdvance);
 		this->infos.collisions += 1;
 
 		// On regarde à quel instant est survenu la première collision
-		collisionList *firstCollision = findFirstCollision(c);
+		collisionList *firstCollision = find_first_collision(c);
 
 		// On avance à cet instant précis
-		moveAllObj(firstCollision->time);
+        move_all_obj(firstCollision->time);
 		// On effectue la collision
 		switch (firstCollision->type) {
 		case CIRCLE:
 			if (firstCollision->id1 == -1 &&
-				firstCollision->id2 < 2 * EQUIPE_SIZE) {
+				firstCollision->id2 < 2 * TEAM_SIZE) {
 				this->infos.touchMean /= 2;
-				if (firstCollision->id2 < EQUIPE_SIZE) {
+				if (firstCollision->id2 < TEAM_SIZE) {
 					this->infos.bonusBleu +=
 						(0.5 - this->infos.bonusBleu) / 3;
 					this->infos.touchMean += 0.5;
@@ -439,16 +439,16 @@ void Game::tick(double timeToAdvance, bool root, bool clearAccels,
 				}
 			}
 
-			computeCollisionCircle(firstCollision->actor,
-								   firstCollision->secondary);
+                compute_collision_circle(firstCollision->actor,
+                                         firstCollision->secondary);
 
 			if (firstCollision->id1 == -1) {
 				this->infos.ball_collisions += 1;
 			}
 			break;
 		case WALL:
-			computeCollisionWall(*firstCollision->actor,
-								 firstCollision->secondary);
+            compute_collision_wall(*firstCollision->actor,
+                                   firstCollision->secondary);
 			break;
 		}
 		// On fait de nouveau un tick, pour compléter le temps restant
@@ -456,10 +456,10 @@ void Game::tick(double timeToAdvance, bool root, bool clearAccels,
 	}
 
 	// On libère la liste dont on n'aura plus besoin
-	freeCollisionList(c);
+    free_collision_list(c);
 };
 
-void Game::writePlayers() {
+void Game::write_players() {
 	csvOutputFile << "2," << (double)this->ball.pos.x << ","
 				  << (double)this->ball.pos.y << ",";
 	for (int i = 0; i < playerNumber; i++) {
@@ -480,13 +480,13 @@ void Game::writePlayers() {
 
 // Effectue une action pour un joueur donné (ce qui lui permet de tourner
 // et/ou d'accélérer)
-void Game::setAccelerations(unsigned int id, double rotation,
-							double acceleration) {
+void Game::set_accelerations(unsigned int id, double rotation,
+                             double acceleration) {
 	players[id].raccel = rotation * PLAYER_ROTATION_ACCELERATION;
 	players[id].acceleration = acceleration * PLAYER_ACCELERATION;
 };
 
-void Game::executePlayerActions(double time, bool clearAccels) {
+void Game::execute_player_actions(double time, bool clearAccels) {
 	for (int id = 0; id < playerNumber; id++) {
 		player &selected = players[id];
 		selected.rvitesse += selected.raccel * time;
@@ -501,45 +501,45 @@ void Game::executePlayerActions(double time, bool clearAccels) {
 	}
 }
 
-void Game::applyFriction(double time) {
+void Game::apply_friction(double time) {
 	// On applique les frottements
 	// Ces frottements sont des frottements fluides (F = K*v)
-	ball.vitesse -= (ball.vitesse * BALL_FROTTEMENT) * time;
+	ball.vitesse -= (ball.vitesse * BALL_FRICTION) * time;
 
 	for (int i = 0; i < playerNumber; i++) {
 		players[i].vitesse -=
-			(players[i].vitesse * PLAYER_FROTTEMENT) * time;
+                (players[i].vitesse * PLAYER_FRICTION) * time;
 		players[i].rvitesse -=
-			(players[i].rvitesse * PLAYER_ROTATION_FROTTEMENT) * time;
+                (players[i].rvitesse * PLAYER_ROTATION_FRICTION) * time;
 	}
 }
 
-void Game::setBall(vector pos, vector vitesse, double size, double mass) {
+void Game::set_ball(vector pos, vector vitesse, double size, double mass) {
 	this->ball = {
 		.pos = pos, .vitesse = vitesse, .size = size, .mass = mass};
 }
 
-void Game::setPlayer(int id, vector pos, vector speed, double orientation,
-					 double size, double mass) {
+void Game::set_player(int id, vector pos, vector speed, double orientation,
+                      double size, double mass) {
 	this->players[id].pos = pos;
 	this->players[id].vitesse = speed;
-	this->players[id].orientation = angleRounded(orientation);
+	this->players[id].orientation = angle_rounded(orientation);
 	this->players[id].size = size;
 	this->players[id].acceleration = 0;
 	this->players[id].raccel = 0;
 	this->players[id].mass = mass;
 }
 
-bool Game::checkGoal(int id) {
-	double cage = getWallCollisionTime(&this->ball, &this->goals[id]);
+bool Game::check_goal(int id) {
+	double cage = get_wall_collision_time(&this->ball, &this->goals[id]);
 
 	if (cage < 0 || cage > 1)
 		return false;
 
 	auto dist = this->ball.pos - goals[id].pos;
 
-	auto vertical = dotProduct(this->goals[id].vitesse, dist) /
-					norme(this->goals[id].vitesse);
+	auto vertical = dot_product(this->goals[id].vitesse, dist) /
+                    norme(this->goals[id].vitesse);
 
 	if (0 < vertical && vertical < GOAL_HEIGHT) {
 		return true;
@@ -554,24 +554,24 @@ bool Game::checkGoal(int id) {
    que c2 à droite.
 */
 gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
-	auto g = Game(2 * EQUIPE_SIZE, save);
+	auto g = Game(2 * TEAM_SIZE, save);
 	g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
 	g.ball.vitesse = {.x = 0, .y = 0};
 
-	int c[] = GAMECONFIG;
-	g.set_players(c, GAMECONFIGLENGTH);
+	int c[] = GAME_CONFIG;
+    g.setup_kickoff(c, GAME_CONFIG_LENGTH);
 
 	int to_touch = MAX_TOUCH_DURATION;
 	unsigned int deltaTouchedBall = 0;
 
 	int k;
 	for (k = 0; k < MAX_GAME_DURATION; k++, to_touch--) {
-		c1->collect_and_apply(g.players, g.players + EQUIPE_SIZE, &g.ball,
-							  false);
-		c2->collect_and_apply(g.players + EQUIPE_SIZE, g.players, &g.ball,
-							  true);
+        c1->collect_and_apply(g.players, g.players + TEAM_SIZE, &g.ball,
+                              false);
+        c2->collect_and_apply(g.players + TEAM_SIZE, g.players, &g.ball,
+                              true);
 
-		for (int a = 0; a < 2 * EQUIPE_SIZE; a++) {
+		for (int a = 0; a < 2 * TEAM_SIZE; a++) {
 			double rotation = g.players[a].outputs->get(0, 0);
 			double acceleration = g.players[a].outputs->get(1, 0);
 			double shoot = g.players[a].outputs->get(2, 0);
@@ -579,10 +579,10 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
 			if (acceleration < 0)
 				acceleration = 0;
 
-			g.setAccelerations(a, rotation, acceleration);
+            g.set_accelerations(a, rotation, acceleration);
 
 			if ((shoot >= 0) && (g.players[a].shootCooldown == 0)) {
-				g.players[a].shootCooldown = SHOOTCOOLDOWN;
+				g.players[a].shootCooldown = SHOOT_COOLDOWN;
 
 				auto explo = (g.ball.pos - g.players[a].pos);
 				double d = norme(explo);
@@ -602,8 +602,8 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
 
 		g.tick(1);
 
-		bool bc1 = g.checkGoal(0);
-		bool bc2 = g.checkGoal(1);
+		bool bc1 = g.check_goal(0);
+		bool bc2 = g.check_goal(1);
 		if (bc1 || bc2) {
 			if (bc1) {
 				c2->stats.instanceGoals += 1;
@@ -628,7 +628,7 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
 			g.ball.vitesse.x = 0;
 			g.ball.vitesse.y = 0;
 
-			g.set_players(c, GAMECONFIGLENGTH);
+            g.setup_kickoff(c, GAME_CONFIG_LENGTH);
 		}
 
 		if (to_touch == 0) {

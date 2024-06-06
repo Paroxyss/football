@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 			throw std::invalid_argument("Population trop petite.");
 
 		if (fn)
-			trainFromFile(fn, n_gen, pop_size, n_thread);
+            train_from_file(fn, n_gen, pop_size, n_thread);
 		else
 			train(n_gen, pop_size, n_thread);
 
@@ -121,18 +121,18 @@ int main(int argc, char *argv[]) {
 
 	} else if (strcmp(argv[1], "rm2") == 0) {
 		std::cout << "simulation random" << std::endl;
-		auto g = Game(2 * EQUIPE_SIZE, true);
+		auto g = Game(2 * TEAM_SIZE, true);
 		g.ball.pos = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
 		g.ball.vitesse = {.x = 0, .y = 0};
 
-		int c[] = GAMECONFIG;
-		g.set_players(c, GAMECONFIGLENGTH);
+		int c[] = GAME_CONFIG;
+        g.setup_kickoff(c, GAME_CONFIG_LENGTH);
 
 		int to_touch = MAX_TOUCH_DURATION;
 
 		for (int k = 0; k < 300; k++, to_touch--) {
-			writeInputs(g.players[0], g.players, g.players + 3, &g.ball,
-						true);
+            write_inputs(g.players[0], g.players, g.players + 3, &g.ball,
+                         true);
 			g.players->orientation += 1 / 10. * (k < 150);
 			g.players->vitesse.x = cos(k / 10.) * 5;
 			g.players->vitesse.y = sin(k / 10.) * 5;

@@ -15,7 +15,7 @@ template <class T> class SafeQueue {
 		std::lock_guard<std::mutex> lock(_m);
 		_q.push(val);
 	}
-	void pushReserved(const T &val, int id) {
+	void push_reserved(const T &val, int id) {
 		std::lock_guard<std::mutex> lock(_m);
 		if (!reservedIds[id]) {
 			throw std::logic_error(
@@ -56,12 +56,12 @@ template <class T> class SafeQueue {
 		}
 		return _q.size() + reserved;
 	}
-	void clearReservations() {
+	void clear_reservations() {
 		std::lock_guard<std::mutex> lock(_m);
 		reserved = 0;
 		std::fill(reservedIds.begin(), reservedIds.end(), 0);
 	}
-	void cancelRes(int id) {
+	void cancel_reservation(int id) {
 		if (id < 0 || id > reservedIds.size() - 1) {
 			throw std::logic_error(
 				"Tentative de réservation d'un id trop grand");

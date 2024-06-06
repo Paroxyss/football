@@ -63,21 +63,21 @@ inline vector operator/(vector a, double factor) {
 	return result /= factor;
 }
 
-inline double dotProduct(vector a, vector b) {
+inline double dot_product(vector a, vector b) {
 	return a.x * b.x + a.y * b.y;
 }
 
-inline double normeCarre(vector a) {
+inline double norme_carre(vector a) {
 	return pow(a.x, 2) + pow(a.y, 2);
 }
 
 inline double norme(vector a) {
-	return sqrt(normeCarre(a));
+	return sqrt(norme_carre(a));
 }
 
 // deuxième fonction testée du programme
 inline double vangle(vector v) {
-	return angleRounded(atan2(v.y, v.x));
+	return angle_rounded(atan2(v.y, v.x));
 }
 
 inline std::ostream &operator<<(std::ostream &out, vector vec) {

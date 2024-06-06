@@ -11,7 +11,7 @@ int previous_power(int n) {
     return n;
 }
 
-double angleRounded(double input) {
+double angle_rounded(double input) {
 	input = fmod(input + M_PI, 2 * M_PI);
 	if (input < 0) {
 		input += 2 * M_PI;

@@ -27,7 +27,7 @@ void CoucheGenealogique::resize(unsigned int size) {
 	ids.reserve(size);
 };
 
-void CoucheGenealogique::pushId(cid_t targetId, cid_t p1, cid_t p2) {
+void CoucheGenealogique::push_id(cid_t targetId, cid_t p1, cid_t p2) {
 	if (ids.size() == expectedSize) {
 		throw std::logic_error(
 			"Tentative d'insertion dans une couche généalogique pleine");
@@ -73,7 +73,7 @@ void CoucheGenealogique::read(std::ifstream &file,
 	for (int i = 0; i < trueSize; i++) {
 		carteIdentite id;
 		READ(id);
-		dest->pushId(id.id, id.p1, id.p2);
+        dest->push_id(id.id, id.p1, id.p2);
 	}
 };
 
@@ -86,10 +86,10 @@ unsigned int ArbreGenealogique::size() {
 };
 
 // ajoute une identité à la derniere couche
-void ArbreGenealogique::pushId(cid_t targetId, cid_t p1, cid_t p2) {
-	couches.back().pushId(targetId, p1, p2);
+void ArbreGenealogique::push_id(cid_t targetId, cid_t p1, cid_t p2) {
+    couches.back().push_id(targetId, p1, p2);
 };
-void ArbreGenealogique::ajouteCouche() {
+void ArbreGenealogique::ajoute_couche() {
 	couches.push_back(CoucheGenealogique(couchesSize));
 };
 

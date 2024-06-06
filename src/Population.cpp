@@ -83,11 +83,11 @@ gameStatistics Population::next(int n_thread, bool save,
 		threads[threadId] = std::thread([this, &nextPop, &expected,
 										 &statsTournois, threadId,
 										 &attributions, &liens, &pbar]() {
-			while (nextPop.reserve(threadId, NB_PAR_TOURNOI) < expected) {
-				int tourn_size = thrand(4 + NB_PAR_TOURNOI,
+			while (nextPop.reserve(threadId, TOURNAMENT_OUTCOME_SIZE) < expected) {
+				int tourn_size = thrand(4 + TOURNAMENT_OUTCOME_SIZE,
 										this->size * PRESSION_SELECTIVE);
 				auto outcome =
-					this->tournament(tourn_size, NB_PAR_TOURNOI, false);
+					this->tournament(tourn_size, TOURNAMENT_OUTCOME_SIZE, false);
 
 				auto q = std::get<0>(outcome);
 				std::vector<Chromosome *> vainqueurs;
@@ -108,14 +108,14 @@ gameStatistics Population::next(int n_thread, bool save,
 												   .p1 = c1->id,
 												   .p2 = c2->id});
 					} else {
-						mutedWinner = cloneChromosome(c1);
+						mutedWinner = clone_chromosome(c1);
 						liens.push((carteIdentite){
 							.id = mutedWinner->id, .p1 = c1->id, .p2 = 0});
 					}
 
 					mutate(*mutedWinner);
 					pbar.step(1, threadId);
-					nextPop.pushReserved(mutedWinner, threadId);
+                    nextPop.push_reserved(mutedWinner, threadId);
 					statsTournois.push(std::get<1>(outcome));
 
                     // Garder trace de la généalogie
@@ -123,7 +123,7 @@ gameStatistics Population::next(int n_thread, bool save,
 						std::tuple(threadId, std::get<1>(outcome).n));
 				}
 			}
-			nextPop.cancelRes(threadId);
+            nextPop.cancel_reservation(threadId);
 
 			// On introduit des individus complètement nouveau pour explorer
 			// le plus de solutions possible.
@@ -131,7 +131,7 @@ gameStatistics Population::next(int n_thread, bool save,
 				Chromosome *c = new Chromosome();
 				c->initialize();
 				pbar.step(1, threadId);
-				nextPop.pushReserved(c, threadId);
+                nextPop.push_reserved(c, threadId);
 				liens.push({.id = c->id, .p1 = 0, .p2 = 0});
 			}
 		});
@@ -140,7 +140,7 @@ gameStatistics Population::next(int n_thread, bool save,
 	for (int i = 0; i < n_thread; i++) {
 		threads[i].join();
 	}
-	nextPop.clearReservations();
+    nextPop.clear_reservations();
 
 	if (nextPop.size() != this->size) {
 		std::cout << nextPop.size() << "≠" << this->size << std::endl;
@@ -170,11 +170,11 @@ gameStatistics Population::next(int n_thread, bool save,
 	}
 
 	if (parent) {
-		parent->arbre.ajouteCouche();
+        parent->arbre.ajoute_couche();
 		while (liens.size()) {
 			carteIdentite c;
 			liens.pop(c);
-			parent->arbre.pushId(c.id, c.p1, c.p2);
+            parent->arbre.push_id(c.id, c.p1, c.p2);
 		}
 	}
 
@@ -243,27 +243,6 @@ Population::tournament(int tourn_size, int maxSize, bool save) {
 	}
 
 	return std::make_tuple(contestants, gameStats);
-}
-
-Chromosome *cloneChromosome(Chromosome *original) {
-	auto clone = new Chromosome();
-
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
-		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
-			Matrix::clone(original->matrix[i][j], clone->matrix[i][j]);
-		}
-	}
-
-	for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-		Matrix::clone(original->didier[i], clone->didier[i]);
-	}
-
-	clone->stats.instanceGoals = original->stats.instanceGoals;
-	clone->stats.instanceAge = original->stats.instanceAge;
-
-	clone->hasDidier = original->hasDidier;
-
-	return clone;
 }
 
 void Population::write(std::ofstream &file) {

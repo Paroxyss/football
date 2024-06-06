@@ -50,7 +50,7 @@ void update_statistics(gameStatistics &tourn_stats,
 	tourn_stats.totalCollisions += tournResult.totalCollisions;
 	tourn_stats.totalGoals += tournResult.totalGoals;
 	tourn_stats.n += tournResult.n;
-	tourn_stats.total_ball_collisions += tournResult.total_ball_collisions;
+	tourn_stats.totalBallCollisions += tournResult.totalBallCollisions;
 	tourn_stats.stopped += tournResult.stopped;
 	tourn_stats.scoreRouge += tournResult.scoreRouge;
 	tourn_stats.scoreBleu += tournResult.scoreBleu;
@@ -74,7 +74,7 @@ gameStatistics Population::next(int n_thread, bool save,
 	gameStatistics tourn_stats = {.n = 0,
 								  .totalCollisions = 0,
 								  .totalGoals = 0,
-								  .total_ball_collisions = 0,
+								  .totalBallCollisions = 0,
 								  .stopped = 0};
 
 	ProgressBar pbar(this->size);
@@ -211,7 +211,7 @@ Population::tournament(int tourn_size, int maxSize, bool save) {
 	gameStatistics gameStats = {.n = 0,
 								.totalCollisions = 0,
 								.totalGoals = 0,
-								.total_ball_collisions = 0,
+								.totalBallCollisions = 0,
 								.stopped = 0,
 								.scoreRouge = 0,
 								.scoreBleu = 0};
@@ -235,7 +235,7 @@ Population::tournament(int tourn_size, int maxSize, bool save) {
 		// statistiques
 		gameStats.totalCollisions += match_results.collisions;
 		gameStats.totalGoals += match_results.goals;
-		gameStats.total_ball_collisions += match_results.ball_collisions;
+		gameStats.totalBallCollisions += match_results.ballCollisions;
 		gameStats.stopped += match_results.stopped ? 1 : 0;
 		gameStats.scoreRouge += match_results.scoreRouge;
 		gameStats.scoreBleu += match_results.scoreBleu;

@@ -443,7 +443,7 @@ void Game::tick(double timeToAdvance, bool root, bool clearAccels,
                                          firstCollision->secondary);
 
 			if (firstCollision->id1 == -1) {
-				this->infos.ball_collisions += 1;
+				this->infos.ballCollisions += 1;
 			}
 			break;
 		case WALL:
@@ -632,11 +632,11 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
 		}
 
 		if (to_touch == 0) {
-			if (g.infos.ball_collisions - deltaTouchedBall == 0) {
+			if (g.infos.ballCollisions - deltaTouchedBall == 0) {
 				g.infos.stopped = true;
 				break;
 			}
-			deltaTouchedBall = g.infos.ball_collisions;
+			deltaTouchedBall = g.infos.ballCollisions;
 
 			to_touch = MAX_TOUCH_DURATION;
 		}

@@ -71,7 +71,7 @@ class Game {
 
 	gameInformations infos = {.collisions = 0,
 							  .goals = 0,
-							  .ball_collisions = 0,
+							  .ballCollisions = 0,
 							  .scoreRouge = 0,
 							  .scoreBleu = 0,
 							  .stopped = false,

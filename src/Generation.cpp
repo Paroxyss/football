@@ -24,7 +24,7 @@ void Generation::create_population(unsigned int size) {
 void push_stats_to_file(std::ofstream &f, gameStatistics g, int generation,
                         double propDidier) {
 	f << "[" << generation << ", " << (double)g.totalCollisions / g.n
-	  << ", " << (double)g.total_ball_collisions / g.n << ", "
+      << ", " << (double)g.totalBallCollisions / g.n << ", "
 	  << (double)g.totalGoals / g.n << ", " << propDidier << "]";
 }
 

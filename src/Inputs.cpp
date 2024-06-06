@@ -26,7 +26,7 @@ double mmn(double x, double min, double max) {
 double mmn_negatif(double x, double min, double max) {
 	return mmn(x, min, max) * 2 - 1;
 }
-double normalizeAngle(double a) {
+double normalize_angle(double a) {
 	return mmn_negatif(a, -M_PI, M_PI);
 }
 

@@ -6,7 +6,7 @@
 struct gameInformations {
 	unsigned int collisions;
 	unsigned int goals;
-	int ball_collisions;
+	int ballCollisions;
 	double scoreRouge;
 	double scoreBleu;
 	bool stopped;
@@ -19,7 +19,7 @@ struct gameStatistics {
 	unsigned int n;
 	unsigned long totalCollisions;
 	unsigned int totalGoals;
-	int total_ball_collisions;
+	int totalBallCollisions;
 	int stopped;
 	double scoreRouge;
 	double scoreBleu;

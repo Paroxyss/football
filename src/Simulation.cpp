@@ -21,7 +21,7 @@ void play_random_match(const char *filename) {
             g.currentPop->pop[thrand(0, g.currentPop->size - 1)]);
 
 	auto info = play_match(c1, c2, 1);
-	while (info.ball_collisions == 0) {
+	while (info.ballCollisions == 0) {
 		info = play_match(c1, c2, 1);
 		std::cout << info << std::endl;
 	}
@@ -58,5 +58,5 @@ void see_ball(const char *filename, int n_ball) {
 
 		delete c1;
 		delete c2;
-	} while(info.ball_collisions >= n_ball);
+	} while(info.ballCollisions >= n_ball);
 }

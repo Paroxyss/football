@@ -25,7 +25,7 @@ double angle_rounded(double input) {
 std::ostream &operator<<(std::ostream &out, gameStatistics stats) {
 	out << std::setprecision(3) << std::setfill(' ') << "S(" << stats.n
 		<< "){c: " << std::setw(8) << DIVN(totalCollisions) << " | "
-		<< std::setw(8) << DIVN(total_ball_collisions)
+		<< std::setw(8) << DIVN(totalBallCollisions)
 		<< "; g: " << std::setw(8) << DIVN(totalGoals)
 		<< "; s: " << std::setw(8)
 		<< (DIVN(scoreBleu) + DIVN(scoreRouge)) / 2 << "}";

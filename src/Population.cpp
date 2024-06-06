@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "Chromosome.hpp"
+#include "Crossover.hpp"
 #include "Game.hpp"
 #include "Genealogy.hpp"
 #include "Population.hpp"

@@ -234,75 +234,7 @@ void mutate(Chromosome &c) {
 	}
 }
 
-Chromosome *classicCrossover(Chromosome &a, Chromosome &b) {
-	Chromosome *child = new Chromosome();
-	child->hasDidier = likelyness(0.5 * (a.hasDidier + b.hasDidier));
 
-	for (int k = 0; k < EQUIPE_SIZE; k++) {
-		for (int i = 0; i < NETWORK_SIZE - 1; i++) {
-
-			Matrix *m = uniform_crossover(*a.matrix[k][i], *b.matrix[k][i]);
-
-			for (int j = 0; j < m->ligne; j++) {
-				for (int l = 0; l < m->col; l++) {
-					child->matrix[k][i]->set(j, l, m->get(j, l));
-				}
-			}
-
-			delete m;
-		}
-	}
-
-	int nDidier = a.hasDidier + b.hasDidier;
-
-	switch (nDidier) {
-	case 0:
-		break;
-	case 2:
-		for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-			Matrix *m = uniform_crossover(*a.didier[i], *b.didier[i]);
-
-			for (int j = 0; j < m->ligne; j++) {
-				for (int l = 0; l < m->col; l++) {
-					child->didier[i]->set(j, l, m->get(j, l));
-				}
-			}
-		}
-		break;
-	case 1:
-		Matrix **source = b.didier;
-		if (a.hasDidier) {
-			source = a.didier;
-		}
-		for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-			Matrix::clone(source[i], child->didier[i]);
-		}
-		break;
-	}
-
-	return child;
-}
-
-Chromosome *swapPlayerCrossover(Chromosome &a, Chromosome &b) {
-	Chromosome *child = new Chromosome();
-
-	child->hasDidier = likelyness(0.5 * (a.hasDidier + b.hasDidier));
-
-	for (int k = 0; k < EQUIPE_SIZE; k++) {
-		Chromosome &source = likelyness(0.5) ? a : b;
-		for (int i = 0; i < NETWORK_SIZE - 1; i++) {
-			Matrix::clone(source.matrix[k][i], child->matrix[k][i]);
-		}
-	}
-	return child;
-}
-
-Chromosome *crossover(Chromosome &a, Chromosome &b) {
-	if (likelyness(SWAP_CROSSOVER_PROBA)) {
-		return swapPlayerCrossover(a, b);
-	}
-	return classicCrossover(a, b);
-}
 
 void Chromosome::write(std::ofstream &file) {
 	int equipeSize = EQUIPE_SIZE;
@@ -399,53 +331,4 @@ Chromosome *Chromosome::read(std::ifstream &file) {
 	}
 
 	return c;
-}
-
-double Chromosome::getPlayersNorm() {
-	double sum = 0;
-
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
-		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
-			for (int k = 0; k < matrix[i][j]->ligne; k++) {
-				for (int l = 0; l < matrix[i][j]->col; l++) {
-					sum += pow(matrix[i][j]->get(k, l), 2);
-				}
-			}
-		}
-	}
-	return sum;
-}
-
-double Chromosome::getMatrixesNorm() {
-	double sum = 0;
-
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
-		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
-			for (int k = 0; k < matrix[i][j]->ligne; k++) {
-				for (int l = 0; l < matrix[i][j]->col; l++) {
-					sum += pow(matrix[i][j]->get(k, l), 2);
-				}
-			}
-		}
-	}
-
-	return sqrt(sum);
-}
-
-double Chromosome::getAngleNorm() {
-	double sum = 0;
-	vector v = {0, 1};
-
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
-		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
-			for (int k = 0; k < matrix[i][j]->ligne; k++) {
-				for (int l = 0; l < matrix[i][j]->col; l++) {
-					v.x = matrix[i][j]->get(k, l);
-					sum += vangle(v);
-				}
-				return sum;
-			}
-		}
-	}
-	return sum;
 }

@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (strcmp(argv[1], "train") == 0) {
-		int n_gen = N;
+		int n_gen = 1000;
 		int pop_size = POPULATION_SIZE;
 		int n_thread = std::thread::hardware_concurrency();
 

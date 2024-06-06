@@ -37,10 +37,6 @@ class Chromosome {
 	void write(std::ofstream &file);
 	static Chromosome *read(std::ifstream &file);
 
-	double getPlayersNorm();
-	double getMatrixesNorm();
-	double getAngleNorm();
 };
 
 void mutate(Chromosome &c);
-Chromosome *crossover(Chromosome &a, Chromosome &b);

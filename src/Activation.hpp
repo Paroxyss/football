@@ -1,12 +1,24 @@
 #pragma once
 #include "Matrix.h"
 #include <cmath>
-#include <iostream>
 
-/*
- * J'ai lu que ReLu était le choix par défaut pour les fonction d'activation
- * mais que ça peut engendrer le problème de neurones mortes. Si ça arrives
- * il faut remplacer par leaky_ReLu.
+/* Remarques sur le choix de la fonction d'activation
+ *
+ * 29/09:
+ *     J'ai lu que ReLu était le choix par défaut pour les fonction d'activation
+ *     mais que ça peut engendrer le problème de neurones mortes. Si ça arrives
+ *     il faut remplacer par leaky_ReLu.
+ *
+ * 07/10:
+ *     Ni ReLu ni leaky_ReLu ne sont adaptées à notre problème, le problème du
+ *     football est symétrique, il nous faut donc une fonction d'activation
+ *     symétrique, pour que les comportements le soient aussi.
+ *     On décide donc d'utiliser des sigmoides
+ * 
+ * 13/12:
+ *     Ajout d'un tanh adouci en sortie des réseaux de neuronnes pour permettre 
+ *     une plus grande précision à nos joueurs
+ *     
  */
 
 inline double a_tanh(double x) {
@@ -21,7 +33,7 @@ inline double sigmoide(double x) {
     return 5 / (1 + exp(-x)) - 5 / 2.;
 }
 
-inline double Heaviside(double x) {
+inline double heaviside(double x) {
     return x >= 0;
 }
 
@@ -33,14 +45,8 @@ inline double mish(double x) {
     return x * tanh(log(1 + exp(x)));
 }
 
-inline double outF(double x) {
-    double v = tanh((1. / 3.) * x);
-
-    /*if (v > 1)
-        v = 1;
-    if (v < -1)
-        v = -1;*/
-    return v;
+inline double tanh_adouci(double x) {
+    return tanh((1. / 3.) * x);
 }
 
 /**
@@ -50,7 +56,7 @@ inline double outF(double x) {
 inline void input_layer_activation(Matrix &c) {
     for (int i = 0; i < c.ligne; i++) {
         for (int j = 0; j < c.col; j++) {
-            c.set(i, j, sigmoide(c.get(i, j) / 1000.));
+            c.set(i, j, sigmoide(c.get(i, j)));
         }
     }
 }
@@ -74,7 +80,7 @@ inline void hidden_layer_activation(Matrix &c) {
 inline void output_layer_activation(Matrix &c) {
     for (int i = 0; i < c.ligne; i++) {
         for (int j = 0; j < c.col; j++) {
-            c.set(i, j, outF(c.get(i, j)));
+            c.set(i, j, tanh_adouci(c.get(i, j)));
         }
     }
 }

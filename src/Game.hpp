@@ -57,7 +57,6 @@ extern std::ofstream csvOutputFile;
 
 class Game {
   public:
-	bool cassee = false;
 	bool logToFile;
 	double timeSinceLastSave = 1;
 
@@ -80,6 +79,7 @@ class Game {
 							  .bonusRouge = 0,
 							  .bonusBleu = 0};
 
+    // Postionne les joueurs en position d'engagement
 	void set_players(const int conf[], int n);
 
 	Game(int playerNumber, bool logToFile = false);
@@ -89,34 +89,37 @@ class Game {
 	void tick(double timeToAdvance = 1, bool root = true,
 			  bool clearAccels = true, bool canSave = true);
 
+    // Appliquer les accélérations liées aux décisions du joueur
 	void setAccelerations(unsigned int id, double rotation,
 						  double acceleration);
 	// Ces fonctions dépendent du temps car les accélérations sont en x.s-2,
 	// on doit donc par exemple les doubler si on veut appliquer
 	// l'équivalent de leurs effets sur 2 secondes
 	void executePlayerActions(double time, bool clearAccels);
-	void applyFriction(double time);
 
-	void setBall(vector pos, vector vitesse = {.x = 0, .y = 0},
+    // Applique les accélérations liées aux forces de friction pour un temps donné
+    void applyFriction(double time);
+
+	// Définit les attributs de la balle
+    void setBall(vector pos, vector vitesse = {.x = 0, .y = 0},
 				 double size = BALL_SIZE, double mass = BALL_MASS);
 
 	// liste les collisions futures d'un objet
 	collisionList *
 	getObjectCollisionList(int objId, collisionList *listToAppend = NULL);
 
-	bool checkGoal(int id);
+    // Regarde si la balle est dans la cage {id}, ou alors qu'elle va traverser la ligne dans la seconde suivante
+    bool checkGoal(int id);
 
-	// bouge tous les objets pour la durée donnée (en s)
+	// Déplace tous les objets pour la durée donnée (en s)
 	void moveAllObj(double time);
 
+    // Écrit l'état des joueurs dans le fichier csv (si la sauvegarde est activée)
 	void writePlayers();
 
+    // Définit les attributs d'un joueur
 	void setPlayer(int id, vector pos, vector speed, double orientation,
 				   double size = PLAYER_SIZE, double mass = PLAYER_MASS);
-
-	void print();
-
-	void aller_chercher_du_pain(int n);
 };
 
 gameInformations play_match(Chromosome *c1, Chromosome *c2,

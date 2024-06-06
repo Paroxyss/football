@@ -20,13 +20,6 @@
 #include "config.h"
 #include "train.hpp"
 
-/*
-
-	TODO: on prend à chaque génération un joueur aléatoire et on voit si sa
-   valeur décroit. Si c'est le cas alors les neurones finissent par mourir
-   il y a donc un problème.
-*/
-
 int main(int argc, char *argv[]) {
 
 	if (argc < 2) {
@@ -144,11 +137,7 @@ int main(int argc, char *argv[]) {
 			g.players->vitesse.x = cos(k / 10.) * 5;
 			g.players->vitesse.y = sin(k / 10.) * 5;
 			// on tick 10 fois pour beaucoup plus de précisions
-			g.tick(0.1, true, false, true);
-			for (int i = 0; i < 8; i++) {
-				g.tick(0.1, true, false, false);
-			}
-			g.tick(0.1, true, true, false);
+			g.tick(0.1);
 		}
 
 	} else if (strcmp(argv[1], "benchmarkMatch") == 0) {
@@ -188,7 +177,7 @@ int main(int argc, char *argv[]) {
 				sqrt(std::reduce(vc.begin(), vc.end()) / (vc.size() - 1));
 
 			totalTime += elapsed_seconds.count();
-			std::cout << mean << " ± " << incertitude
+			std::cout << mean << " +- " << incertitude
 					  << " matchs par seconde " << "(" << nbMatch << " / "
 					  << totalTime << "s)" << std::endl;
 		}

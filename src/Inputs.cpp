@@ -6,10 +6,6 @@
 #include "Vector.hpp"
 #include "config.h"
 
-/**
- * @brief min-max normalization: Retranche la valeur donnée entre 0 et 1.
- */
-
 // Opérations couteuses donc mises en statiques, elles sont utilisées
 // pour la normalisation min-max.
 static const double d_map = sqrt(pow(MAP_LENGTH, 2) + pow(MAP_HEIGHT, 2));
@@ -86,6 +82,7 @@ inline void writeNearestPlayer(Matrix &mat, player &viewer, player *&equipe,
 
 	for (int i = 0; i < EQUIPE_SIZE; i++) {
 		double nd = norme(equipe[i].pos - viewer.pos);
+        // nd > PLAYER_SIZE/2. sert à éviter de compter viewer comme le joueur le plus proche
 		if (nd < d && nd > PLAYER_SIZE / 2.) {
 			nearest = &equipe[i];
 			d = nd;
@@ -133,6 +130,7 @@ void writeInputs(player &viewer, player *equipeAlliee,
 	writeNearestPlayer(mat, viewer, equipeAlliee, indice);
 	writeNearestPlayer(mat, viewer, equipeAdverse, indice);
 
+    // Temps avant de pouvoir tirer à nouveau
 	writeValRaw(mat, viewer.shootCooldown / (double)SHOOTCOOLDOWN, indice);
 
 #ifdef MATRIX_DEBUG

@@ -1,14 +1,7 @@
 #include "config.h"
-#include "Vector.hpp"
-#include "Inputs.hpp"
-#include "Genealogy.hpp"
 #include "Game.hpp"
 #include "Crossover.hpp"
 #include "Chromosome.hpp"
-#include "Activation.hpp"
-#include <ostream>
-#include <iostream>
-#include <cmath>
 #include "Matrix.h"
 
 #include "util.hpp"
@@ -17,7 +10,7 @@
 
 Matrix *one_pointer_crossover(Matrix &a, Matrix &b) {
 	if (a.ligne != b.ligne || a.col != b.col)
-		throw std::invalid_argument("lol opc");
+		throw std::invalid_argument("Dimensions invalides opc");
 
 	int x = rand() % a.col;
 	Matrix *c = new Matrix(a.ligne, a.col);
@@ -35,7 +28,7 @@ Matrix *one_pointer_crossover(Matrix &a, Matrix &b) {
 
 Matrix *uniform_crossover(Matrix &a, Matrix &b) {
 	if (a.ligne != b.ligne || a.col != b.col)
-		throw std::invalid_argument("lol uc");
+		throw std::invalid_argument("Dimensions invalides uc");
 
 	Matrix *c = new Matrix(a.ligne, a.col);
 

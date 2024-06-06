@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "Chromosome.hpp"
+#include "Mutation.hpp"
 #include "Crossover.hpp"
 #include "Game.hpp"
 #include "Genealogy.hpp"
@@ -18,6 +19,7 @@
 #include "SafeQueue.hpp"
 #include "config.h"
 #include "util.hpp"
+#include "Rand.h"
 
 Population::Population(int size, double proportionDidier) {
 	this->size = size;
@@ -99,13 +101,8 @@ gameStatistics Population::next(int n_thread, bool save,
 					Chromosome *mutedWinner;
 					auto c1 = vainqueurs[i];
 					auto c2 = vainqueurs[(i + 1) % vainqueurs.size()];
-					if (scores[i] / std::log2(std::get<1>(outcome).n) <=
-						0) {
-						// trop nul, on génère un nouvel individu
-						Chromosome *c = new Chromosome();
-						c->initialize();
-						mutedWinner = c;
-					} else if (likelyness(CROSSOVER_PROBABILITY)) {
+
+                    if (likelyness(CROSSOVER_PROBABILITY)) {
 						mutedWinner = crossover(*c1, *c2);
 						liens.push((carteIdentite){.id = mutedWinner->id,
 												   .p1 = c1->id,
@@ -120,6 +117,8 @@ gameStatistics Population::next(int n_thread, bool save,
 					pbar.step(1, threadId);
 					nextPop.pushReserved(mutedWinner, threadId);
 					statsTournois.push(std::get<1>(outcome));
+
+                    // Garder trace de la généalogie
 					attributions.push(
 						std::tuple(threadId, std::get<1>(outcome).n));
 				}
@@ -158,6 +157,7 @@ gameStatistics Population::next(int n_thread, bool save,
 		this->pop[i] = c;
 	}
 
+    // Statistiques sur les performances des threads
 	std::vector<int> perfs(n_thread, 0);
 	std::tuple<int, int> tstats;
 	while (attributions.pop(tstats)) {
@@ -192,7 +192,6 @@ Population::tournament(int tourn_size, int maxSize, bool save) {
 	bool *selected = (bool *)calloc(this->size, sizeof(bool));
 
 	for (int i = 0; i < tourn_size; i++) {
-		// TODO: Apparemment rand() n'est pas thread-safe.
 		int k = thrand(0, this->size - 1);
 
 		while (selected[k]) {
@@ -218,12 +217,13 @@ Population::tournament(int tourn_size, int maxSize, bool save) {
 								.scoreBleu = 0};
 
 	while (contestants.size() > maxSize) {
+        // On prend les deux premiers joueurs de la file
 		auto c1 = contestants.front();
 		contestants.pop();
 		auto c2 = contestants.front();
 		contestants.pop();
 		auto match_results = play_match(c1.first, c2.first, save);
-
+        // On ajoute le gagnant du match à la fin de la file
 		if (match_results.scoreBleu - match_results.scoreRouge > 0) {
 			c1.second += match_results.scoreBleu;
 			contestants.push(c1);

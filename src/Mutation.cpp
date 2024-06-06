@@ -1,30 +1,19 @@
 #include <random>
 
+#include "Chromosome.hpp"
+#include "Rand.h"
+#include "Mutation.hpp"
+#include "config.h"
 #include "util.hpp"
 
-/**
- * @brief Permet d'explorer un large espace solution mais peut perdre une
- * bonne solution rapidement.
- */
 double replacement() {
 	return randomDouble();
 }
 
-/**
- * @brief Permet de préserver la forme générale d'un individu déjà près
- * d'une bonne solution. Le désavantage étant que l'exploration de l'espace
- * solution est plus faible et la convergence plus lente.
- */
 double perturbation(double x) {
 	return x + randomDouble(-x / 10., x / 10.);
 }
 
-/**
- * @brief Juste une idée comme ça. Pour notre cas puisque l'on a pas une
- * énorme puissance de calcul on ne peut ni se permettre d'utiliser
- * uniquement replacement() ce qui requière une grosse population ni
- * perturbation() qui requière beaucoup de génération.
- */
 double balance(double x) {
 	if (likelyness(0.5)) {
 		return perturbation(x);
@@ -33,10 +22,48 @@ double balance(double x) {
 	return replacement();
 }
 
-double gaussian(double x) {
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::normal_distribution<double> distribution(0.0, 0.1);
+void mutation(Matrix &m) {
+    for (int i = 0; i < m.ligne; i++) {
+        for (int j = 0; j < m.col; j++) {
+            if (likelyness(1 - MUTATION_PROBABILITY)) {
+                continue;
+            }
 
-	return x + distribution(gen);
+            m.set(i, j, replacement());
+        }
+    }
 }
+
+void mutate(Chromosome &c) {
+	// on mute le chromosome donc il perd en capacité, donc ses buts
+	// précédents doivent être moins prépondérants
+	c.stats.instanceGoals = (double)c.stats.instanceGoals / 2.;
+	for (int i = 0; i < EQUIPE_SIZE; i++) {
+		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
+			mutation(*c.matrix[i][j]);
+		}
+	}
+
+	if (likelyness(SWAP_MUTATION_PROBA)) {
+		int a = thrand(0, EQUIPE_SIZE - 1);
+		int b = thrand(0, EQUIPE_SIZE - 2);
+		if (a == b)
+			b++;
+
+		for (int i = 0; i < NETWORK_SIZE - 1; i++) {
+			for (int j = 0; j < c.matrix[a][i]->col; j++) {
+				for (int k = 0; k < c.matrix[a][i]->ligne; k++) {
+					int tmp = c.matrix[a][i]->get(k, j);
+					c.matrix[a][i]->set(k, j, c.matrix[b][i]->get(k, j));
+					c.matrix[b][i]->set(k, j, tmp);
+				}
+			}
+		}
+	}
+	for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
+		mutation(*c.didier[i]);
+	}
+}
+
+
+

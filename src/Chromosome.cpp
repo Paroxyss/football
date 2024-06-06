@@ -1,16 +1,13 @@
-#include <cmath>
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
 
 #include "Activation.hpp"
 #include "Chromosome.hpp"
-#include "Crossover.hpp"
 #include "Game.hpp"
 #include "Genealogy.hpp"
 #include "Inputs.hpp"
 #include "Matrix.h"
-#include "Vector.hpp"
 #include "config.h"
 #include "util.hpp"
 
@@ -53,15 +50,6 @@ void Chromosome::print() {
 	}
 }
 
-/*
-	Permet la génération de la population initiale.
-	Les valeurs initialement générées sont pour le moment
-	comprises entre -10 et 10.
-
-	TODO: faut-il appliquer déjà ici la fonction d'activation
-	coefficients?
-*/
-
 void Chromosome::initialize() {
 	for (int i = 0; i < EQUIPE_SIZE; i++) {
 		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
@@ -73,22 +61,6 @@ void Chromosome::initialize() {
 		this->didier[i]->initialize();
 	}
 }
-
-/*
-	Code testé, ne pas toucher.
-
-	inputs (resp. ouputs) est une matrice de taille NETWORK_INPUT_SIZE
-   * EQUIPE_SIZE (resp. NETWORK_OUTPUT_SIZE * EQUIPE_SIZE) qui contient sur
-   sa i-ème colonne les entrée (respectivement sortie) pour le i-ème joueur.
-
-	Attention à faire attention c'est assez contre intuitif (il faudrait
-   possiblement le changer plus tard) mais Chromosome possède bien sur sa
-   i-ème LIGNE les (NETWORK_SIZE -1) matrices composant le NN du i-ème
-   joueur tandis qu'ici les joueurs sont représentés sur les colonnes.
-
-	A bien noter que chaque joueur possède autant de hidden layer et de même
-   dimensions dans le but d'éviter les "inégalités"
-*/
 
 void Chromosome::apply(player *equipeAlliee) {
 	for (int i = 0; i < EQUIPE_SIZE; i++) {
@@ -119,18 +91,8 @@ void Chromosome::apply(player *equipeAlliee) {
 	}
 }
 
-/*
-	Didier est toujours évalué avant les joueurs.
-	Chaque joueur contient les outputs qu'il a donné à la fin du tick
-   précédent. On les passe en entrée pour didier, en sortie, didier écrit
-   lets inputs destinés aux joueurs dans leurs champ output
-*/
-
 void Chromosome::apply_didier(player *equipeAlliee) {
 	Matrix inputs = Matrix(COM_SIZE * EQUIPE_SIZE, 1);
-
-	// std::cout << "Didier reçoit pour le joueur 1 :
-	// ";equipeAlliee[0].outputs->print();
 
 	for (int i = 0; i < EQUIPE_SIZE; i++) {
 		for (int j = 0; j < COM_SIZE; j++) {
@@ -140,32 +102,14 @@ void Chromosome::apply_didier(player *equipeAlliee) {
 		}
 	}
 
-	// std::cout << "INputs remplis:" << std::endl;
-	// inputs.print();
-	// inputs.mult_inv(*this->didier[0]);
-	// std::cout << "firstLayer" << std::endl;
-	// inputs.print();
-	// input_layer_activation(inputs);
-	/*std::cout << "INPUTS DIDIER" << std::endl;
-	inputs.print();
-	std::cout << "MULTIPLICATION AVEC CE RÉSEAU:" << std::endl;
-	this->didier[0]->print();
-*/
 	for (int i = 1; i < DIDIER_NETWORK_SIZE - 2; i++) {
 		inputs.mult_inv(*this->didier[i]);
-		// std::cout << "layer "<< i << std::endl;
-		// inputs.print();
 		hidden_layer_activation(inputs);
-		// std::cout << "hidden" << std::endl;
-		// inputs.print();
 	}
 
 	inputs.mult_inv(*this->didier[DIDIER_NETWORK_SIZE - 2]);
 	output_layer_activation(inputs);
-	/*std::cout << "OUTPUT DIDIER" << std::endl;
-	inputs.print();
-
-*/
+	
 	for (int i = 0; i < EQUIPE_SIZE; i++) {
 		for (int j = 0; j < COM_SIZE; j++) {
 			equipeAlliee[i].inputs->set(j, 0,
@@ -194,47 +138,6 @@ void Chromosome::collect_and_apply(player *equipeAlliee,
 	// Evaluation du réseau de neurones de chaque joueurs.
 	this->apply(equipeAlliee);
 }
-
-/*
-	Pour mutter un chromosome (équipe) on mute pour le moment
-	chaque matrice composant le chromosome.
-
-	TODO: Une idée pourrait être également d'échanger la position de deux
-   matrices (se qui échangerais la position initiale de 2 joueurs)
-*/
-
-void mutate(Chromosome &c) {
-	// on mute le chromosome donc il perd en capacité, donc ses buts
-	// précédents doivent être moins prépondérants
-	c.stats.instanceGoals = (double)c.stats.instanceGoals / 2.;
-	for (int i = 0; i < EQUIPE_SIZE; i++) {
-		for (int j = 0; j < NETWORK_SIZE - 1; j++) {
-			mutation(*c.matrix[i][j]);
-		}
-	}
-
-	if (likelyness(SWAP_MUTATION_PROBA)) {
-		int a = thrand(0, EQUIPE_SIZE - 1);
-		int b = thrand(0, EQUIPE_SIZE - 2);
-		if (a == b)
-			b++;
-
-		for (int i = 0; i < NETWORK_SIZE - 1; i++) {
-			for (int j = 0; j < c.matrix[a][i]->col; j++) {
-				for (int k = 0; k < c.matrix[a][i]->ligne; k++) {
-					int tmp = c.matrix[a][i]->get(k, j);
-					c.matrix[a][i]->set(k, j, c.matrix[b][i]->get(k, j));
-					c.matrix[b][i]->set(k, j, tmp);
-				}
-			}
-		}
-	}
-	for (int i = 0; i < DIDIER_NETWORK_SIZE - 1; i++) {
-		mutation(*c.didier[i]);
-	}
-}
-
-
 
 void Chromosome::write(std::ofstream &file) {
 	int equipeSize = EQUIPE_SIZE;

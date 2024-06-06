@@ -25,13 +25,10 @@ struct gameStatistics {
 	double scoreBleu;
 };
 
-double randomDouble(double min, double max);
-int thrand(int min, int max);
-double randomDouble();
-int previous_power(int n);
-int random_power(int n);
 double angleRounded(double input);
-bool likelyness(double v);
+
+// Retourne la puissance de 2 précédente
+int previous_power(int n);
 
 std::ostream &operator<<(std::ostream &out, gameStatistics stats);
 std::ostream &operator<<(std::ostream &out, gameInformations stats);

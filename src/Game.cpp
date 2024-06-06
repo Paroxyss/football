@@ -5,6 +5,7 @@
 #include "config.h"
 #include "stdlib.h"
 #include "util.hpp"
+#include "Rand.h"
 
 #include <cmath>
 #include <cstdio>
@@ -53,11 +54,13 @@ Game::Game(int playerNumber, bool logToFile) {
 
 	this->goals = new wall[2];
 
+    // Bordures du terrain
 	SETWALL(0, 0, 0, MAP_LENGTH, 0);
 	SETWALL(1, 0, 0, 0, MAP_HEIGHT);
 	SETWALL(2, 0, MAP_HEIGHT, MAP_LENGTH, 0);
 	SETWALL(3, MAP_LENGTH, MAP_HEIGHT, 0, -MAP_HEIGHT);
 
+    // Cages de l'équipe de gauche
 	SETWALL(4, 0, (MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POTEAU_WIDTH,
 			POTEAU_LENGTH, 0);
 	SETWALL(5, 0, (MAP_HEIGHT - (double)GOAL_HEIGHT) / 2, POTEAU_LENGTH, 0);
@@ -70,6 +73,7 @@ Game::Game(int playerNumber, bool logToFile) {
 	SETWALL(9, POTEAU_LENGTH, (MAP_HEIGHT + (double)GOAL_HEIGHT) / 2, 0,
 			POTEAU_WIDTH);
 
+    // Cages de l'équipe de droite
 	SETWALL(10, MAP_LENGTH,
 			(MAP_HEIGHT - (double)GOAL_HEIGHT) / 2 - POTEAU_WIDTH,
 			-POTEAU_LENGTH, 0);
@@ -140,10 +144,7 @@ Game::~Game() {
 /*
 	Répartis les joueurs sur le terrain selon la configuration voulue.
 	Pour 3 joueurs, on peut par exemple avoir {2, 1}, placés comme au vrai
-   foot
-
-	Si on place l'équipe de droite les joueurs sont placés dans l'ordre
-   inverse d'apparition dans la configuration.
+    foot
 */
 void Game::set_players(const int conf[], int n) {
 	int c = 0, s = 0;
@@ -170,15 +171,12 @@ void Game::set_players(const int conf[], int n) {
 
 	for (int i = 0; i < n; i++) {
 		for (int k = conf[i]; k >= 1; k--) {
-			// symétrie centrale par rapport à au centre du terrain
+			// symétrie centrale par rapport au centre du terrain
 			vector centre = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
 			this->players[c].pos =
 				players[c - s].pos + 2 * (centre - players[c - s].pos);
 			this->players[c].vitesse = {.x = -0.01, .y = 0};
 
-			// on donne aux joueurs de droite le même angle que ceux de
-			// gauche, c'est après en python que l'on ajoute M_PI pour
-			// donner la symétrie.
 			this->players[c].orientation =
 				this->players[c - s].orientation + M_PI;
 			c++;
@@ -194,10 +192,6 @@ void Game::set_players(const int conf[], int n) {
 	this->ball.pos.x += ((float)PLAYER_SIZE + BALL_SIZE) / 2 + 30;*/
 }
 
-inline double distancecarre(ball &p, const ball &b) {
-	return normeCarre(p.pos - b.pos);
-}
-
 inline collisionList *insert(collisionList *list, ball *actor,
 							 ball *secondary, int id1, int id2,
 							 CollisionType type, double time = INFINITY) {
@@ -211,8 +205,7 @@ inline collisionList *insert(collisionList *list, ball *actor,
 	l->id2 = id2;
 	return l;
 }
-// Retourne le temps avant lequel un objet va rencontrer un mur, si le temps
-// est négatif ou NaN, la collision n'arrivera jamais
+// Retourne le temps avant lequel un objet va rencontrer un mur (potentiellement négatif), ou NaN si la collision n'arrivera jamais
 double getWallCollisionTime(ball *obj, ball *wall) {
 	vector MO = obj->pos - wall->pos;
 
@@ -228,8 +221,7 @@ double getWallCollisionTime(ball *obj, ball *wall) {
 	return T / ev;
 }
 
-// Retourne le temps avant lequel un objet va rencontrer un autre objet, si
-// le temps est négatif ou NaN, la collision n'arrivera jamais
+// Retourne le temps avant lequel un objet va rencontrer un autre objet (potentiellement négatif), ou NaN si la collision n'arrivera jamais
 double getTwoBallCollisionTime(ball *b1, ball *b2) {
 	vector v_relative = b1->vitesse - b2->vitesse;
 	vector LM = b1->pos - b2->pos;
@@ -247,7 +239,11 @@ double getTwoBallCollisionTime(ball *b1, ball *b2) {
 	return (ev - pprime) / norme(v_relative);
 }
 
-// Remplit une liste chainée avec les conflit au moment où elle est appellée
+inline double distancecarre(ball &p, const ball &b) {
+    return normeCarre(p.pos - b.pos);
+}
+
+// Remplit une liste chainée avec les conflits au moment où elle est appellée
 collisionList *Game::getObjectCollisionList(int objId,
 											collisionList *listToAppend) {
 	struct ball *selected;
@@ -367,9 +363,6 @@ collisionList *findFirstCollision(collisionList *list) {
 	if (nextBest && nextBest->time < list->time && list->time > 0) {
 		return nextBest;
 	}
-	if (list->time >= -10000) {
-		return list;
-	}
 	return NULL;
 }
 
@@ -382,7 +375,6 @@ void freeCollisionList(collisionList *list) {
 	delete[] list;
 }
 
-// fait bouger tous les objets pour une certaine durée
 void Game::moveAllObj(double time) {
 	ball.pos += ball.vitesse * time;
 	for (int i = 0; i < playerNumber; i++) {
@@ -391,7 +383,6 @@ void Game::moveAllObj(double time) {
 	}
 }
 
-// effectue un pas de simulation, d'une durée souhaitée
 void Game::tick(double timeToAdvance, bool root, bool clearAccels,
 				bool canSave) {
 	// ici, root est un bouléen défini à vrai ssi c'est le premier appel
@@ -428,18 +419,6 @@ void Game::tick(double timeToAdvance, bool root, bool clearAccels,
 
 		// On regarde à quel instant est survenu la première collision
 		collisionList *firstCollision = findFirstCollision(c);
-		if (!firstCollision || firstCollision->time < -10000) {
-			// très rare cas, si un objet à une trajéctoire parfaitement
-			// parallèle à un mur
-			freeCollisionList(c);
-			return;
-		}
-
-		if (firstCollision->time == 0) {
-			std::cout << "game cassée" << std::endl;
-			this->cassee = true;
-			return;
-		}
 
 		// On avance à cet instant précis
 		moveAllObj(firstCollision->time);
@@ -470,33 +449,6 @@ void Game::tick(double timeToAdvance, bool root, bool clearAccels,
 		case WALL:
 			computeCollisionWall(*firstCollision->actor,
 								 firstCollision->secondary);
-			if (firstCollision->id1 == -1) {
-				if (firstCollision->id2 == 0) {
-					this->ball.vitesse.y = 5;
-					this->ball.vitesse.x = 0;
-				} else if (firstCollision->id2 == 2) {
-					this->ball.vitesse.y = -5;
-					this->ball.vitesse.x = 0;
-				}
-
-				/*for (int i = 0; i < this->playerNumber; i++) {
-					auto explo = (this->players[i].pos - this->ball.pos);
-					double d = norme(explo);
-					// vecteur unitaire de direction de projection
-					explo /= d;
-					// on obient la norme de ∆v causée par l'explosion
-					explo *= fmax(200 - d, 0) / 10.;
-
-					this->players[i].vitesse += explo;
-				}*/
-
-				/*if (infos.touchMean < 0) {
-					infos.bonusRouge -= 0.05;
-				}
-				if (infos.touchMean > 0) {
-					infos.bonusBleu -= 0.05;
-				}*/
-			}
 			break;
 		}
 		// On fait de nouveau un tick, pour compléter le temps restant
@@ -507,7 +459,6 @@ void Game::tick(double timeToAdvance, bool root, bool clearAccels,
 	freeCollisionList(c);
 };
 
-// Écrit l'état des joueurs dans un fichier
 void Game::writePlayers() {
 	csvOutputFile << "2," << (double)this->ball.pos.x << ","
 				  << (double)this->ball.pos.y << ",";
@@ -579,8 +530,6 @@ void Game::setPlayer(int id, vector pos, vector speed, double orientation,
 	this->players[id].mass = mass;
 }
 
-// Regarde si la balle est dans la cage n°id, ou alors qu'elle va la
-// traverser dans la seconde suivante
 bool Game::checkGoal(int id) {
 	double cage = getWallCollisionTime(&this->ball, &this->goals[id]);
 
@@ -621,11 +570,6 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
 							  false);
 		c2->collect_and_apply(g.players + EQUIPE_SIZE, g.players, &g.ball,
 							  true);
-		// std::cout << "INPUTS J1: " << g.players[0].inputs->get(0, 0) <<
-		// ";"
-		// << g.players[0].inputs->get(1, 0) << std::endl; std::cout <<
-		// "OUTPUTS j1:"; g.players[0].outputs->print(); std::cout <<
-		// std::endl;
 
 		for (int a = 0; a < 2 * EQUIPE_SIZE; a++) {
 			double rotation = g.players[a].outputs->get(0, 0);
@@ -644,7 +588,7 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
 				double d = norme(explo);
 				// vecteur unitaire de direction de projection
 				explo /= d;
-				// on obient la norme de ∆v causée par l'explosion
+				// on obient la norme de l'accélération causée par "l'explosion"
 				double dmax = PLAYER_SIZE + 2 * BALL_SIZE;
 				explo *= fmax(dmax - d, 0) / dmax * 60;
 
@@ -653,20 +597,10 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
 			if (shoot < 0) {
 				g.players[a].shootCooldown =
 					fmax(g.players[a].shootCooldown - 1, 0);
-				// g.players[a].shootCooldown -= 1;
 			}
 		}
 
-		// on tick 10 fois pour beaucoup plus de précisions
-		g.tick(0.1, true, false, true);
-		for (int i = 0; i < 8; i++) {
-			g.tick(0.1, true, false, false);
-		}
-		g.tick(0.1, true, true, false);
-
-		if (g.cassee) {
-			return g.infos;
-		}
+		g.tick(1);
 
 		bool bc1 = g.checkGoal(0);
 		bool bc2 = g.checkGoal(1);

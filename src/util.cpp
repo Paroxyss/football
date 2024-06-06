@@ -1,6 +1,7 @@
+#include <iomanip>
+
 #include "util.hpp"
 #include "Rand.h"
-#include <iomanip>
 
 /**
  * @brief Apparemment la fonction rand() n'est pas "thread-safe" et peut
@@ -10,66 +11,66 @@
  * ATTENTION LES DEUX BORNES SONT INCLUES
  */
 int thrand(int min, int max) {
-    std::uniform_int_distribution<int> distribution(min, max);
-    return distribution(rng);
+	std::uniform_int_distribution<int> distribution(min, max);
+	return distribution(rng);
 }
 
 double randomDouble(double min, double max) {
-    std::uniform_real_distribution<double> distribution(min, max);
-    return distribution(rng);
+	std::uniform_real_distribution<double> distribution(min, max);
+	return distribution(rng);
 }
 
 double randomDouble() {
-    return randomDouble(-1.77, 1.77);
+	return randomDouble(-1.77, 1.77);
 }
 
 int previous_power(int n) {
-    while (n & n - 1) {
-        n = n & n - 1;
-    }
+	while (n & n - 1) {
+		n = n & n - 1;
+	}
 
-    return n;
+	return n;
 }
 
 int random_power(int n) {
-    int r = thrand(4, n);
-    int p = 4;
+	int r = thrand(4, n);
+	int p = 4;
 
-    while (p * 2 < r) {
-        p *= 2;
-    }
+	while (p * 2 < r) {
+		p *= 2;
+	}
 
-    return p;
+	return p;
 }
 
 double angleRounded(double input) {
-    input = fmod(input + M_PI, 2 * M_PI);
-    if (input < 0) {
-        input += 2 * M_PI;
-    }
+	input = fmod(input + M_PI, 2 * M_PI);
+	if (input < 0) {
+		input += 2 * M_PI;
+	}
 
-    return input - M_PI;
+	return input - M_PI;
 }
 
 bool likelyness(double v) {
-    return randomDouble(0, 1) < v;
+	return randomDouble(0, 1) < v;
 }
 
 #define DIVN(name) stats.name / (double)stats.n
 #define DIVLN(name) stats.name / std::log2((double)stats.n)
 std::ostream &operator<<(std::ostream &out, gameStatistics stats) {
-    out << std::setprecision(3) << std::setfill(' ') << "S(" << stats.n
-        << "){c: " << std::setw(8) << DIVN(totalCollisions) << " | "
-        << std::setw(8) << DIVN(total_ball_collisions)
-        << "; g: " << std::setw(8) << DIVN(totalGoals)
-        << "; s: " << std::setw(8) << (DIVN(scoreBleu) + DIVN(scoreRouge)) / 2
-        << "}";
-    return out;
+	out << std::setprecision(3) << std::setfill(' ') << "S(" << stats.n
+		<< "){c: " << std::setw(8) << DIVN(totalCollisions) << " | "
+		<< std::setw(8) << DIVN(total_ball_collisions)
+		<< "; g: " << std::setw(8) << DIVN(totalGoals)
+		<< "; s: " << std::setw(8)
+		<< (DIVN(scoreBleu) + DIVN(scoreRouge)) / 2 << "}";
+	return out;
 }
 
 std::ostream &operator<<(std::ostream &out, gameInformations stats) {
-    out << "Stats{ collisions : " << stats.collisions
-        << ", goals : " << stats.goals << ", score : " << stats.scoreBleu
-        << " | " << stats.scoreRouge << " }";
-    return out;
+	out << "Stats{ collisions : " << stats.collisions
+		<< ", goals : " << stats.goals << ", score : " << stats.scoreBleu
+		<< " | " << stats.scoreRouge << " }";
+	return out;
 }

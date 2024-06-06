@@ -1,28 +1,29 @@
 #pragma once
 
 #include <cmath>
+
 #define NETWORK_SIZE 7
 #define DIDIER_NETWORK_SIZE 2
 
 // pour l'instant le réseau ne prend pas l'accélération en entrée
 // pour pouvoir évoluer plus facilement.
-// x, y, vx, vy, theta, distance_balle, rthetab, distance cage, angle relatif
-// cage, distance abverse + proche, angle adverse + proche, com1, .. ,
-// com{COM_SIZE}
+// x, y, vx, vy, theta, distance_balle, rthetab, distance cage, angle
+// relatif cage, distance abverse + proche, angle adverse + proche, com1, ..
+// , com{COM_SIZE}
 #define COM_SIZE 2
 #define NETWORK_OUTPUT_SIZE 3 + COM_SIZE
 #define NETWORK_INPUT_SIZE 27 + COM_SIZE
 
 #define EQUIPE_SIZE 3
-#define GAMECONFIG                                                             \
-    { 1, 0, 2 }
+#define GAMECONFIG                                                         \
+	{ 1, 0, 2 }
 #define GAMECONFIGLENGTH 3
 
 // Configurations des réseaux de neurones
-const int PLAYER_LAYERS[NETWORK_SIZE] = {NETWORK_INPUT_SIZE, 28, 20, 16, 10, 6,
-                                         NETWORK_OUTPUT_SIZE};
+const int PLAYER_LAYERS[NETWORK_SIZE] = {
+	NETWORK_INPUT_SIZE, 28, 20, 16, 10, 6, NETWORK_OUTPUT_SIZE};
 const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {COM_SIZE * EQUIPE_SIZE,
-                                                COM_SIZE * EQUIPE_SIZE};
+												COM_SIZE *EQUIPE_SIZE};
 
 // GAME CONFIG
 #define MAX_GAME_DURATION (40 * 60)
@@ -44,12 +45,12 @@ const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {COM_SIZE * EQUIPE_SIZE,
 
 #define PLAYER_ROTATION_ACCELERATION 0.10
 #define PLAYER_ROTATION_FROTTEMENT (1 / 3.)
-// configuration des tirs 
+// configuration des tirs
 // force du tir
 #define SHOOTSTRENGTH 50
 // temps entre chaque tir
 #define SHOOTCOOLDOWN 10 // en seconde
- 
+
 // Coefficient de restitution (collisions elastiques
 #define COLLISION_CONS 0.9
 
@@ -59,12 +60,12 @@ const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {COM_SIZE * EQUIPE_SIZE,
 #define BALL_FROTTEMENT (1 / 35.)
 
 // SENSOR CONFIG
-// Tests d'une autre méthode de communication: les capteurs, 
-// pour conserver la continuité des entrées 
+// Tests d'une autre méthode de communication: les capteurs,
+// pour conserver la continuité des entrées
 // (abandonnée car trop complexe à apprendre)
 #define PLAYER_SENSOR_NUMBER 3
 const double PLAYER_SENSOR_ANGLES[PLAYER_SENSOR_NUMBER] = {
-    -45. * M_PI / 180., 0. * M_PI / 180., 45. * M_PI / 180.};
+	-45. * M_PI / 180., 0. * M_PI / 180., 45. * M_PI / 180.};
 #define PLAYER_SENSOR_DISTANCE 4 * PLAYER_SIZE
 #define PLAYER_SENSOR_RANGE 8 * PLAYER_SIZE
 
@@ -86,7 +87,8 @@ const double PLAYER_SENSOR_ANGLES[PLAYER_SENSOR_NUMBER] = {
 // entre 0.001 et 0.1
 #define MUTATION_PROBABILITY 0.04
 
-// Probablité d'échanger des poids entre les joueurs, au sein d'une même équipe
+// Probablité d'échanger des poids entre les joueurs, au sein d'une même
+// équipe
 #define SWAP_MUTATION_PROBA 0.025
 
 // Proportion de joueurs aléatoires par générations
@@ -95,5 +97,5 @@ const double PLAYER_SENSOR_ANGLES[PLAYER_SENSOR_NUMBER] = {
 // intervalle (en génération) des sauvegardes
 #define SAVE_RATE 5
 
-// Active les tests lors de l'accession aux matrices (très couteux en ressources)
-// #define MATRIXDEBUG
+// Active les tests lors de l'accession aux matrices (très couteux en
+// ressources) #define MATRIXDEBUG

@@ -1,43 +1,45 @@
 #pragma once
 
+#include <fstream>
+
 #include "Game.hpp"
 #include "Matrix.h"
 #include "config.h"
-#include <fstream>
+
 
 typedef struct chromosomeStats {
-    unsigned short instanceGoals;
-    int instanceAge;
+	unsigned short instanceGoals;
+	int instanceAge;
 } chromosomeStats;
 
 class Chromosome {
   public:
-    chromosomeStats stats = {.instanceGoals = 0, .instanceAge = 0};
+	chromosomeStats stats = {.instanceGoals = 0, .instanceAge = 0};
 	unsigned long id;
 	bool hasDidier = false;
 
-    Matrix *matrix[EQUIPE_SIZE][NETWORK_SIZE - 1];
-    Matrix *didier[DIDIER_NETWORK_SIZE - 1];
+	Matrix *matrix[EQUIPE_SIZE][NETWORK_SIZE - 1];
+	Matrix *didier[DIDIER_NETWORK_SIZE - 1];
 
-    Chromosome();
-    ~Chromosome();
+	Chromosome();
+	~Chromosome();
 
-    void print();
+	void print();
 
-    void initialize();
+	void initialize();
 
-    void collect_and_apply(player *equipeAlliee, player *equipeAdverse, ball *b,
-                           bool team);
+	void collect_and_apply(player *equipeAlliee, player *equipeAdverse,
+						   ball *b, bool team);
 
-    void apply(player *equipeAlliee);
-    void apply_didier(player *equipeAlliee);
+	void apply(player *equipeAlliee);
+	void apply_didier(player *equipeAlliee);
 
-    void write(std::ofstream &file);
-    static Chromosome *read(std::ifstream &file);
+	void write(std::ofstream &file);
+	static Chromosome *read(std::ifstream &file);
 
-    double getPlayersNorm();
-    double getMatrixesNorm();
-    double getAngleNorm();
+	double getPlayersNorm();
+	double getMatrixesNorm();
+	double getAngleNorm();
 };
 
 void mutate(Chromosome &c);

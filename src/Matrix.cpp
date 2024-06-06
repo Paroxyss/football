@@ -1,12 +1,12 @@
-#include "Matrix.h"
-#include "Mutation.hpp"
-#include "config.h"
-#include "util.hpp"
-
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+
+#include "Matrix.h"
+#include "Mutation.hpp"
+#include "config.h"
+#include "util.hpp"
 
 /**
  * @brief Créer une matrice.
@@ -15,32 +15,32 @@
  * @param col Nombre de colonnes de la matrice
  */
 Matrix::Matrix(int ligne, int col) {
-    this->ligne = ligne;
-    this->col = col;
-    this->t = new double[MATRIX_SIZE];
+	this->ligne = ligne;
+	this->col = col;
+	this->t = new double[MATRIX_SIZE];
 	memset(t, 0, sizeof(double));
-    this->ct = new double[MATRIX_SIZE];
+	this->ct = new double[MATRIX_SIZE];
 }
 
 /**
  * @brief Détruit la matrice après utilisation.
  */
 Matrix::~Matrix() {
-    delete[] this->t;
-    delete[] this->ct;
+	delete[] this->t;
+	delete[] this->ct;
 }
 
 /**
  * @brief Affiche une matrice.
  */
 void Matrix::print() {
-	std::cout << "m: "<< this->ligne << " x " << this->col << std::endl;
-    for (int i = 0; i < this->ligne; i++) {
-        for (int j = 0; j < this->col; j++) {
-            std::cout << this->get(i, j) << " ";
-        }
-        std::cout << std::endl;
-    }
+	std::cout << "m: " << this->ligne << " x " << this->col << std::endl;
+	for (int i = 0; i < this->ligne; i++) {
+		for (int j = 0; j < this->col; j++) {
+			std::cout << this->get(i, j) << " ";
+		}
+		std::cout << std::endl;
+	}
 }
 
 /**
@@ -49,13 +49,13 @@ void Matrix::print() {
  * de valeur moyenne 0.
  */
 void Matrix::initialize() {
-    for (int i = 0; i < this->ligne; i++) {
-        for (int j = 0; j < this->col; j++) {
-            double x = randomDouble();
+	for (int i = 0; i < this->ligne; i++) {
+		for (int j = 0; j < this->col; j++) {
+			double x = randomDouble();
 
-            this->set(i, j, x);
-        }
-    }
+			this->set(i, j, x);
+		}
+	}
 }
 
 /**
@@ -66,13 +66,13 @@ void Matrix::initialize() {
  * @return Valeur de la matrice à la ligne `i` et colonne `j`
  */
 double Matrix::get(int i, int j) {
-	#ifdef MATRIXDEBUG
-    if (i >= this->ligne || j >= this->col) {
-        throw std::invalid_argument("Bad matrice get: ");
-    }
-	#endif
+#ifdef MATRIXDEBUG
+	if (i >= this->ligne || j >= this->col) {
+		throw std::invalid_argument("Bad matrice get: ");
+	}
+#endif
 
-    return this->t[i * this->col + j];
+	return this->t[i * this->col + j];
 }
 
 /**
@@ -83,13 +83,13 @@ double Matrix::get(int i, int j) {
  * @param x Valeur
  */
 void Matrix::set(int i, int j, double x) {
-	#ifdef MATRIXDEBUG
-    if (i >= this->ligne || j >= this->col) {
-        throw std::invalid_argument("Bad matrice set");
-    }
-	#endif
+#ifdef MATRIXDEBUG
+	if (i >= this->ligne || j >= this->col) {
+		throw std::invalid_argument("Bad matrice set");
+	}
+#endif
 
-    this->t[i * this->col + j] = x;
+	this->t[i * this->col + j] = x;
 }
 
 /**
@@ -99,24 +99,25 @@ void Matrix::set(int i, int j, double x) {
  * @param a Matrice à multiplier à gauche
  */
 void Matrix::mult_inv(Matrix &a) {
-    /*if (this->ligne != a.col) {
-        throw std::invalid_argument("lol multinv");
-    }*/
+	/*if (this->ligne != a.col) {
+		throw std::invalid_argument("lol multinv");
+	}*/
 
-    for (int i = 0; i < a.ligne; i++) {
-        for (int j = 0; j < this->col; j++) {
-            this->ct[i * this->col + j] = 0;
-            for (int k = 0; k < this->ligne; k++) {
-                this->ct[i * this->col + j] += a.get(i, k) * this->get(k, j);
-            }
-        }
-    }
+	for (int i = 0; i < a.ligne; i++) {
+		for (int j = 0; j < this->col; j++) {
+			this->ct[i * this->col + j] = 0;
+			for (int k = 0; k < this->ligne; k++) {
+				this->ct[i * this->col + j] +=
+					a.get(i, k) * this->get(k, j);
+			}
+		}
+	}
 
-    auto tmp = this->t;
-    this->t = this->ct;
-    this->ct = tmp;
+	auto tmp = this->t;
+	this->t = this->ct;
+	this->ct = tmp;
 
-    this->ligne = a.ligne;
+	this->ligne = a.ligne;
 }
 
 /**
@@ -130,15 +131,15 @@ void Matrix::mult_inv(Matrix &a) {
  * @return Matrice passée en argument une fois mutée.
  */
 void mutation(Matrix &m) {
-    for (int i = 0; i < m.ligne; i++) {
-        for (int j = 0; j < m.col; j++) {
-            if (likelyness(1 - MUTATION_PROBABILITY)) {
-                continue;
-            }
+	for (int i = 0; i < m.ligne; i++) {
+		for (int j = 0; j < m.col; j++) {
+			if (likelyness(1 - MUTATION_PROBABILITY)) {
+				continue;
+			}
 
-            m.set(i, j, replacement());
-        }
-    }
+			m.set(i, j, replacement());
+		}
+	}
 }
 
 /**
@@ -147,15 +148,15 @@ void mutation(Matrix &m) {
  * @param file Fichier dans lequel écrire la matrice.
  */
 void Matrix::write(std::ofstream &file) {
-    file.write((char *)&this->col, sizeof(this->col));
-    file.write((char *)&this->ligne, sizeof(this->ligne));
+	file.write((char *)&this->col, sizeof(this->col));
+	file.write((char *)&this->ligne, sizeof(this->ligne));
 
-    for (int i = 0; i < this->ligne; i++) {
-        for (int j = 0; j < this->col; j++) {
-            double v = this->get(i, j);
-            file.write((char *)&v, sizeof(double));
-        }
-    }
+	for (int i = 0; i < this->ligne; i++) {
+		for (int j = 0; j < this->col; j++) {
+			double v = this->get(i, j);
+			file.write((char *)&v, sizeof(double));
+		}
+	}
 }
 
 /**
@@ -165,30 +166,30 @@ void Matrix::write(std::ofstream &file) {
  * @return La matrice lue.
  */
 Matrix *Matrix::read(std::ifstream &file) {
-    int lignes;
-    int colonnes;
+	int lignes;
+	int colonnes;
 
-    file.read((char *)&colonnes, sizeof(colonnes));
-    file.read((char *)&lignes, sizeof(lignes));
+	file.read((char *)&colonnes, sizeof(colonnes));
+	file.read((char *)&lignes, sizeof(lignes));
 
-    auto m = new Matrix(lignes, colonnes);
+	auto m = new Matrix(lignes, colonnes);
 
-    for (int i = 0; i < m->ligne; i++) {
-        for (int j = 0; j < m->col; j++) {
-            file.read((char *)&m->t[i * colonnes + j], sizeof(double));
-        }
-    }
+	for (int i = 0; i < m->ligne; i++) {
+		for (int j = 0; j < m->col; j++) {
+			file.read((char *)&m->t[i * colonnes + j], sizeof(double));
+		}
+	}
 
-    return m;
+	return m;
 }
 
-void Matrix::clone(Matrix *source, Matrix *dest){
-	if(source->col != dest->col || source->ligne != dest->ligne){
+void Matrix::clone(Matrix *source, Matrix *dest) {
+	if (source->col != dest->col || source->ligne != dest->ligne) {
 		throw std::logic_error("clone de matrices de mauvaise taille");
 	}
-    for (int i = 0; i < source->ligne; i++) {
-        for (int j = 0; j < source->col; j++) {
-			dest->set(i, j, source->get(i,j));
-        }
-    }
+	for (int i = 0; i < source->ligne; i++) {
+		for (int j = 0; j < source->col; j++) {
+			dest->set(i, j, source->get(i, j));
+		}
+	}
 }

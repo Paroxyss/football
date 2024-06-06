@@ -4,23 +4,23 @@
 #include <ostream>
 
 struct gameInformations {
-    unsigned int collisions;
-    unsigned int goals;
-    int ball_collisions;
-    double scoreRouge;
-    double scoreBleu;
-    bool stopped;
+	unsigned int collisions;
+	unsigned int goals;
+	int ball_collisions;
+	double scoreRouge;
+	double scoreBleu;
+	bool stopped;
 	double touchMean;
 	double bonusRouge;
 	double bonusBleu;
 };
 
 struct gameStatistics {
-    unsigned int n;
-    unsigned long totalCollisions;
-    unsigned int totalGoals;
-    int total_ball_collisions;
-    int stopped;
+	unsigned int n;
+	unsigned long totalCollisions;
+	unsigned int totalGoals;
+	int total_ball_collisions;
+	int stopped;
 	double scoreRouge;
 	double scoreBleu;
 };
@@ -42,16 +42,16 @@ std::ostream &operator<<(std::ostream &out, gameInformations stats);
 #define READ_EXPL(vname, file) file.read((char *)&vname, sizeof(vname))
 #define READ(vname) READ_EXPL(vname, file)
 
-#define FILE_METHOD(method, constructor)                                       \
-    void method(std::constructor &file);                                       \
-    void method(std::string filename) {                                        \
-        std::constructor file;                                                 \
-        file.open(filename);                                                   \
-        if (!file.is_open())                                                  \
-            throw std::invalid_argument("File not found");                     \
-        method(file);                                                          \
-        file.close();                                                          \
-    };
+#define FILE_METHOD(method, constructor)                                   \
+	void method(std::constructor &file);                                   \
+	void method(std::string filename) {                                    \
+		std::constructor file;                                             \
+		file.open(filename);                                               \
+		if (!file.is_open())                                               \
+			throw std::invalid_argument("File not found");                 \
+		method(file);                                                      \
+		file.close();                                                      \
+	};
 
 #define INFILE_METHOD(method) FILE_METHOD(method, ifstream)
 #define OUTFILE_METHOD(method) FILE_METHOD(method, ofstream)

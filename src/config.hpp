@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cmath>
-
 #define NETWORK_SIZE 7
 #define DIDIER_NETWORK_SIZE 2
 
@@ -15,15 +13,15 @@
 #define NETWORK_INPUT_SIZE 27 + COM_SIZE
 
 #define TEAM_SIZE 3
-#define GAME_CONFIG                                                         \
-	{ 1, 0, 2 }
+#define GAME_CONFIG                                                        \
+    { 1, 0, 2 }
 #define GAME_CONFIG_LENGTH 3
 
 // Configurations des réseaux de neurones
 const int PLAYER_LAYERS[NETWORK_SIZE] = {
-	NETWORK_INPUT_SIZE, 28, 20, 16, 10, 6, NETWORK_OUTPUT_SIZE};
+    NETWORK_INPUT_SIZE, 28, 20, 16, 10, 6, NETWORK_OUTPUT_SIZE};
 const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {COM_SIZE * TEAM_SIZE,
-                                                COM_SIZE * TEAM_SIZE};
+                                                COM_SIZE *TEAM_SIZE};
 
 // GAME CONFIG
 #define MAX_GAME_DURATION (40 * 60)
@@ -63,7 +61,7 @@ const int DIDIER_LAYERS[DIDIER_NETWORK_SIZE] = {COM_SIZE * TEAM_SIZE,
 // (abandonnée car trop complexe à apprendre)
 #define PLAYER_SENSOR_NUMBER 3
 const double PLAYER_SENSOR_ANGLES[PLAYER_SENSOR_NUMBER] = {
-	-45. * M_PI / 180., 0. * M_PI / 180., 45. * M_PI / 180.};
+    -45. * M_PI / 180., 0. * M_PI / 180., 45. * M_PI / 180.};
 #define PLAYER_SENSOR_DISTANCE 4 * PLAYER_SIZE
 #define PLAYER_SENSOR_RANGE 8 * PLAYER_SIZE
 

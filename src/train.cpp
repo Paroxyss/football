@@ -15,90 +15,90 @@ namespace fs = std::filesystem;
 #include "train.hpp"
 
 #define POPNAME(gen)                                                       \
-	"pops/pop-gen" + std::to_string(gen) + "-at-" +                        \
-		std::to_string(time(NULL))
+    "pops/pop-gen" + std::to_string(gen) + "-at-" +                        \
+        std::to_string(time(NULL))
 
 void train(int n_gen, int population_size, int n_thread) {
-	Generation g((unsigned int)n_thread);
-	g.create_population(population_size);
-	std::cout << "Nouvelle génération crée" << std::endl;
+    Generation g((unsigned int)n_thread);
+    g.create_population(population_size);
+    std::cout << "Nouvelle génération crée" << std::endl;
     train_population(g, n_gen, n_thread);
 }
 
 void train_from_file(const char *inputFile, int n_gen, int population_size,
                      int n_thread) {
-	Generation g(n_thread);
-	g.load(inputFile);
-	std::cout << "Génération " << g.generation << " chargée ("
-			  << g.currentPop->size << " individus)" << std::endl;
+    Generation g(n_thread);
+    g.load(inputFile);
+    std::cout << "Génération " << g.generation << " chargée ("
+              << g.currentPop->size << " individus)" << std::endl;
     train_population(g, n_gen, n_thread);
 }
 
 void train_population(Generation &g, int n_gen, int n_thread) {
-	std::cout << "Starting a train of " << n_gen << " generations with "
-			  << g.currentPop->size << " chromosomes on " << n_thread
-			  << " threads." << std::endl;
+    std::cout << "Starting a train of " << n_gen << " generations with "
+              << g.currentPop->size << " chromosomes on " << n_thread
+              << " threads." << std::endl;
 
     g.rewrite_stats();
 
-	uint proportionDidier = 0;
-	for (int i = 0; i < g.currentPop->size; i++) {
-		proportionDidier += g.currentPop->pop[i]->hasDidier;
-	}
-	std::cout << " prop didier initiale: "
-			  << (double)proportionDidier / g.currentPop->size << std::endl;
+    uint proportionDidier = 0;
+    for (int i = 0; i < g.currentPop->size; i++) {
+        proportionDidier += g.currentPop->pop[i]->hasDidier;
+    }
+    std::cout << " prop didier initiale: "
+              << (double)proportionDidier / g.currentPop->size << std::endl;
 
-	unsigned int initialGeneration = g.generation;
-	while (g.generation - initialGeneration < n_gen) {
+    unsigned int initialGeneration = g.generation;
+    while (g.generation - initialGeneration < n_gen) {
 
-		auto start = std::chrono::steady_clock::now();
+        auto start = std::chrono::steady_clock::now();
 
-		g.step();
+        g.step();
 
-		auto end = std::chrono::steady_clock::now();
-		std::chrono::duration<double> elapsed_seconds = end - start;
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end - start;
 
-		auto stats = g.stats.back();
+        auto stats = g.stats.back();
 
-		uint proportionDidier = 0;
-		for (int i = 0; i < g.currentPop->size; i++) {
-			proportionDidier += g.currentPop->pop[i]->hasDidier;
-		}
+        uint proportionDidier = 0;
+        for (int i = 0; i < g.currentPop->size; i++) {
+            proportionDidier += g.currentPop->pop[i]->hasDidier;
+        }
 
-		std::cout << "Stats gen " << std::setw(5) << g.generation << " "
-				  << stats << " in " << elapsed_seconds.count()
-				  << " prop didier: "
-				  << (double)proportionDidier / g.currentPop->size
-				  << std::endl;
+        std::cout << "Stats gen " << std::setw(5) << g.generation << " "
+                  << stats << " in " << elapsed_seconds.count()
+                  << " prop didier: "
+                  << (double)proportionDidier / g.currentPop->size
+                  << std::endl;
 
-		if (g.generation % SAVE_RATE == 0 && g.generation > 0) {
-			auto backup_fname = POPNAME(g.generation);
-			g.save(backup_fname);
+        if (g.generation % SAVE_RATE == 0 && g.generation > 0) {
+            auto backup_fname = POPNAME(g.generation);
+            g.save(backup_fname);
 
-			fs::remove("pops/latest-backup");
-			fs::create_hard_link(backup_fname, "pops/latest-backup");
-		}
-	}
+            fs::remove("pops/latest-backup");
+            fs::create_hard_link(backup_fname, "pops/latest-backup");
+        }
+    }
 
-	auto fn = POPNAME(g.generation);
-	g.save(fn);
-	fs::remove("pops/latest");
-	fs::create_hard_link(fn, "pops/latest");
+    auto fn = POPNAME(g.generation);
+    g.save(fn);
+    fs::remove("pops/latest");
+    fs::create_hard_link(fn, "pops/latest");
 }
 
 void play_match(const char *fileC1, const char *fileC2) {
-	std::cout << "Opening ... ";
-	std::ifstream fc1;
-	std::ifstream fc2;
-	fc1.open(fileC1);
-	fc2.open(fileC2);
-	if (!fc1.is_open() || !fc2.is_open()) {
-		throw std::invalid_argument("File not found");
-	}
-	std::cout << "Loading ... ";
-	auto c1 = Chromosome::read(fc1);
-	auto c2 = Chromosome::read(fc2);
-	std::cout << "Ok ! " << std::endl << "Saving match" << std::endl;
+    std::cout << "Opening ... ";
+    std::ifstream fc1;
+    std::ifstream fc2;
+    fc1.open(fileC1);
+    fc2.open(fileC2);
+    if (!fc1.is_open() || !fc2.is_open()) {
+        throw std::invalid_argument("File not found");
+    }
+    std::cout << "Loading ... ";
+    auto c1 = Chromosome::read(fc1);
+    auto c2 = Chromosome::read(fc2);
+    std::cout << "Ok ! " << std::endl << "Saving match" << std::endl;
 
-	play_match(c1, c2, true);
+    play_match(c1, c2, true);
 }

@@ -7,75 +7,75 @@
 
 template <class T> class SafeQueue {
   public:
-	SafeQueue(unsigned int threadNumber = 0) {
-		reservedIds.resize(threadNumber);
-		std::fill(reservedIds.begin(), reservedIds.end(), 0);
-	}
-	void push(const T &val) {
-		std::lock_guard<std::mutex> lock(_m);
-		_q.push(val);
-	}
-	void push_reserved(const T &val, int id) {
-		std::lock_guard<std::mutex> lock(_m);
-		if (!reservedIds[id]) {
-			throw std::logic_error(
-				"Tentative de résolution d'un id non réservé");
-		} else {
-			reserved--;
-			reservedIds[id]--;
-		}
-		_q.push(val);
-	}
+    SafeQueue(unsigned int threadNumber = 0) {
+        reservedIds.resize(threadNumber);
+        std::fill(reservedIds.begin(), reservedIds.end(), 0);
+    }
+    void push(const T &val) {
+        std::lock_guard<std::mutex> lock(_m);
+        _q.push(val);
+    }
+    void push_reserved(const T &val, int id) {
+        std::lock_guard<std::mutex> lock(_m);
+        if (!reservedIds[id]) {
+            throw std::logic_error(
+                "Tentative de résolution d'un id non réservé");
+        } else {
+            reserved--;
+            reservedIds[id]--;
+        }
+        _q.push(val);
+    }
 
-	bool pop(T &val) {
-		std::lock_guard<std::mutex> lock(_m);
-		if (!_q.empty()) {
-			val = _q.front();
-			_q.pop();
-			return true;
-		} else {
-			return false;
-		}
-	}
-	int size() {
-		std::lock_guard<std::mutex> lock(_m);
-		return _q.size() + reserved;
-	}
-	int reserve(int id, int n) {
-		std::lock_guard<std::mutex> lock(_m);
-		if (id < 0 || id > reservedIds.size() - 1) {
-			throw std::logic_error(
-				"Tentative de réservation d'un id trop grand");
-		}
-		if (reservedIds[id]) {
-			throw std::logic_error(
-				"Tentative de reservation d'un id déjà réservé");
-		} else {
-			reserved += n;
-			reservedIds[id] += n;
-		}
-		return _q.size() + reserved;
-	}
-	void clear_reservations() {
-		std::lock_guard<std::mutex> lock(_m);
-		reserved = 0;
-		std::fill(reservedIds.begin(), reservedIds.end(), 0);
-	}
-	void cancel_reservation(int id) {
-		if (id < 0 || id > reservedIds.size() - 1) {
-			throw std::logic_error(
-				"Tentative de réservation d'un id trop grand");
-		}
-		std::lock_guard<std::mutex> lock(_m);
-		if (reservedIds[id]) {
-			reserved -= reservedIds[id];
-			reservedIds[id] = 0;
-		}
-	}
+    bool pop(T &val) {
+        std::lock_guard<std::mutex> lock(_m);
+        if (!_q.empty()) {
+            val = _q.front();
+            _q.pop();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    int size() {
+        std::lock_guard<std::mutex> lock(_m);
+        return _q.size() + reserved;
+    }
+    int reserve(int id, int n) {
+        std::lock_guard<std::mutex> lock(_m);
+        if (id < 0 || id > reservedIds.size() - 1) {
+            throw std::logic_error(
+                "Tentative de réservation d'un id trop grand");
+        }
+        if (reservedIds[id]) {
+            throw std::logic_error(
+                "Tentative de reservation d'un id déjà réservé");
+        } else {
+            reserved += n;
+            reservedIds[id] += n;
+        }
+        return _q.size() + reserved;
+    }
+    void clear_reservations() {
+        std::lock_guard<std::mutex> lock(_m);
+        reserved = 0;
+        std::fill(reservedIds.begin(), reservedIds.end(), 0);
+    }
+    void cancel_reservation(int id) {
+        if (id < 0 || id > reservedIds.size() - 1) {
+            throw std::logic_error(
+                "Tentative de réservation d'un id trop grand");
+        }
+        std::lock_guard<std::mutex> lock(_m);
+        if (reservedIds[id]) {
+            reserved -= reservedIds[id];
+            reservedIds[id] = 0;
+        }
+    }
 
   private:
-	std::mutex _m;
-	std::queue<T> _q;
-	int reserved = 0;
-	std::vector<int> reservedIds;
+    std::mutex _m;
+    std::queue<T> _q;
+    int reserved = 0;
+    std::vector<int> reservedIds;
 };

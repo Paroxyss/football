@@ -14,7 +14,8 @@ double perturbation(double x);
 // Tentative d'une solution équilibrée entre les deux valeurs précédentes
 double balance(double x);
 
-//Pour muter un chromosome (équipe) on mute chaque matrice composant le chromosome.
+// Pour muter un chromosome (équipe) on mute chaque matrice composant le
+// chromosome.
 void mutate(Chromosome &c);
 // Idem pour une matrice
 void mutate(Matrix &c);

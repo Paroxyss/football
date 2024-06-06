@@ -11,7 +11,7 @@ namespace fs = std::filesystem;
 #include "Chromosome.hpp"
 #include "Generation.hpp"
 #include "Population.hpp"
-#include "config.h"
+#include "config.hpp"
 #include "train.hpp"
 
 #define POPNAME(gen)                                                       \

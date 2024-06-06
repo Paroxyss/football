@@ -1,11 +1,11 @@
 #include "Game.hpp"
 #include "Chromosome.hpp"
-#include "Matrix.h"
+#include "Matrix.hpp"
 #include "Vector.hpp"
-#include "config.h"
+#include "config.hpp"
 #include "stdlib.h"
 #include "util.hpp"
-#include "Rand.h"
+#include "Rand.hpp"
 
 #include <cmath>
 #include <cstdio>

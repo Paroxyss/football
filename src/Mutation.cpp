@@ -1,9 +1,9 @@
 #include <random>
 
 #include "Chromosome.hpp"
-#include "Rand.h"
+#include "Rand.hpp"
 #include "Mutation.hpp"
-#include "config.h"
+#include "config.hpp"
 #include "util.hpp"
 
 double replacement() {

@@ -17,7 +17,7 @@
 #include "Generation.hpp"
 #include "Inputs.hpp"
 #include "Simulation.hpp"
-#include "config.h"
+#include "config.hpp"
 #include "train.hpp"
 
 int main(int argc, char *argv[]) {

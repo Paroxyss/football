@@ -7,8 +7,8 @@
 #include "Game.hpp"
 #include "Genealogy.hpp"
 #include "Inputs.hpp"
-#include "Matrix.h"
-#include "config.h"
+#include "Matrix.hpp"
+#include "config.hpp"
 #include "util.hpp"
 
 Chromosome::Chromosome() {

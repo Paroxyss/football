@@ -3,9 +3,9 @@
 #include <fstream>
 
 #include "Game.hpp"
-#include "Matrix.h"
-#include "config.h"
-#include "Rand.h"
+#include "Matrix.hpp"
+#include "config.hpp"
+#include "Rand.hpp"
 
 typedef struct chromosomeStats {
 	unsigned short instanceGoals;

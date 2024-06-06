@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Chromosome.hpp"
-#include "Matrix.h"
-#include "Rand.h"
+#include "Matrix.hpp"
+#include "Rand.hpp"
 
 // ## CROSSOVERS ENTRE MATRICES
 

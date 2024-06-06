@@ -2,9 +2,9 @@
 
 #include "Inputs.hpp"
 #include "Game.hpp"
-#include "Matrix.h"
+#include "Matrix.hpp"
 #include "Vector.hpp"
-#include "config.h"
+#include "config.hpp"
 
 // Opérations couteuses donc mises en statiques, elles sont utilisées
 // pour la normalisation min-max.

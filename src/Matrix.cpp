@@ -2,10 +2,10 @@
 #include <fstream>
 #include <iostream>
 
-#include "Matrix.h"
+#include "Matrix.hpp"
 #include "Mutation.hpp"
 #include "util.hpp"
-#include "Rand.h"
+#include "Rand.hpp"
 
 Matrix::Matrix(int ligne, int col) {
 #ifdef MATRIXDEBUG

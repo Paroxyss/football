@@ -1,8 +1,8 @@
-#include "config.h"
+#include "config.hpp"
 #include "Game.hpp"
 #include "Crossover.hpp"
 #include "Chromosome.hpp"
-#include "Matrix.h"
+#include "Matrix.hpp"
 
 #include "util.hpp"
 

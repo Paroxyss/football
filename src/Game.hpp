@@ -2,9 +2,9 @@
 
 #include <fstream>
 
-#include "Matrix.h"
+#include "Matrix.hpp"
 #include "Vector.hpp"
-#include "config.h"
+#include "config.hpp"
 
 struct ball {
 	// pos en m, vitesse en m.s-1

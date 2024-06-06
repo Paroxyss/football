@@ -1,7 +1,7 @@
 #include <iomanip>
 
 #include "util.hpp"
-#include "Rand.h"
+#include "Rand.hpp"
 
 int previous_power(int n) {
     while (n & n - 1) {

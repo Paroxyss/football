@@ -17,9 +17,9 @@
 #include "Population.hpp"
 #include "ProgressBar.hpp"
 #include "SafeQueue.hpp"
-#include "config.h"
+#include "config.hpp"
 #include "util.hpp"
-#include "Rand.h"
+#include "Rand.hpp"
 
 Population::Population(int size, double proportionDidier) {
 	this->size = size;

@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "Matrix.h"
+#include "Matrix.hpp"
 
 /*
    Remarques sur le choix de la fonction d'activation

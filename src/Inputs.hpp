@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Game.hpp"
-#include "Matrix.h"
+#include "Matrix.hpp"
 
 // Normalise x entre 0 et 1
 double mmn(double x, double min, double max);

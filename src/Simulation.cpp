@@ -1,6 +1,6 @@
 #include "Population.hpp"
 #include "util.hpp"
-#include "Rand.h"
+#include "Rand.hpp"
 
 void simulate_and_save(const char *filename) {
 	Generation g(0);

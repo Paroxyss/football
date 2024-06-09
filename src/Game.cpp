@@ -162,7 +162,7 @@ void Game::setup_kickoff(const int conf[], int n) {
 
         for (int k = 1; k <= conf[i]; k++) {
             this->players[c].pos = {.x = (i + 1) * spx, .y = k * spy};
-            this->players[c].vitesse = {.x = 0.01, .y = 0};
+            this->players[c].vitesse = {.x = 0, .y = 0};
             this->players[c].orientation = random_double(-M_PI, M_PI);
 
             c++;
@@ -175,7 +175,7 @@ void Game::setup_kickoff(const int conf[], int n) {
             vector centre = {.x = MAP_LENGTH / 2., .y = MAP_HEIGHT / 2.};
             this->players[c].pos =
                 players[c - s].pos + 2 * (centre - players[c - s].pos);
-            this->players[c].vitesse = {.x = -0.01, .y = 0};
+            this->players[c].vitesse = {.x = 0, .y = 0};
 
             this->players[c].orientation =
                 this->players[c - s].orientation + M_PI;
@@ -186,10 +186,6 @@ void Game::setup_kickoff(const int conf[], int n) {
     for (int i = 0; i < playerNumber; i++) {
         players[i].shootCooldown = 0;
     }
-
-    /*this->ball.pos.x = this->players[1].pos.x;
-    this->ball.pos.y = this->players[1].pos.y;
-    this->ball.pos.x += ((float)PLAYER_SIZE + BALL_SIZE) / 2 + 30;*/
 }
 
 inline collisionList *insert(collisionList *list, ball *actor,

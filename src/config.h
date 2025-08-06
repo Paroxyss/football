@@ -17,6 +17,7 @@
 
 const int PLAYER_LAYERS[NETWORK_SIZE] = {
     NETWORK_INPUT_SIZE, 28, 28, 20, 16, 10, 6, NETWORK_OUTPUT_SIZE};
+#define POINTFIXE_FA 1.77 
 
 #define MAX_GAME_DURATION (60 * 60)
 #define MAX_TOUCH_DURATION (40 * 60)
@@ -42,16 +43,16 @@ const int PLAYER_LAYERS[NETWORK_SIZE] = {
 
 // entre 0 et 1, configure la taille maximum des tournois en proportion de
 // population, 1 pour tous, 0 pour personne
-#define PRESSION_SELECTIVE 0.33
+#define PRESSION_SELECTIVE 0.5
 // entre 0.6 et 0.9
-#define CROSSOVER_PROBABILITY 0.9
+#define CROSSOVER_PROBABILITY 0.4
 
 // entre 0.001 et 0.1
-#define MUTATION_PROBABILITY 0.001
+#define MUTATION_PROBABILITY 0.01
 
-#define NEW_BLOOD 0.1
+#define NEW_BLOOD 0.05
 
 // nombre de générations
 #define N 10
 // intervalle (en génération) des sauvegardes
-#define SAVE_RATE 50
+#define SAVE_RATE 20

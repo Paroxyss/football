@@ -1,4 +1,5 @@
 #include "util.hpp"
+#include "config.h"
 #include "Rand.h"
 
 /**
@@ -18,8 +19,9 @@ double randomDouble(double min, double max) {
     return distribution(rng);
 }
 
+// point fixe de la fonction d'activation
 double randomDouble() {
-    return randomDouble(-1.77, 1.77);
+    return randomDouble(-POINTFIXE_FA, POINTFIXE_FA);
 }
 
 // loi binomiale avec restriction

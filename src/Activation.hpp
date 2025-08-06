@@ -46,6 +46,7 @@ inline double outF(double x) {
 /**
  * @brief applique la fonction d'activation
  * pour les couches d'input.
+ * NE PAS MODIFIER
  */
 inline void input_layer_activation(Matrix &c) {
     for (int i = 0; i < c.ligne; i++) {
@@ -58,6 +59,7 @@ inline void input_layer_activation(Matrix &c) {
 /**
  * @brief applique la fonction d'activation
  * pour les couches internes.
+ * NE PAS MODIFIER
  */
 inline void hidden_layer_activation(Matrix &c) {
     for (int i = 0; i < c.ligne; i++) {

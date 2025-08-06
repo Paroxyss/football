@@ -588,14 +588,14 @@ gameInformations play_match(Chromosome *c1, Chromosome *c2, bool save) {
             g.set_players(c, GAMECONFIGLENGTH);
         }
 
-        if (to_touch == 0) {
+        /*if (to_touch == 0) {
             if (g.infos.ball_collisions == 0) {
                 g.infos.stopped = true;
                 break;
             }
 
             to_touch = MAX_TOUCH_DURATION;
-        }
+        }*/
 
         // 2-0, on arrête
         if ((abs(g.infos.score) >= 2 && !save)) {

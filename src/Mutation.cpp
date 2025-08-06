@@ -1,4 +1,5 @@
 #include "util.hpp"
+#include "config.h"
 #include <random>
 
 /**
@@ -15,7 +16,10 @@ double replacement() {
  * est plus faible et la convergence plus lente.
  */
 double perturbation(double x) {
-    return x + randomDouble(-x / 10., x / 10.);
+    double n = x + randomDouble(-x / 10., x / 10.);
+	if(n < -POINTFIXE_FA) return -POINTFIXE_FA;
+	if(n > POINTFIXE_FA) return POINTFIXE_FA;
+	return n;
 }
 
 /**
